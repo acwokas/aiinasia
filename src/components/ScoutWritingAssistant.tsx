@@ -9,7 +9,7 @@ import {
 import { Wand2, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-interface AIWritingAssistantProps {
+interface ScoutWritingAssistantProps {
   selectedText: string;
   onReplace: (newText: string) => void;
   context?: {
@@ -18,7 +18,7 @@ interface AIWritingAssistantProps {
   };
 }
 
-const AIWritingAssistant = ({ selectedText, onReplace, context }: AIWritingAssistantProps) => {
+const ScoutWritingAssistant = ({ selectedText, onReplace, context }: ScoutWritingAssistantProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
@@ -26,7 +26,7 @@ const AIWritingAssistant = ({ selectedText, onReplace, context }: AIWritingAssis
     if (!selectedText.trim()) {
       toast({
         title: "No text selected",
-        description: "Please select some text to use AI assistance.",
+        description: "Please select some text to use Scout.",
         variant: "destructive",
       });
       return;
@@ -36,7 +36,7 @@ const AIWritingAssistant = ({ selectedText, onReplace, context }: AIWritingAssis
 
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-assistant`,
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/scout-assistant`,
         {
           method: "POST",
           headers: {
@@ -61,14 +61,14 @@ const AIWritingAssistant = ({ selectedText, onReplace, context }: AIWritingAssis
       if (data.result) {
         onReplace(data.result);
         toast({
-          title: "AI suggestion applied",
-          description: "The text has been updated with AI assistance.",
+          title: "Scout suggestion applied",
+          description: "The text has been updated with Scout's assistance.",
         });
       }
     } catch (error) {
       console.error("AI assistant error:", error);
       toast({
-        title: "AI Error",
+        title: "Scout Error",
         description: error instanceof Error ? error.message : "Failed to process request",
         variant: "destructive",
       });
@@ -91,7 +91,7 @@ const AIWritingAssistant = ({ selectedText, onReplace, context }: AIWritingAssis
           ) : (
             <Wand2 className="h-4 w-4" />
           )}
-          AI Assist
+          Scout Assist
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
@@ -109,4 +109,4 @@ const AIWritingAssistant = ({ selectedText, onReplace, context }: AIWritingAssis
   );
 };
 
-export default AIWritingAssistant;
+export default ScoutWritingAssistant;

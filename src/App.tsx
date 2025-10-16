@@ -20,7 +20,7 @@ import CookiePolicy from "./pages/CookiePolicy";
 import Redirects from "./pages/Redirects";
 import NotFound from "./pages/NotFound";
 import NewsletterPopup from "./components/NewsletterPopup";
-import AIChatbot from "./components/AIChatbot";
+import ScoutChatbot from "./components/ScoutChatbot";
 import GoogleAnalytics from "./components/GoogleAnalytics";
 import { loadGoogleAdsScript } from "./components/GoogleAds";
 import ConsentBanner from "./components/ConsentBanner";
@@ -38,7 +38,7 @@ const App = () => (
         <GoogleAnalytics />
         <ConsentBanner />
         <NewsletterPopup />
-        <AIChatbot />
+        <ScoutChatbot />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/article/:slug" element={<Article />} />

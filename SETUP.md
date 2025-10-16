@@ -89,20 +89,24 @@ The platform supports three roles:
 - `editor`: Can create, edit, and publish content
 - `contributor`: Can create and edit own articles (pending review)
 
-## AI Features
+## Scout - Your AI Assistant
 
-### Lovable AI
+### Lovable AI Integration
 
-The AI assistant and chatbot use Lovable AI (pre-configured).
+Scout uses Lovable AI (pre-configured) to power all AI features.
 
-**Included Features**:
-- AI chatbot for visitor queries
+**Scout Features**:
+- AI chatbot for visitor queries ("Ask Scout")
 - Writing assistant (improve, shorten, expand)
 - Auto-tagging suggestions
 - SEO title & meta description generation
 - Article summarisation
 
 **Rate Limits**: Free tier includes limited monthly usage. Upgrade in Lovable dashboard if needed.
+
+**Edge Functions**:
+- `scout-chat`: Powers the chatbot
+- `scout-assistant`: Powers editorial AI tools
 
 ## Content Migration
 
@@ -119,7 +123,7 @@ The migration tools are prepared but article import is currently manual:
 Use the CMS Editor at `/editor`:
 - Block-based editing
 - Live preview
-- SEO controls
+- SEO controls with Scout assistance
 - Image uploads
 - Scheduling
 - Categories & tags
@@ -150,7 +154,7 @@ Before going live:
 - [ ] Create admin user account
 - [ ] Test authentication flows
 - [ ] Verify newsletter signup works
-- [ ] Check article creation workflow
+- [ ] Check article creation workflow with Scout
 - [ ] Test comment submission and moderation
 - [ ] Review privacy policy, terms, cookie policy
 - [ ] Submit sitemap to Google Search Console
@@ -174,7 +178,7 @@ Before going live:
 ## Support
 
 - Platform issues: Check Supabase logs in Lovable Cloud dashboard
-- AI features: Review Lovable AI usage and limits
+- Scout features: Review Lovable AI usage and limits
 - General queries: Refer to documentation
 
 ---
@@ -182,7 +186,7 @@ Before going live:
 **Platform Stack**:
 - Frontend: React + TypeScript + Vite
 - Backend: Lovable Cloud (Supabase)
-- AI: Lovable AI Gateway
+- AI: Lovable AI Gateway (Scout)
 - Hosting: Lovable.dev
 - Database: PostgreSQL (Supabase)
 - Authentication: Supabase Auth

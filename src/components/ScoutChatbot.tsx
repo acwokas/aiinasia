@@ -9,12 +9,12 @@ interface Message {
   content: string;
 }
 
-const AIChatbot = () => {
+const ScoutChatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: "Hello! I'm the AI assistant for AIinASIA. Ask me anything about AI developments, trends, and news across Asia.",
+      content: "Hello! I'm Scout, your AI assistant for AIinASIA. Ask me anything about AI developments, trends, and news across Asia.",
     },
   ]);
   const [input, setInput] = useState("");
@@ -41,7 +41,7 @@ const AIChatbot = () => {
 
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-chat`,
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/scout-chat`,
         {
           method: "POST",
           headers: {
@@ -136,7 +136,7 @@ const AIChatbot = () => {
       <div className="flex items-center justify-between p-4 border-b border-border bg-primary text-primary-foreground rounded-t-lg">
         <div className="flex items-center gap-2">
           <MessageCircle className="h-5 w-5" />
-          <h3 className="font-semibold">Ask AIinASIA</h3>
+          <h3 className="font-semibold">Ask Scout</h3>
         </div>
         <Button
           variant="ghost"
@@ -188,7 +188,7 @@ const AIChatbot = () => {
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask about AI in Asia..."
+            placeholder="Ask Scout..."
             disabled={isLoading}
           />
           <Button type="submit" size="icon" disabled={isLoading || !input.trim()}>
@@ -200,4 +200,4 @@ const AIChatbot = () => {
   );
 };
 
-export default AIChatbot;
+export default ScoutChatbot;

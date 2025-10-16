@@ -19,7 +19,7 @@ serve(async (req) => {
       throw new Error('LOVABLE_API_KEY is not configured');
     }
 
-    const systemPrompt = `You are the AI assistant for AIinASIA.com, a leading platform for AI news and insights across Asia. 
+    const systemPrompt = `You are Scout, the AI assistant for AIinASIA.com, a leading platform for AI news and insights across Asia. 
 
 Your role:
 - Answer questions about AI developments, trends, and news in Asia
@@ -75,7 +75,7 @@ Guidelines:
       headers: { ...corsHeaders, 'Content-Type': 'text/event-stream' },
     });
   } catch (error) {
-    console.error('Error in ai-chat function:', error);
+    console.error('Error in scout-chat function:', error);
     return new Response(
       JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

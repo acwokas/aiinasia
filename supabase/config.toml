@@ -1,9 +1,9 @@
 project_id = "ppvifagplcdjpdpqknzt"
 
-[functions.ai-chat]
+[functions.scout-chat]
 verify_jwt = false
 
-[functions.ai-assistant]
+[functions.scout-assistant]
 verify_jwt = true
 
 [functions.generate-sitemap]

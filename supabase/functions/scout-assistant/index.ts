@@ -24,37 +24,37 @@ serve(async (req) => {
 
     switch (action) {
       case 'improve':
-        systemPrompt = 'You are an expert editorial AI assistant for AIinASIA.com. Improve the given text while maintaining the author\'s voice. Focus on clarity, engagement, and British English. Return only the improved text.';
+        systemPrompt = 'You are Scout, an expert editorial assistant for AIinASIA.com. Improve the given text while maintaining the author\'s voice. Focus on clarity, engagement, and British English. Return only the improved text.';
         userPrompt = `Improve this text:\n\n${content}`;
         break;
       
       case 'shorten':
-        systemPrompt = 'You are an editorial AI assistant. Make the given text more concise while preserving key information and maintaining British English. Return only the shortened text.';
+        systemPrompt = 'You are Scout, an editorial assistant. Make the given text more concise while preserving key information and maintaining British English. Return only the shortened text.';
         userPrompt = `Shorten this text:\n\n${content}`;
         break;
       
       case 'expand':
-        systemPrompt = 'You are an editorial AI assistant. Expand the given text with relevant details and examples while maintaining coherence. Use British English. Return only the expanded text.';
+        systemPrompt = 'You are Scout, an editorial assistant. Expand the given text with relevant details and examples while maintaining coherence. Use British English. Return only the expanded text.';
         userPrompt = `Expand this text:\n\n${content}`;
         break;
       
       case 'summarize':
-        systemPrompt = 'You are an AI assistant that creates concise summaries. Create a 2-3 sentence summary suitable for article previews. Use British English.';
+        systemPrompt = 'You are Scout, an assistant that creates concise summaries. Create a 2-3 sentence summary suitable for article previews. Use British English.';
         userPrompt = `Summarize this article:\n\n${content}`;
         break;
       
       case 'suggest-tags':
-        systemPrompt = 'You are an AI assistant that suggests relevant tags for AI and technology articles. Return only a JSON array of 3-5 relevant tags as strings. Focus on AI, machine learning, technology, and Asia-specific topics when relevant.';
+        systemPrompt = 'You are Scout, an assistant that suggests relevant tags for AI and technology articles. Return only a JSON array of 3-5 relevant tags as strings. Focus on AI, machine learning, technology, and Asia-specific topics when relevant.';
         userPrompt = `Suggest tags for this article:\n\nTitle: ${context?.title || ''}\n\nContent: ${content}`;
         break;
       
       case 'seo-title':
-        systemPrompt = 'You are an SEO expert. Create an engaging, SEO-optimized title under 60 characters. Use British English. Return only the title text.';
+        systemPrompt = 'You are Scout, an SEO expert. Create an engaging, SEO-optimized title under 60 characters. Use British English. Return only the title text.';
         userPrompt = `Create an SEO title for:\n\n${content}`;
         break;
       
       case 'meta-description':
-        systemPrompt = 'You are an SEO expert. Create an engaging meta description under 160 characters that includes relevant keywords. Use British English. Return only the description text.';
+        systemPrompt = 'You are Scout, an SEO expert. Create an engaging meta description under 160 characters that includes relevant keywords. Use British English. Return only the description text.';
         userPrompt = `Create a meta description for:\n\nTitle: ${context?.title || ''}\n\nContent: ${content}`;
         break;
       
@@ -114,7 +114,7 @@ serve(async (req) => {
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
-    console.error('Error in ai-assistant function:', error);
+    console.error('Error in scout-assistant function:', error);
     return new Response(
       JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
