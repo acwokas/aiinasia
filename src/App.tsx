@@ -17,8 +17,10 @@ import Contact from "./pages/Contact";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import CookiePolicy from "./pages/CookiePolicy";
+import Redirects from "./pages/Redirects";
 import NotFound from "./pages/NotFound";
 import NewsletterPopup from "./components/NewsletterPopup";
+import AIChatbot from "./components/AIChatbot";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +31,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <NewsletterPopup />
+        <AIChatbot />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/article/:slug" element={<Article />} />
@@ -45,6 +48,7 @@ const App = () => (
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/cookie-policy" element={<CookiePolicy />} />
+          <Route path="/redirects" element={<Redirects />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

@@ -283,6 +283,15 @@ const Admin = () => {
                   </div>
                   <Button variant="outline">Configure</Button>
                 </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="font-semibold">URL Redirects</h4>
+                    <p className="text-sm text-muted-foreground">Manage SEO redirects and migrations</p>
+                  </div>
+                  <Button variant="outline" onClick={() => navigate("/redirects")}>
+                    Manage
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
