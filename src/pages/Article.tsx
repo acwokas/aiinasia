@@ -1,5 +1,6 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import Comments from "@/components/Comments";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Clock, User, Share2, Bookmark, Twitter, Linkedin, Facebook } from "lucide-react";
@@ -140,6 +141,9 @@ const Article = () => {
               </div>
             </div>
           </footer>
+
+          {/* Comments Section */}
+          <Comments articleId="sample-article-id" />
         </article>
 
         {/* Related Articles */}

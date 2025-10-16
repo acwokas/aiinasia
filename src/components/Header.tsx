@@ -26,11 +26,11 @@ const Header = () => {
             </a>
             
             <nav className="hidden md:flex items-center space-x-6">
-              <a href="/features" className="text-sm font-medium hover:text-primary transition-colors">Features</a>
-              <a href="/news" className="text-sm font-medium hover:text-primary transition-colors">News</a>
-              <a href="/tools" className="text-sm font-medium hover:text-primary transition-colors">Tools</a>
-              <a href="/voices" className="text-sm font-medium hover:text-primary transition-colors">Voices</a>
-              <a href="/academy" className="text-sm font-medium hover:text-primary transition-colors">Academy</a>
+              <a href="/category/features" className="text-sm font-medium hover:text-primary transition-colors">Features</a>
+              <a href="/category/news" className="text-sm font-medium hover:text-primary transition-colors">News</a>
+              <a href="/category/tools" className="text-sm font-medium hover:text-primary transition-colors">Tools</a>
+              <a href="/category/voices" className="text-sm font-medium hover:text-primary transition-colors">Voices</a>
+              <a href="/about" className="text-sm font-medium hover:text-primary transition-colors">About</a>
             </nav>
           </div>
 
@@ -73,11 +73,12 @@ const Header = () => {
         {isMenuOpen && (
           <nav className="md:hidden py-4 border-t border-border">
             <div className="flex flex-col space-y-3">
-              <a href="/features" className="text-sm font-medium hover:text-primary transition-colors">Features</a>
-              <a href="/news" className="text-sm font-medium hover:text-primary transition-colors">News</a>
-              <a href="/tools" className="text-sm font-medium hover:text-primary transition-colors">Tools</a>
-              <a href="/voices" className="text-sm font-medium hover:text-primary transition-colors">Voices</a>
-              <a href="/academy" className="text-sm font-medium hover:text-primary transition-colors">Academy</a>
+              <a href="/category/features" className="text-sm font-medium hover:text-primary transition-colors">Features</a>
+              <a href="/category/news" className="text-sm font-medium hover:text-primary transition-colors">News</a>
+              <a href="/category/tools" className="text-sm font-medium hover:text-primary transition-colors">Tools</a>
+              <a href="/category/voices" className="text-sm font-medium hover:text-primary transition-colors">Voices</a>
+              <a href="/about" className="text-sm font-medium hover:text-primary transition-colors">About</a>
+              <a href="/contact" className="text-sm font-medium hover:text-primary transition-colors">Contact</a>
               <div className="pt-2">
                 <Input
                   type="search"

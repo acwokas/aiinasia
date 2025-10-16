@@ -1,7 +1,50 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const Footer = () => {
+  const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
+
+  const handleNewsletterSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      const { error } = await supabase
+        .from("newsletter_subscribers")
+        .insert([{ email }]);
+
+      if (error) {
+        if (error.code === "23505") {
+          toast({
+            title: "Already subscribed",
+            description: "This email is already on our list.",
+          });
+        } else {
+          throw error;
+        }
+      } else {
+        toast({
+          title: "Successfully subscribed!",
+          description: "Check your inbox for a confirmation email.",
+        });
+        setEmail("");
+      }
+    } catch (error) {
+      toast({
+        title: "Subscription failed",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <footer className="border-t border-border bg-muted/30 mt-16">
       <div className="container mx-auto px-4 py-12">
@@ -43,10 +86,9 @@ const Footer = () => {
           <div>
             <h4 className="font-semibold mb-4">Resources</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><a href="/academy" className="hover:text-primary transition-colors">AI Academy</a></li>
-              <li><a href="/prompt-and-go" className="hover:text-primary transition-colors">PromptAndGo.ai</a></li>
-              <li><a href="/business-byte" className="hover:text-primary transition-colors">BusinessInAByte</a></li>
               <li><a href="/about" className="hover:text-primary transition-colors">About Us</a></li>
+              <li><a href="/contact" className="hover:text-primary transition-colors">Contact</a></li>
+              <li><a href="/contact" className="hover:text-primary transition-colors">Advertise</a></li>
             </ul>
           </div>
 
@@ -55,14 +97,19 @@ const Footer = () => {
             <p className="text-sm text-muted-foreground mb-4">
               Get weekly insights delivered to your inbox.
             </p>
-            <div className="flex gap-2">
+            <form onSubmit={handleNewsletterSubmit} className="flex gap-2">
               <Input
                 type="email"
                 placeholder="Your email"
                 className="flex-1"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
               />
-              <Button variant="default">Join</Button>
-            </div>
+              <Button variant="default" disabled={isSubmitting}>
+                {isSubmitting ? "..." : "Join"}
+              </Button>
+            </form>
           </div>
         </div>
 
@@ -71,7 +118,7 @@ const Footer = () => {
           <div className="flex gap-6">
             <a href="/privacy" className="hover:text-primary transition-colors">Privacy Policy</a>
             <a href="/terms" className="hover:text-primary transition-colors">Terms of Service</a>
-            <a href="/cookies" className="hover:text-primary transition-colors">Cookie Policy</a>
+            <a href="/cookie-policy" className="hover:text-primary transition-colors">Cookie Policy</a>
           </div>
         </div>
       </div>
