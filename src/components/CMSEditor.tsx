@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,7 +7,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Bold, Italic, List, Quote, Link as LinkIcon, Image, Save } from "lucide-react";
+import { Bold, Italic, List, Quote, Link as LinkIcon, Image, Save, Upload, Loader2 } from "lucide-react";
+import ScoutWritingAssistant from "@/components/ScoutWritingAssistant";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface CMSEditorProps {
   initialData?: any;
@@ -28,6 +31,12 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
   const [focusKeyphrase, setFocusKeyphrase] = useState(initialData?.focus_keyphrase || "");
   const [featuredOnHomepage, setFeaturedOnHomepage] = useState(initialData?.featured_on_homepage || false);
   const [sticky, setSticky] = useState(initialData?.sticky || false);
+  const [selectedText, setSelectedText] = useState("");
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const contentRef = useRef<HTMLTextAreaElement>(null);
+  const excerptRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
 
   const generateSlug = (text: string) => {
     return text
@@ -40,6 +49,82 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
     setTitle(value);
     if (!initialData) {
       setSlug(generateSlug(value));
+    }
+  };
+
+  const handleTextSelection = (textarea: HTMLTextAreaElement) => {
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selected = textarea.value.substring(start, end);
+    setSelectedText(selected);
+  };
+
+  const replaceSelectedText = (newText: string) => {
+    const textarea = contentRef.current || excerptRef.current;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const currentValue = textarea.value;
+    const newValue = currentValue.substring(0, start) + newText + currentValue.substring(end);
+    
+    if (textarea === contentRef.current) {
+      setContent(newValue);
+    } else {
+      setExcerpt(newValue);
+    }
+    
+    setSelectedText("");
+  };
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Invalid file type",
+        description: "Please upload an image file",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsUploadingImage(true);
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('article-images')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('article-images')
+        .getPublicUrl(filePath);
+
+      setFeaturedImage(publicUrl);
+      
+      toast({
+        title: "Image uploaded",
+        description: "Featured image has been uploaded successfully",
+      });
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast({
+        title: "Upload failed",
+        description: error instanceof Error ? error.message : "Failed to upload image",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploadingImage(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
   };
 
@@ -99,11 +184,20 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
               </div>
 
               <div>
-                <Label htmlFor="excerpt">Excerpt</Label>
+                <div className="flex items-center justify-between mb-2">
+                  <Label htmlFor="excerpt">Excerpt</Label>
+                  <ScoutWritingAssistant
+                    selectedText={selectedText}
+                    onReplace={replaceSelectedText}
+                    context={{ title, fullContent: content }}
+                  />
+                </div>
                 <Textarea
+                  ref={excerptRef}
                   id="excerpt"
                   value={excerpt}
                   onChange={(e) => setExcerpt(e.target.value)}
+                  onSelect={(e) => handleTextSelection(e.currentTarget)}
                   placeholder="Brief summary of the article..."
                   rows={3}
                 />
@@ -134,35 +228,77 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
               </div>
 
               <div>
-                <Label htmlFor="content">Content</Label>
+                <div className="flex items-center justify-between mb-2">
+                  <Label htmlFor="content">Content</Label>
+                  <ScoutWritingAssistant
+                    selectedText={selectedText}
+                    onReplace={replaceSelectedText}
+                    context={{ title, fullContent: content }}
+                  />
+                </div>
                 <Textarea
+                  ref={contentRef}
                   id="content"
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
+                  onSelect={(e) => handleTextSelection(e.currentTarget)}
                   placeholder="Write your article content here..."
                   rows={20}
                   className="font-mono text-sm"
                 />
               </div>
 
-              <div>
-                <Label htmlFor="featured-image">Featured Image URL</Label>
-                <Input
-                  id="featured-image"
-                  value={featuredImage}
-                  onChange={(e) => setFeaturedImage(e.target.value)}
-                  placeholder="https://example.com/image.jpg"
-                />
-              </div>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="featured-image">Featured Image</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="featured-image"
+                      value={featuredImage}
+                      onChange={(e) => setFeaturedImage(e.target.value)}
+                      placeholder="https://example.com/image.jpg"
+                      className="flex-1"
+                    />
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={isUploadingImage}
+                    >
+                      {isUploadingImage ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Upload className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
+                  {featuredImage && (
+                    <div className="mt-2">
+                      <img
+                        src={featuredImage}
+                        alt="Preview"
+                        className="w-full max-w-md h-48 object-cover rounded-lg border border-border"
+                      />
+                    </div>
+                  )}
+                </div>
 
-              <div>
-                <Label htmlFor="featured-image-alt">Featured Image Alt Text</Label>
-                <Input
-                  id="featured-image-alt"
-                  value={featuredImageAlt}
-                  onChange={(e) => setFeaturedImageAlt(e.target.value)}
-                  placeholder="Descriptive alt text for accessibility"
-                />
+                <div>
+                  <Label htmlFor="featured-image-alt">Featured Image Alt Text</Label>
+                  <Input
+                    id="featured-image-alt"
+                    value={featuredImageAlt}
+                    onChange={(e) => setFeaturedImageAlt(e.target.value)}
+                    placeholder="Descriptive alt text for accessibility"
+                  />
+                </div>
               </div>
             </CardContent>
           </Card>

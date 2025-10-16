@@ -346,6 +346,42 @@ export type Database = {
           },
         ]
       }
+      contact_messages: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          message: string
+          name: string
+          read_at: string | null
+          replied_at: string | null
+          status: string
+          subject: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          message: string
+          name: string
+          read_at?: string | null
+          replied_at?: string | null
+          status?: string
+          subject: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+          read_at?: string | null
+          replied_at?: string | null
+          status?: string
+          subject?: string
+        }
+        Relationships: []
+      }
       newsletter_subscribers: {
         Row: {
           confirmed: boolean | null
@@ -367,6 +403,36 @@ export type Database = {
           id?: string
           subscribed_at?: string
           unsubscribed_at?: string | null
+        }
+        Relationships: []
+      }
+      redirects: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          from_path: string
+          id: string
+          status_code: number
+          to_path: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          from_path: string
+          id?: string
+          status_code?: number
+          to_path: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          from_path?: string
+          id?: string
+          status_code?: number
+          to_path?: string
+          updated_at?: string
         }
         Relationships: []
       }

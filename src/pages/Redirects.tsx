@@ -39,11 +39,20 @@ const Redirects = () => {
 
   const fetchRedirects = async () => {
     try {
-      // Note: This would require a redirects table in the database
-      // For now, we'll show a placeholder
-      setRedirects([]);
+      const { data, error } = await supabase
+        .from('redirects')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      setRedirects(data || []);
     } catch (error) {
       console.error("Error fetching redirects:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load redirects",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -52,17 +61,68 @@ const Redirects = () => {
   const addRedirect = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    toast({
-      title: "Feature coming soon",
-      description: "Redirect management will be available after database migration.",
-    });
+    if (!fromPath || !toPath) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('redirects')
+        .insert({
+          from_path: fromPath,
+          to_path: toPath,
+          status_code: statusCode,
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Redirect added successfully",
+      });
+
+      setFromPath("");
+      setToPath("");
+      setStatusCode(301);
+      fetchRedirects();
+    } catch (error) {
+      console.error("Error adding redirect:", error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to add redirect",
+        variant: "destructive",
+      });
+    }
   };
 
   const deleteRedirect = async (id: string) => {
-    toast({
-      title: "Feature coming soon",
-      description: "Redirect management will be available after database migration.",
-    });
+    try {
+      const { error } = await supabase
+        .from('redirects')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Redirect deleted successfully",
+      });
+
+      fetchRedirects();
+    } catch (error) {
+      console.error("Error deleting redirect:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete redirect",
+        variant: "destructive",
+      });
+    }
   };
 
   return (

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 const Admin = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [user, setUser] = useState<any>(null);
 
@@ -110,6 +111,56 @@ const Admin = () => {
       return data;
     },
   });
+
+  const approveComment = async (commentId: string) => {
+    try {
+      const { error } = await supabase
+        .from('comments')
+        .update({ approved: true })
+        .eq('id', commentId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Comment approved",
+        description: "The comment is now visible on the article",
+      });
+
+      queryClient.invalidateQueries({ queryKey: ['pendingComments'] });
+      queryClient.invalidateQueries({ queryKey: ['stats'] });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to approve comment",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const deleteComment = async (commentId: string) => {
+    try {
+      const { error } = await supabase
+        .from('comments')
+        .delete()
+        .eq('id', commentId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Comment deleted",
+        description: "The comment has been removed",
+      });
+
+      queryClient.invalidateQueries({ queryKey: ['pendingComments'] });
+      queryClient.invalidateQueries({ queryKey: ['stats'] });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete comment",
+        variant: "destructive",
+      });
+    }
+  };
 
   if (isAdmin === null) {
     return (
@@ -235,8 +286,20 @@ const Admin = () => {
                       <div className="flex items-start justify-between mb-2">
                         <p className="font-semibold">{comment.author_name}</p>
                         <div className="flex gap-2">
-                          <Button variant="outline" size="sm">Approve</Button>
-                          <Button variant="outline" size="sm">Delete</Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => approveComment(comment.id)}
+                          >
+                            Approve
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => deleteComment(comment.id)}
+                          >
+                            Delete
+                          </Button>
                         </div>
                       </div>
                       <p className="text-sm mb-2">{comment.content}</p>

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import { Mail, MapPin, Phone } from "lucide-react";
 
 const Contact = () => {
@@ -15,16 +16,35 @@ const Contact = () => {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Simulate form submission
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    toast({
-      title: "Message sent",
-      description: "We'll get back to you within 48 hours.",
-    });
-    
-    setIsSubmitting(false);
-    (e.target as HTMLFormElement).reset();
+    const formData = new FormData(e.currentTarget);
+    const name = formData.get('name') as string;
+    const email = formData.get('email') as string;
+    const subject = formData.get('subject') as string;
+    const message = formData.get('message') as string;
+
+    try {
+      const { error } = await supabase
+        .from('contact_messages')
+        .insert([{ name, email, subject, message }]);
+
+      if (error) throw error;
+
+      toast({
+        title: "Message sent",
+        description: "We'll get back to you within 48 hours.",
+      });
+      
+      (e.target as HTMLFormElement).reset();
+    } catch (error) {
+      console.error('Error sending message:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -79,21 +99,21 @@ const Contact = () => {
                 <label htmlFor="name" className="block text-sm font-medium mb-2">
                   Name *
                 </label>
-                <Input id="name" required placeholder="Your full name" />
+                <Input id="name" name="name" required placeholder="Your full name" />
               </div>
               
               <div>
                 <label htmlFor="email" className="block text-sm font-medium mb-2">
                   Email *
                 </label>
-                <Input id="email" type="email" required placeholder="your@email.com" />
+                <Input id="email" name="email" type="email" required placeholder="your@email.com" />
               </div>
               
               <div>
                 <label htmlFor="subject" className="block text-sm font-medium mb-2">
                   Subject *
                 </label>
-                <Input id="subject" required placeholder="What's this about?" />
+                <Input id="subject" name="subject" required placeholder="What's this about?" />
               </div>
               
               <div>
@@ -101,7 +121,8 @@ const Contact = () => {
                   Message *
                 </label>
                 <Textarea 
-                  id="message" 
+                  id="message"
+                  name="message"
                   required 
                   placeholder="Tell us more..."
                   className="min-h-[150px]"
