@@ -2,14 +2,24 @@ import { Search, Menu, Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Header = () => {
   const [isDark, setIsDark] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const navigate = useNavigate();
 
   const toggleTheme = () => {
     setIsDark(!isDark);
     document.documentElement.classList.toggle("dark");
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
+    }
   };
 
   return (
@@ -35,16 +45,18 @@ const Header = () => {
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="hidden lg:flex items-center gap-2">
+            <form onSubmit={handleSearch} className="hidden lg:flex items-center gap-2">
               <div className="relative">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="search"
                   placeholder="Search articles..."
                   className="w-64 pl-8"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
-            </div>
+            </form>
 
             <Button
               variant="ghost"
@@ -64,8 +76,8 @@ const Header = () => {
               <Menu className="h-5 w-5" />
             </Button>
 
-            <Button variant="default" className="hidden md:inline-flex">
-              Subscribe
+            <Button variant="default" className="hidden md:inline-flex" asChild>
+              <a href="#newsletter">Subscribe</a>
             </Button>
           </div>
         </div>

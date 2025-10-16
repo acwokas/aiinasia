@@ -8,6 +8,7 @@ interface ArticleCardProps {
   author: string;
   readTime: string;
   image: string;
+  slug: string;
   featured?: boolean;
 }
 
@@ -18,11 +19,12 @@ const ArticleCard = ({
   author, 
   readTime, 
   image,
+  slug,
   featured = false 
 }: ArticleCardProps) => {
   return (
     <article className={`article-card ${featured ? 'md:col-span-2 md:row-span-2' : ''}`}>
-      <a href="/article" className="block">
+      <a href={`/article/${slug}`} className="block">
         <div className="relative aspect-video overflow-hidden">
           <img 
             src={image} 

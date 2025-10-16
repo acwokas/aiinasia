@@ -95,6 +95,7 @@ const Tag = () => {
                 author={article.authors?.name || ""}
                 readTime={`${article.reading_time_minutes || 5} min read`}
                 image={article.featured_image_url || ""}
+                slug={article.slug}
               />
             ))}
           </div>

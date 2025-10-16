@@ -1,12 +1,19 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ArticleCard from "@/components/ArticleCard";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { TrendingUp, Users, Calendar, Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
+  const [newsletterEmail, setNewsletterEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
+
   const { data: topStories, isLoading } = useQuery({
     queryKey: ["homepage-articles"],
     queryFn: async () => {
@@ -25,6 +32,33 @@ const Index = () => {
       return data || [];
     },
   });
+
+  const handleNewsletterSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      const { error } = await supabase
+        .from("newsletter_subscribers")
+        .insert([{ email: newsletterEmail }]);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success!",
+        description: "You've been subscribed to our newsletter.",
+      });
+      setNewsletterEmail("");
+    } catch (error) {
+      toast({
+        title: "Subscription failed",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -51,6 +85,7 @@ const Index = () => {
                 author={article.authors?.name || ""}
                 readTime={`${article.reading_time_minutes || 5} min read`}
                 image={article.featured_image_url || ""}
+                slug={article.slug}
                 featured={article.featured_on_homepage}
               />
             ))}
@@ -163,7 +198,7 @@ const Index = () => {
         </section>
 
         {/* Newsletter CTA */}
-        <section className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground py-16">
+        <section id="newsletter" className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground py-16">
           <div className="container mx-auto px-4 text-center">
             <h2 className="font-serif text-4xl font-bold mb-4">
               Never Miss an AI Breakthrough
@@ -171,16 +206,19 @@ const Index = () => {
             <p className="text-lg mb-8 opacity-90">
               Join 10,000+ professionals getting the AI in Asia Brief every week.
             </p>
-            <div className="flex gap-4 max-w-md mx-auto">
-              <input
+            <form onSubmit={handleNewsletterSignup} className="flex gap-4 max-w-md mx-auto">
+              <Input
                 type="email"
                 placeholder="Your email address"
-                className="flex-1 px-4 py-3 rounded-lg text-foreground"
+                value={newsletterEmail}
+                onChange={(e) => setNewsletterEmail(e.target.value)}
+                required
+                className="flex-1 bg-white text-foreground"
               />
-              <Button variant="secondary" size="lg">
-                Subscribe
+              <Button type="submit" variant="secondary" size="lg" disabled={isSubmitting}>
+                {isSubmitting ? "Subscribing..." : "Subscribe"}
               </Button>
-            </div>
+            </form>
           </div>
         </section>
       </main>

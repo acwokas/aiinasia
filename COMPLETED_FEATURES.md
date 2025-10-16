@@ -19,6 +19,9 @@
 - [x] Sticky posts functionality
 - [x] Reading time calculation
 - [x] Article scheduling (schema ready)
+- [x] Dynamic article pages with slug routing
+- [x] Article card linking to proper article pages
+- [x] Related articles display on article pages
 
 ### Scout AI Integration
 - [x] AI-powered chatbot for visitors (floating button)
@@ -95,8 +98,9 @@
 - [x] Loading states with spinners
 - [x] Toast notifications for user actions
 - [x] Cookie consent banner
-- [x] Header navigation
+- [x] Header navigation with working search
 - [x] Footer with social links
+- [x] Newsletter signup forms (header link + homepage form)
 
 ### Database Structure
 - [x] articles table with full schema
