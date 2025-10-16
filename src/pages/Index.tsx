@@ -1,49 +1,38 @@
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ArticleCard from "@/components/ArticleCard";
 import { Button } from "@/components/ui/button";
-import { TrendingUp, Users, Calendar } from "lucide-react";
-import heroImage from "@/assets/hero-ai-networks.jpg";
-import featureImage from "@/assets/feature-ai-team.jpg";
-import roboticsImage from "@/assets/robotics-lab.jpg";
-import mlImage from "@/assets/ml-visualization.jpg";
+import { TrendingUp, Users, Calendar, Loader2 } from "lucide-react";
 
 const Index = () => {
-  const topStories = [
-    {
-      title: "How Singapore's AI Strategy is Reshaping Southeast Asia's Tech Landscape",
-      excerpt: "An in-depth look at Singapore's National AI Strategy 2.0 and its ripple effects across the region, from startups to government initiatives.",
-      category: "Feature",
-      author: "Dr. Sarah Chen",
-      readTime: "8 min read",
-      image: heroImage,
-      featured: true,
+  const { data: topStories, isLoading } = useQuery({
+    queryKey: ["homepage-articles"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("articles")
+        .select(`
+          *,
+          authors (name, slug),
+          categories:primary_category_id (name)
+        `)
+        .eq("status", "published")
+        .order("published_at", { ascending: false })
+        .limit(4);
+      
+      if (error) throw error;
+      return data || [];
     },
-    {
-      title: "China's Latest AI Regulations: What They Mean for Innovation",
-      excerpt: "New guidelines aim to balance innovation with control in the world's fastest-growing AI market.",
-      category: "News",
-      author: "Michael Wong",
-      readTime: "5 min read",
-      image: featureImage,
-    },
-    {
-      title: "Inside Japan's Robotics Revolution",
-      excerpt: "How Japanese companies are leading the next wave of AI-powered robotics for healthcare and elderly care.",
-      category: "Feature",
-      author: "Yuki Tanaka",
-      readTime: "10 min read",
-      image: roboticsImage,
-    },
-    {
-      title: "India's AI Talent Exodus: Opportunities or Crisis?",
-      excerpt: "As Indian AI professionals move to global tech hubs, what does this mean for the domestic AI ecosystem?",
-      category: "Opinion",
-      author: "Priya Sharma",
-      readTime: "6 min read",
-      image: mlImage,
-    },
-  ];
+  });
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -53,10 +42,24 @@ const Index = () => {
         {/* Hero Section */}
         <section className="container mx-auto px-4 py-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {topStories.map((story, index) => (
-              <ArticleCard key={index} {...story} />
+            {topStories?.map((article: any) => (
+              <ArticleCard
+                key={article.id}
+                title={article.title}
+                excerpt={article.excerpt || ""}
+                category={article.categories?.name || ""}
+                author={article.authors?.name || ""}
+                readTime={`${article.reading_time_minutes || 5} min read`}
+                image={article.featured_image_url || ""}
+                featured={article.featured_on_homepage}
+              />
             ))}
           </div>
+          {(!topStories || topStories.length === 0) && (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">No articles published yet.</p>
+            </div>
+          )}
         </section>
 
         {/* Ad Banner */}
