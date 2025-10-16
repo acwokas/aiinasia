@@ -21,6 +21,11 @@ import Redirects from "./pages/Redirects";
 import NotFound from "./pages/NotFound";
 import NewsletterPopup from "./components/NewsletterPopup";
 import AIChatbot from "./components/AIChatbot";
+import GoogleAnalytics from "./components/GoogleAnalytics";
+import { loadGoogleAdsScript } from "./components/GoogleAds";
+import ConsentBanner from "./components/ConsentBanner";
+
+loadGoogleAdsScript();
 
 const queryClient = new QueryClient();
 
@@ -30,6 +35,8 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <GoogleAnalytics />
+        <ConsentBanner />
         <NewsletterPopup />
         <AIChatbot />
         <Routes>
