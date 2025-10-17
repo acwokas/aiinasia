@@ -7,9 +7,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Bold, Italic, List, Quote, Link as LinkIcon, Image, Save, Upload, Loader2 } from "lucide-react";
+import { Save, Upload, Loader2, Info } from "lucide-react";
 import ScoutWritingAssistant from "@/components/ScoutWritingAssistant";
-import ArticlePreview from "@/components/ArticlePreview";
+import RichTextEditor from "@/components/RichTextEditor";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { compressImage } from "@/lib/imageCompression";
@@ -168,10 +168,8 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-[1800px] mx-auto">
-      {/* Editor Panel */}
-      <div className="space-y-6">
-        <Tabs defaultValue="content" className="space-y-6">
+    <div className="max-w-6xl mx-auto">
+      <Tabs defaultValue="content" className="space-y-6">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="content">Content</TabsTrigger>
           <TabsTrigger value="seo">SEO</TabsTrigger>
@@ -225,48 +223,26 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
                 />
               </div>
 
-              <div>
-                <Label>Formatting Toolbar</Label>
-                <div className="flex gap-2 p-2 border border-border rounded-lg mb-2">
-                  <Button variant="ghost" size="sm" type="button">
-                    <Bold className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="sm" type="button">
-                    <Italic className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="sm" type="button">
-                    <List className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="sm" type="button">
-                    <Quote className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="sm" type="button">
-                    <LinkIcon className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="sm" type="button">
-                    <Image className="h-4 w-4" />
-                  </Button>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label>Article Content (Live Preview)</Label>
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <Info className="h-3 w-3" />
+                      <span>Use markdown: **bold** *italic* # heading</span>
+                    </div>
+                    <ScoutWritingAssistant
+                      selectedText={selectedText}
+                      onReplace={replaceSelectedText}
+                      context={{ title, fullContent: content }}
+                    />
+                  </div>
                 </div>
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <Label htmlFor="content">Content</Label>
-                  <ScoutWritingAssistant
-                    selectedText={selectedText}
-                    onReplace={replaceSelectedText}
-                    context={{ title, fullContent: content }}
-                  />
-                </div>
-                <Textarea
-                  ref={contentRef}
-                  id="content"
+                <RichTextEditor
                   value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  onSelect={(e) => handleTextSelection(e.currentTarget)}
-                  placeholder="Write your article content here..."
-                  rows={20}
-                  className="font-mono text-sm"
+                  onChange={setContent}
+                  onSelect={setSelectedText}
+                  placeholder="Start writing your article... Use markdown for formatting."
                 />
               </div>
 
@@ -454,21 +430,6 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
           <Save className="h-4 w-4 mr-2" />
           Save Article
         </Button>
-      </div>
-      </div>
-
-      {/* Live Preview Panel */}
-      <div className="lg:sticky lg:top-4 lg:h-[calc(100vh-2rem)] space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold">Live Preview</h3>
-          <span className="text-xs text-muted-foreground">Updates in real-time</span>
-        </div>
-        <ArticlePreview
-          title={title}
-          excerpt={excerpt}
-          content={content}
-          featuredImage={featuredImage}
-        />
       </div>
     </div>
   );
