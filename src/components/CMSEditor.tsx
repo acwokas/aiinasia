@@ -9,8 +9,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Bold, Italic, List, Quote, Link as LinkIcon, Image, Save, Upload, Loader2 } from "lucide-react";
 import ScoutWritingAssistant from "@/components/ScoutWritingAssistant";
+import ArticlePreview from "@/components/ArticlePreview";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { compressImage } from "@/lib/imageCompression";
 
 interface CMSEditorProps {
   initialData?: any;
@@ -93,13 +95,31 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
     setIsUploadingImage(true);
 
     try {
-      const fileExt = file.name.split('.').pop();
+      // Compress image before upload
+      toast({
+        title: "Optimizing image...",
+        description: "Compressing image for best performance",
+      });
+
+      const compressedFile = await compressImage(file, {
+        maxWidth: 1920,
+        maxHeight: 1080,
+        quality: 0.85,
+        maxSizeMB: 1,
+      });
+
+      const originalSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+      const compressedSizeMB = (compressedFile.size / (1024 * 1024)).toFixed(2);
+      
+      console.log(`Image compressed: ${originalSizeMB}MB → ${compressedSizeMB}MB`);
+
+      const fileExt = 'jpg'; // Always use jpg after compression
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
       const filePath = `${fileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from('article-images')
-        .upload(filePath, file);
+        .upload(filePath, compressedFile);
 
       if (uploadError) throw uploadError;
 
@@ -111,7 +131,7 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
       
       toast({
         title: "Image uploaded",
-        description: "Featured image has been uploaded successfully",
+        description: `Optimized and uploaded (${originalSizeMB}MB → ${compressedSizeMB}MB)`,
       });
     } catch (error) {
       console.error('Error uploading image:', error);
@@ -148,8 +168,10 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto">
-      <Tabs defaultValue="content" className="space-y-6">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-[1800px] mx-auto">
+      {/* Editor Panel */}
+      <div className="space-y-6">
+        <Tabs defaultValue="content" className="space-y-6">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="content">Content</TabsTrigger>
           <TabsTrigger value="seo">SEO</TabsTrigger>
@@ -251,12 +273,15 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
               <div className="space-y-4">
                 <div>
                   <Label htmlFor="featured-image">Featured Image</Label>
+                  <p className="text-xs text-muted-foreground mb-2">
+                    Paste URL or upload (auto-optimized to ~1MB)
+                  </p>
                   <div className="flex gap-2">
                     <Input
                       id="featured-image"
                       value={featuredImage}
                       onChange={(e) => setFeaturedImage(e.target.value)}
-                      placeholder="https://example.com/image.jpg"
+                      placeholder="Paste image URL or upload below"
                       className="flex-1"
                     />
                     <input
@@ -271,6 +296,7 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
                       variant="outline"
                       onClick={() => fileInputRef.current?.click()}
                       disabled={isUploadingImage}
+                      title="Upload & optimize image"
                     >
                       {isUploadingImage ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
@@ -424,11 +450,25 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
       </Tabs>
 
       <div className="flex justify-end gap-4 mt-6">
-        <Button variant="outline">Preview</Button>
         <Button onClick={handleSave}>
           <Save className="h-4 w-4 mr-2" />
           Save Article
         </Button>
+      </div>
+      </div>
+
+      {/* Live Preview Panel */}
+      <div className="lg:sticky lg:top-4 lg:h-[calc(100vh-2rem)] space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold">Live Preview</h3>
+          <span className="text-xs text-muted-foreground">Updates in real-time</span>
+        </div>
+        <ArticlePreview
+          title={title}
+          excerpt={excerpt}
+          content={content}
+          featuredImage={featuredImage}
+        />
       </div>
     </div>
   );
