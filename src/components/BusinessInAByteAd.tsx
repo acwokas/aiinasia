@@ -23,14 +23,7 @@ export const BusinessInAByteAd = () => {
           </div>
 
           {/* Content */}
-          <div className="flex flex-col items-center space-y-1.5">
-            <div className="flex items-center justify-center gap-1.5">
-              <Rocket className="w-4 h-4 text-white" />
-              <p className="text-white font-bold text-sm leading-tight">
-                Launch in 7 Days
-              </p>
-            </div>
-            
+          <div className="flex flex-col items-center">
             <p className="text-white text-xs leading-tight px-2">
               Free tools and playbooks. Built for entrepreneurs who move fast.
             </p>
@@ -38,7 +31,7 @@ export const BusinessInAByteAd = () => {
 
           {/* CTA */}
           <div className="w-full bg-black/90 text-white rounded-lg px-4 py-2.5 font-bold text-sm flex items-center justify-center gap-2 group-hover:bg-black transition-colors">
-            Get Started Free
+            Launch in 7 Days
             <ExternalLink className="w-3.5 h-3.5" />
           </div>
         </div>
