@@ -139,7 +139,7 @@ const Index = () => {
                   Trending
                 </div>
               </div>
-              {trendingArticles?.slice(0, 3).map((article: any, index: number) => (
+              {trendingArticles?.slice(0, 3).filter((article: any) => article.slug).map((article: any, index: number) => (
                 <Link 
                   key={article.id}
                   to={`/article/${article.slug}`}
@@ -179,7 +179,7 @@ const Index = () => {
 
             {/* Featured Article - Center */}
             <div className="lg:col-span-6">
-              {featuredArticle ? (
+              {featuredArticle && featuredArticle.slug ? (
                 <Link to={`/article/${featuredArticle.slug}`} className="block group h-full">
                   <div className="relative h-full min-h-[500px] overflow-hidden rounded-lg">
                     <img 
@@ -205,7 +205,7 @@ const Index = () => {
                   </div>
                 </Link>
               ) : (
-                trendingArticles?.[0] && (
+                trendingArticles?.[0]?.slug && (
                   <Link to={`/article/${trendingArticles[0].slug}`} className="block group h-full">
                     <div className="relative h-full min-h-[500px] overflow-hidden rounded-lg">
                       <img 
@@ -242,7 +242,7 @@ const Index = () => {
                 </div>
                 <span className="text-xs text-muted-foreground">Videos</span>
               </div>
-              {latestArticles?.map((article: any) => (
+              {latestArticles?.filter((article: any) => article.slug).map((article: any) => (
                 <Link 
                   key={article.id}
                   to={`/article/${article.slug}`}
