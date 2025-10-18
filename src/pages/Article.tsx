@@ -9,31 +9,15 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Clock, User, Share2, Bookmark, Twitter, Linkedin, Facebook, Loader2, ExternalLink } from "lucide-react";
 import { Helmet } from "react-helmet";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 const Article = () => {
   const { slug } = useParams();
+  const { toast } = useToast();
+  const [isBookmarked, setIsBookmarked] = useState(false);
   // Remove trailing slashes from slug for consistent lookups
   const cleanSlug = slug?.replace(/\/+$/g, '');
-
-  const handleShare = async () => {
-    const shareData = {
-      title: article?.title || '',
-      text: article?.excerpt || '',
-      url: window.location.href
-    };
-
-    try {
-      if (navigator.share) {
-        await navigator.share(shareData);
-      } else {
-        await navigator.clipboard.writeText(window.location.href);
-        // Could add a toast notification here
-        alert('Link copied to clipboard!');
-      }
-    } catch (err) {
-      console.error('Error sharing:', err);
-    }
-  };
 
   const { data: article, isLoading } = useQuery({
     queryKey: ["article", cleanSlug],
@@ -53,6 +37,38 @@ const Article = () => {
       return data;
     },
   });
+
+  const handleShare = async () => {
+    const shareData = {
+      title: article?.title || '',
+      text: article?.excerpt || '',
+      url: window.location.href
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        toast({
+          title: "Link copied!",
+          description: "Article link copied to clipboard",
+        });
+      }
+    } catch (err) {
+      console.error('Error sharing:', err);
+    }
+  };
+
+  const handleBookmark = () => {
+    setIsBookmarked(!isBookmarked);
+    toast({
+      title: isBookmarked ? "Bookmark removed" : "Bookmarked!",
+      description: isBookmarked 
+        ? "Article removed from bookmarks" 
+        : "Article saved to bookmarks",
+    });
+  };
 
   const { data: relatedArticles } = useQuery({
     queryKey: ["related-articles", article?.primary_category_id, article?.id],
@@ -335,8 +351,8 @@ const Article = () => {
                 </div>
 
                 <div className="flex gap-2">
-                  <Button variant="outline" size="icon">
-                    <Bookmark className="h-4 w-4" />
+                  <Button variant="outline" size="icon" onClick={handleBookmark}>
+                    <Bookmark className={`h-4 w-4 ${isBookmarked ? 'fill-current' : ''}`} />
                   </Button>
                   <Button variant="outline" size="icon" onClick={handleShare}>
                     <Share2 className="h-4 w-4" />
