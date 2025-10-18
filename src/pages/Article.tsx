@@ -93,10 +93,10 @@ const Article = () => {
       
       // Process inline formatting FIRST (before splitting into blocks)
       let processed = consolidated
-        // Convert actual bold text (must come before removing empty markers)
-        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-        // Convert italic text
-        .replace(/\*(.+?)\*/g, '<em>$1</em>')
+        // Convert actual bold text first
+        .replace(/\*\*([^\*]+?)\*\*/g, '<strong>$1</strong>')
+        // Convert italic text (single asterisks only, not part of **)
+        .replace(/(?<!\*)\*([^\*]+?)\*(?!\*)/g, '<em>$1</em>')
         // Remove any remaining standalone ** markers (cleanup)
         .replace(/\*\*/g, '')
         // Convert links with new tab marker (^) - add external link icon (must come before regular links)
