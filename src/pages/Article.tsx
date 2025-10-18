@@ -87,45 +87,47 @@ const Article = () => {
     
     // If content is a string (markdown), convert it to HTML with proper parsing
     if (typeof content === 'string') {
-      // First, normalize the content by adding line breaks before markdown elements if missing
-      let normalized = content
-        // Add line breaks before headings if they appear mid-line
-        .replace(/([^\n])(\n?)(#{1,3} )/g, '$1\n\n$3')
-        // Add line breaks before blockquotes if they appear mid-line
-        .replace(/([^\n])(\n?)(> )/g, '$1\n\n$3');
-      
-      const html = normalized
-        // Process headings - MUST check longest patterns first
-        .replace(/^### (.+)$/gm, '<h3 class="text-2xl font-semibold mt-8 mb-4">$1</h3>')
-        .replace(/^## (.+)$/gm, '<h2 class="text-3xl font-bold mt-8 mb-4">$1</h2>')
-        .replace(/^# (.+)$/gm, '<h1 class="text-4xl font-bold mt-8 mb-4">$1</h1>')
-        // Process blockquotes - handle lines starting with >
-        .replace(/^> (.+)$/gm, '<blockquote class="border-l-4 border-primary pl-6 py-2 my-8 italic text-xl">$1</blockquote>')
-        // Process lists
-        .replace(/^- (.+)$/gm, '<li class="ml-6">$1</li>')
-        // Wrap consecutive list items in ul
-        .replace(/(<li class="ml-6">.+<\/li>\n?)+/g, (match) => `<ul class="list-disc ml-6 my-6 space-y-2">${match}</ul>`)
-        // Process inline formatting
+      // Process inline formatting FIRST (before splitting into blocks)
+      let processed = content
         .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
         .replace(/\*(.+?)\*/g, '<em>$1</em>')
-        .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" class="text-primary underline hover:no-underline">$1</a>')
-        // Process paragraphs - split by double line breaks
-        .split('\n\n')
-        .map(block => {
-          // Skip if already formatted (heading, blockquote, list)
-          if (block.match(/^<(h1|h2|h3|blockquote|ul)/)) {
-            return block;
-          }
-          // Wrap in paragraph if it's plain text
-          const trimmed = block.trim();
-          if (trimmed && !trimmed.startsWith('<')) {
-            return `<p class="leading-relaxed mb-6">${trimmed.replace(/\n/g, ' ')}</p>`;
-          }
-          return block;
-        })
-        .join('\n');
+        .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" class="text-primary underline hover:no-underline">$1</a>');
       
-      return <div dangerouslySetInnerHTML={{ __html: html }} />;
+      // Split into blocks by double line breaks
+      const blocks = processed.split('\n\n').map(block => block.trim()).filter(block => block.length > 0);
+      
+      // Process each block
+      const htmlBlocks = blocks.map(block => {
+        // Check for headings (must be at start of block)
+        if (block.startsWith('### ')) {
+          return `<h3 class="text-2xl font-semibold mt-8 mb-4">${block.substring(4)}</h3>`;
+        }
+        if (block.startsWith('## ')) {
+          return `<h2 class="text-3xl font-bold mt-8 mb-4">${block.substring(3)}</h2>`;
+        }
+        if (block.startsWith('# ')) {
+          return `<h1 class="text-4xl font-bold mt-8 mb-4">${block.substring(2)}</h1>`;
+        }
+        
+        // Check for blockquotes
+        if (block.startsWith('> ')) {
+          return `<blockquote class="border-l-4 border-primary pl-6 py-2 my-8 italic text-xl">${block.substring(2)}</blockquote>`;
+        }
+        
+        // Check for lists (multiple lines starting with -)
+        if (block.includes('\n- ') || block.startsWith('- ')) {
+          const items = block.split('\n')
+            .filter(line => line.trim().startsWith('- '))
+            .map(line => `<li class="ml-6">${line.trim().substring(2)}</li>`)
+            .join('\n');
+          return `<ul class="list-disc ml-6 my-6 space-y-3">${items}</ul>`;
+        }
+        
+        // Default to paragraph
+        return `<p class="leading-relaxed mb-6">${block.replace(/\n/g, ' ')}</p>`;
+      });
+      
+      return <div dangerouslySetInnerHTML={{ __html: htmlBlocks.join('\n') }} />;
     }
     
     // Otherwise try to parse as JSON blocks (legacy format)
