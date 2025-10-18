@@ -236,8 +236,7 @@ const Article = () => {
               </div>
             </header>
 
-            {/* Article Content */}
-            {/* Hero Image */}
+            {/* Hero Image - Featured image displayed above article content */}
             {article.featured_image_url && (
               <div className="relative aspect-video overflow-hidden rounded-lg mb-8">
                 <img 
@@ -253,6 +252,7 @@ const Article = () => {
               </div>
             )}
 
+            {/* Article Content */}
             <div className="prose prose-lg max-w-none">
               {renderContent(article.content)}
             </div>
