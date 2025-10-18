@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Bold, Italic, Heading1, Heading2, Heading3, List, Quote, Link as LinkIcon, Minus, Image, Type, Table as TableIcon } from "lucide-react";
+import { Bold, Italic, Heading1, Heading2, Heading3, List, ListOrdered, Quote, Link as LinkIcon, Minus, Image, Type, Table as TableIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -59,6 +59,11 @@ const RichTextEditor = ({
       .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2">$1</a>')
       .replace(/^- (.+)$/gm, '<li>$1</li>')
       .replace(/(<li>.*?<\/li>\s*)+/gs, '<ul>$&</ul>')
+      .replace(/^\d+\. (.+)$/gm, '<li>$1</li>')
+      .replace(/(<li>.*?<\/li>\s*)+/gs, (match) => {
+        if (match.includes('<ul>')) return match;
+        return '<ol>' + match + '</ol>';
+      })
       .replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>')
       .replace(/\n\n/g, '</p><p>')
       .replace(/\n/g, '<br>');
@@ -74,11 +79,13 @@ const RichTextEditor = ({
       .replace(/([^\n>])(<blockquote)/g, '$1\n\n$2')
       .replace(/([^\n>])(<p[^>]*>)/g, '$1\n\n$2')
       .replace(/([^\n>])(<ul)/g, '$1\n\n$2')
+      .replace(/([^\n>])(<ol)/g, '$1\n\n$2')
       // Ensure block closing tags have line breaks after them
       .replace(/(<\/h[123]>)([^\n])/g, '$1\n\n$2')
       .replace(/(<\/blockquote>)([^\n])/g, '$1\n\n$2')
       .replace(/(<\/p>)([^\n])/g, '$1\n\n$2')
-      .replace(/(<\/ul>)([^\n])/g, '$1\n\n$2');
+      .replace(/(<\/ul>)([^\n])/g, '$1\n\n$2')
+      .replace(/(<\/ol>)([^\n])/g, '$1\n\n$2');
     
     let markdown = normalized
       // Convert inline formatting first
@@ -95,7 +102,14 @@ const RichTextEditor = ({
       .replace(/<a[^>]*target="_blank"[^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/g, '[$2]($1)^')
       // Convert regular links
       .replace(/<a[^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/g, '[$2]($1)')
-      // Convert lists
+      // Convert ordered lists first
+      .replace(/<ol[^>]*>(.*?)<\/ol>/gs, (match, content) => {
+        let counter = 1;
+        return content.replace(/<li[^>]*>(.*?)<\/li>/gs, (_: string, item: string) => {
+          return `${counter++}. ${item}\n`;
+        });
+      })
+      // Convert unordered lists
       .replace(/<li[^>]*>(.*?)<\/li>/gs, '- $1\n')
       .replace(/<ul[^>]*>(.*?)<\/ul>/gs, '$1')
       // Convert blockquotes
@@ -146,6 +160,9 @@ const RichTextEditor = ({
         break;
       case 'list':
         execCommand('insertUnorderedList');
+        break;
+      case 'orderedList':
+        execCommand('insertOrderedList');
         break;
       case 'quote':
         execCommand('formatBlock', '<blockquote>');
@@ -560,9 +577,18 @@ const RichTextEditor = ({
           variant="ghost"
           size="sm"
           onClick={() => handleFormat('list')}
-          title="List"
+          title="Bulleted List"
         >
           <List className="h-4 w-4" />
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => handleFormat('orderedList')}
+          title="Numbered List"
+        >
+          <ListOrdered className="h-4 w-4" />
         </Button>
         <Button
           type="button"
@@ -633,6 +659,7 @@ const RichTextEditor = ({
               "[&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:mt-5 [&_h2]:mb-3",
               "[&_h3]:text-xl [&_h3]:font-semibold [&_h3]:mt-4 [&_h3]:mb-2",
               "[&_ul]:list-disc [&_ul]:ml-6 [&_ul]:my-4",
+              "[&_ol]:list-decimal [&_ol]:ml-6 [&_ol]:my-4",
               "[&_li]:my-1",
               "[&_blockquote]:border-l-4 [&_blockquote]:border-primary [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:my-4",
               "[&_a]:text-primary [&_a]:underline [&_a]:hover:no-underline",
