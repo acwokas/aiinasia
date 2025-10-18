@@ -24,6 +24,7 @@ const RichTextEditor = ({
   const editorRef = useRef<HTMLDivElement>(null);
   const [isEmpty, setIsEmpty] = useState(!value);
   const lastValueRef = useRef(value);
+  const formatTimeoutRef = useRef<NodeJS.Timeout>();
 
   const formatContent = (text: string) => {
     if (!text) return '';
@@ -50,6 +51,14 @@ const RichTextEditor = ({
       editorRef.current.innerHTML = formatContent(value);
       lastValueRef.current = value;
     }
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (formatTimeoutRef.current) {
+        clearTimeout(formatTimeoutRef.current);
+      }
+    };
   }, []);
 
   const saveCursorPosition = () => {
@@ -188,14 +197,24 @@ const RichTextEditor = ({
     lastValueRef.current = text;
     onChange(text);
     
-    // Apply formatting in real-time
-    const cursorPos = saveCursorPosition();
-    editorRef.current.innerHTML = formatContent(text);
-    
-    // Restore cursor position after formatting
-    if (cursorPos !== null) {
-      requestAnimationFrame(() => restoreCursorPosition(cursorPos));
+    // Clear existing timeout
+    if (formatTimeoutRef.current) {
+      clearTimeout(formatTimeoutRef.current);
     }
+    
+    // Apply formatting after user stops typing (500ms delay)
+    formatTimeoutRef.current = setTimeout(() => {
+      if (!editorRef.current) return;
+      
+      const cursorPos = saveCursorPosition();
+      const currentText = editorRef.current.innerText || '';
+      editorRef.current.innerHTML = formatContent(currentText);
+      
+      // Restore cursor position
+      if (cursorPos !== null) {
+        requestAnimationFrame(() => restoreCursorPosition(cursorPos));
+      }
+    }, 500);
   };
 
   const handleSelection = () => {
