@@ -1,15 +1,17 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { Helmet } from "react-helmet";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ArticleCard from "@/components/ArticleCard";
 import { Button } from "@/components/ui/button";
-import { Loader2, Twitter, Linkedin, Globe } from "lucide-react";
+import { Loader2, Twitter, Linkedin, Globe, ChevronDown, ChevronUp } from "lucide-react";
 
 const AuthorProfile = () => {
   const { slug } = useParams();
+  const [isBioExpanded, setIsBioExpanded] = useState(false);
 
   const { data: author, isLoading: authorLoading } = useQuery({
     queryKey: ["author", slug],
@@ -95,11 +97,33 @@ const AuthorProfile = () => {
                     {author.job_title}
                   </p>
                 )}
+                
                 {author?.bio && (
-                  <p className="text-lg text-muted-foreground mb-4 max-w-2xl">
-                    {author.bio}
-                  </p>
+                  <div className="mb-4">
+                    <div className={`text-lg text-muted-foreground max-w-2xl ${!isBioExpanded && 'line-clamp-2'}`}>
+                      {author.bio}
+                    </div>
+                    {author.bio.length > 150 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setIsBioExpanded(!isBioExpanded)}
+                        className="mt-2 text-primary hover:text-primary/80"
+                      >
+                        {isBioExpanded ? (
+                          <>
+                            Show less <ChevronUp className="ml-1 h-4 w-4" />
+                          </>
+                        ) : (
+                          <>
+                            Read more <ChevronDown className="ml-1 h-4 w-4" />
+                          </>
+                        )}
+                      </Button>
+                    )}
+                  </div>
                 )}
+                
                 <p className="text-sm text-muted-foreground mb-4">
                   {articles?.length || 0} articles published
                 </p>
