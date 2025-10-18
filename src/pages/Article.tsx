@@ -220,11 +220,39 @@ const Article = () => {
 
               <div className="flex items-center justify-between flex-wrap gap-4 pb-6 border-b border-border">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-secondary" />
+                  {article.authors?.slug ? (
+                    <Link to={`/author/${article.authors.slug}`}>
+                      {article.authors.avatar_url ? (
+                        <img 
+                          src={article.authors.avatar_url} 
+                          alt={article.authors.name}
+                          className="w-12 h-12 rounded-full object-cover hover:opacity-80 transition-opacity"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-secondary hover:opacity-80 transition-opacity" />
+                      )}
+                    </Link>
+                  ) : (
+                    article.authors?.avatar_url ? (
+                      <img 
+                        src={article.authors.avatar_url} 
+                        alt={article.authors?.name || 'Anonymous'}
+                        className="w-12 h-12 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-secondary" />
+                    )
+                  )}
                   <div>
                     <div className="flex items-center gap-2 font-semibold">
                       <User className="h-4 w-4" />
-                      {article.authors?.name || 'Anonymous'}
+                      {article.authors?.slug ? (
+                        <Link to={`/author/${article.authors.slug}`} className="hover:text-primary transition-colors">
+                          {article.authors.name}
+                        </Link>
+                      ) : (
+                        article.authors?.name || 'Anonymous'
+                      )}
                     </div>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Clock className="h-3 w-3" />
@@ -289,9 +317,39 @@ const Article = () => {
 
               {article.authors && (
                 <div className="bg-muted/50 rounded-lg p-6 flex items-center gap-4">
-                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-secondary flex-shrink-0" />
+                  {article.authors.slug ? (
+                    <Link to={`/author/${article.authors.slug}`}>
+                      {article.authors.avatar_url ? (
+                        <img 
+                          src={article.authors.avatar_url} 
+                          alt={article.authors.name}
+                          className="w-20 h-20 rounded-full object-cover flex-shrink-0 hover:opacity-80 transition-opacity"
+                        />
+                      ) : (
+                        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-secondary flex-shrink-0 hover:opacity-80 transition-opacity" />
+                      )}
+                    </Link>
+                  ) : (
+                    article.authors.avatar_url ? (
+                      <img 
+                        src={article.authors.avatar_url} 
+                        alt={article.authors.name}
+                        className="w-20 h-20 rounded-full object-cover flex-shrink-0"
+                      />
+                    ) : (
+                      <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-secondary flex-shrink-0" />
+                    )
+                  )}
                   <div>
-                    <h4 className="font-semibold text-lg mb-2">{article.authors.name}</h4>
+                    <h4 className="font-semibold text-lg mb-2">
+                      {article.authors.slug ? (
+                        <Link to={`/author/${article.authors.slug}`} className="hover:text-primary transition-colors">
+                          {article.authors.name}
+                        </Link>
+                      ) : (
+                        article.authors.name
+                      )}
+                    </h4>
                     {article.authors.bio && (
                       <p className="text-sm text-muted-foreground">
                         {article.authors.bio}
