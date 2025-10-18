@@ -312,9 +312,9 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Ad Banner */}
-        <section className="container mx-auto px-4 py-8">
-          <p className="text-sm text-muted-foreground text-center mb-2">Advertisement</p>
+        {/* Promotional Banner */}
+        <section className="my-12">
+          <p className="text-sm text-muted-foreground text-center mb-4">Sponsored Content</p>
           <PromptAndGoBanner />
         </section>
 
