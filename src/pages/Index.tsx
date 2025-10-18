@@ -159,7 +159,7 @@ const Index = () => {
             <div className="flex items-center justify-between mb-8">
               <h2 className="headline text-3xl flex items-center gap-2">
                 <Users className="h-8 w-8 text-secondary" />
-                Featured Voices
+                Digital Transformation
               </h2>
               <Button variant="outline">All Contributors</Button>
             </div>
