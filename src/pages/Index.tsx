@@ -44,7 +44,8 @@ const Index = () => {
   const { data: trendingArticles } = useQuery({
     queryKey: ["trending-articles"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // First get top articles by view count
+      const { data: topViewed, error: topError } = await supabase
         .from("articles")
         .select(`
           *,
@@ -53,10 +54,40 @@ const Index = () => {
         `)
         .eq("status", "published")
         .order("view_count", { ascending: false })
+        .limit(10);
+      
+      if (topError) throw topError;
+      
+      // If we have at least 4, return them
+      if (topViewed && topViewed.length >= 4) {
+        return topViewed.slice(0, 4);
+      }
+      
+      // Otherwise, supplement with latest articles
+      const { data: latest, error: latestError } = await supabase
+        .from("articles")
+        .select(`
+          *,
+          authors (name, slug),
+          categories:primary_category_id (name)
+        `)
+        .eq("status", "published")
+        .order("published_at", { ascending: false })
         .limit(4);
       
-      if (error) throw error;
-      return data || [];
+      if (latestError) throw latestError;
+      
+      // Combine and deduplicate
+      const combined = [...(topViewed || [])];
+      const existingIds = new Set(combined.map(a => a.id));
+      
+      for (const article of (latest || [])) {
+        if (!existingIds.has(article.id) && combined.length < 4) {
+          combined.push(article);
+        }
+      }
+      
+      return combined.slice(0, 4);
     },
   });
 
