@@ -35,7 +35,7 @@ const Article = () => {
   });
 
   const { data: relatedArticles } = useQuery({
-    queryKey: ["related-articles", article?.primary_category_id],
+    queryKey: ["related-articles", article?.primary_category_id, article?.id],
     enabled: !!article?.primary_category_id,
     queryFn: async () => {
       const { data, error } = await supabase
@@ -48,6 +48,7 @@ const Article = () => {
         .eq("primary_category_id", article?.primary_category_id)
         .neq("id", article?.id)
         .eq("status", "published")
+        .order("view_count", { ascending: false })
         .order("published_at", { ascending: false })
         .limit(3);
       
@@ -55,6 +56,33 @@ const Article = () => {
       return data;
     },
   });
+
+  // Determine external link based on article category
+  const getExternalLink = () => {
+    const categoryName = article?.categories?.name?.toLowerCase() || '';
+    
+    if (categoryName.includes('ai') || categoryName.includes('machine learning')) {
+      return {
+        text: 'Try ChatGPT',
+        url: 'https://chat.openai.com',
+        icon: '🤖'
+      };
+    } else if (categoryName.includes('robotics')) {
+      return {
+        text: 'Try Gemini AI',
+        url: 'https://gemini.google.com',
+        icon: '✨'
+      };
+    } else {
+      return {
+        text: 'Explore Google Gemini',
+        url: 'https://gemini.google.com',
+        icon: '🚀'
+      };
+    }
+  };
+
+  const externalLink = getExternalLink();
 
   if (isLoading) {
     return (
@@ -374,7 +402,7 @@ const Article = () => {
             <section className="bg-muted/30 py-12 mt-12">
               <div className="container mx-auto px-4 max-w-6xl">
                 <h2 className="headline text-3xl mb-8">You may also like:</h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                   {relatedArticles.map((relatedArticle: any) => (
                     <ArticleCard
                       key={relatedArticle.id}
@@ -387,6 +415,35 @@ const Article = () => {
                       slug={relatedArticle.slug}
                     />
                   ))}
+                  
+                  {/* External Link Card for SEO */}
+                  <a 
+                    href={externalLink.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="article-card group hover:shadow-lg transition-shadow"
+                  >
+                    <div className="relative aspect-video overflow-hidden bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                      <span className="text-6xl">{externalLink.icon}</span>
+                    </div>
+                    
+                    <div className="p-6">
+                      <h3 className="headline text-xl mb-3 hover:text-primary transition-colors flex items-center gap-2">
+                        {externalLink.text}
+                        <ExternalLink className="h-4 w-4" />
+                      </h3>
+                      
+                      <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                        Explore cutting-edge AI technology and interactive experiences
+                      </p>
+                      
+                      <div className="flex items-center justify-between text-xs text-muted-foreground">
+                        <Badge variant="secondary" className="bg-primary text-primary-foreground">
+                          External Resource
+                        </Badge>
+                      </div>
+                    </div>
+                  </a>
                 </div>
               </div>
             </section>
