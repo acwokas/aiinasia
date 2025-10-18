@@ -187,20 +187,14 @@ const RichTextEditor = ({
     setIsEmpty(text.trim().length === 0);
     lastValueRef.current = text;
     onChange(text);
-  };
-
-  const handleBlur = () => {
-    if (!editorRef.current) return;
     
-    const text = editorRef.current.innerText || '';
+    // Apply formatting in real-time
     const cursorPos = saveCursorPosition();
-    
-    // Apply formatting on blur
     editorRef.current.innerHTML = formatContent(text);
     
-    // Restore cursor
+    // Restore cursor position after formatting
     if (cursorPos !== null) {
-      setTimeout(() => restoreCursorPosition(cursorPos), 0);
+      requestAnimationFrame(() => restoreCursorPosition(cursorPos));
     }
   };
 
@@ -310,7 +304,6 @@ const RichTextEditor = ({
           ref={editorRef}
           contentEditable
           onInput={handleInput}
-          onBlur={handleBlur}
           onSelect={handleSelection}
           onPaste={handlePaste}
           className={cn(
