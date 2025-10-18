@@ -2,12 +2,14 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import logo from "@/assets/aiinasia-logo.png";
 
 const Footer = () => {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { user } = useAuth();
   const { toast } = useToast();
 
   const handleNewsletterSubmit = async (e: React.FormEvent) => {
@@ -29,10 +31,49 @@ const Footer = () => {
           throw error;
         }
       } else {
-        toast({
-          title: "Successfully subscribed!",
-          description: "Check your inbox for a confirmation email.",
-        });
+        // Award newsletter badge and points if logged in
+        if (user) {
+          await supabase.rpc('award_points', { 
+            _user_id: user.id, 
+            _points: 25 
+          });
+          
+          // Award Newsletter Insider achievement
+          const { data: achievement } = await supabase
+            .from('achievements')
+            .select('id')
+            .eq('name', 'Newsletter Insider')
+            .single();
+          
+          if (achievement) {
+            // Check if already earned
+            const { data: existing } = await supabase
+              .from('user_achievements')
+              .select('id')
+              .eq('user_id', user.id)
+              .eq('achievement_id', achievement.id)
+              .maybeSingle();
+            
+            if (!existing) {
+              await supabase
+                .from('user_achievements')
+                .insert({ 
+                  user_id: user.id, 
+                  achievement_id: achievement.id 
+                });
+            }
+          }
+
+          toast({
+            title: "Successfully subscribed!",
+            description: "You earned 25 points and the Newsletter Insider badge! 🎉",
+          });
+        } else {
+          toast({
+            title: "Successfully subscribed!",
+            description: "Check your inbox for a confirmation email.",
+          });
+        }
         setEmail("");
       }
     } catch (error) {
