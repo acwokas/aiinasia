@@ -52,7 +52,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
           <div>
             <img src={logo} alt="AI in Asia" className="h-24 mb-0 -ml-6" />
-            <p className="text-sm text-muted-foreground mb-4 -mt-2">
+            <p className="text-sm text-muted-foreground mb-4 -mt-4">
               Your trusted source for AI news, insights and innovation across Asia.
             </p>
             <div className="flex gap-2">
