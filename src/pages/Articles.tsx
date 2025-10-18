@@ -10,6 +10,16 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Home, Search, Filter, Edit, Trash2, Eye, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const Articles = () => {
   const navigate = useNavigate();
@@ -22,6 +32,7 @@ const Articles = () => {
   const [authorFilter, setAuthorFilter] = useState<string>("all");
   const [sortBy, setSortBy] = useState("created_at");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [deleteArticle, setDeleteArticle] = useState<{ id: string; title: string } | null>(null);
 
   useEffect(() => {
     checkAdminStatus();
@@ -67,8 +78,11 @@ const Articles = () => {
           status,
           created_at,
           updated_at,
+          published_at,
           view_count,
           article_type,
+          author_id,
+          primary_category_id,
           authors (name, slug),
           categories:primary_category_id (name, slug)
         `);
@@ -128,14 +142,40 @@ const Articles = () => {
     },
   });
 
-  const handleDelete = async (articleId: string, title: string) => {
-    if (!confirm(`Are you sure you want to delete "${title}"?`)) return;
+  const handleUpdate = async (articleId: string, field: string, value: any) => {
+    try {
+      const updateData: any = { [field]: value };
+      
+      const { error } = await supabase
+        .from("articles")
+        .update(updateData)
+        .eq("id", articleId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Article updated",
+        description: "The article has been successfully updated.",
+      });
+
+      refetch();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update article",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deleteArticle) return;
 
     try {
       const { error } = await supabase
         .from("articles")
         .delete()
-        .eq("id", articleId);
+        .eq("id", deleteArticle.id);
 
       if (error) throw error;
 
@@ -144,6 +184,7 @@ const Articles = () => {
         description: "The article has been successfully deleted.",
       });
 
+      setDeleteArticle(null);
       refetch();
     } catch (error) {
       toast({
@@ -330,7 +371,7 @@ const Articles = () => {
                     Title {sortBy === "title" && (sortOrder === "asc" ? "↑" : "↓")}
                   </TableHead>
                   <TableHead>Author</TableHead>
-                  <TableHead>Category</TableHead>
+                   <TableHead>Category</TableHead>
                   <TableHead>Type</TableHead>
                   <TableHead 
                     className="cursor-pointer hover:bg-muted/50"
@@ -338,17 +379,12 @@ const Articles = () => {
                   >
                     Status {sortBy === "status" && (sortOrder === "asc" ? "↑" : "↓")}
                   </TableHead>
+                  <TableHead>Published Date</TableHead>
                   <TableHead 
                     className="cursor-pointer hover:bg-muted/50"
                     onClick={() => handleSort("view_count")}
                   >
                     Views {sortBy === "view_count" && (sortOrder === "asc" ? "↑" : "↓")}
-                  </TableHead>
-                  <TableHead 
-                    className="cursor-pointer hover:bg-muted/50"
-                    onClick={() => handleSort("created_at")}
-                  >
-                    Date {sortBy === "created_at" && (sortOrder === "asc" ? "↑" : "↓")}
                   </TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -357,32 +393,78 @@ const Articles = () => {
                 {articles.map((article: any) => (
                   <TableRow key={article.id}>
                     <TableCell className="font-medium max-w-md">
-                      <div className="truncate">{article.title}</div>
-                      <div className="text-xs text-muted-foreground truncate">
+                      <Input
+                        value={article.title}
+                        onChange={(e) => handleUpdate(article.id, "title", e.target.value)}
+                        className="font-medium"
+                      />
+                      <div className="text-xs text-muted-foreground truncate mt-1">
                         /{article.slug}
                       </div>
                     </TableCell>
                     <TableCell>
-                      {article.authors?.name || "—"}
+                      <Select
+                        value={article.author_id || ""}
+                        onValueChange={(value) => handleUpdate(article.id, "author_id", value)}
+                      >
+                        <SelectTrigger className="w-[140px]">
+                          <SelectValue placeholder="Select author" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {authors?.map((author) => (
+                            <SelectItem key={author.id} value={author.id}>
+                              {author.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </TableCell>
                     <TableCell>
-                      {article.categories?.name || "—"}
+                      <Select
+                        value={article.primary_category_id || ""}
+                        onValueChange={(value) => handleUpdate(article.id, "primary_category_id", value)}
+                      >
+                        <SelectTrigger className="w-[140px]">
+                          <SelectValue placeholder="Select category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {categories?.map((category) => (
+                            <SelectItem key={category.id} value={category.id}>
+                              {category.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </TableCell>
                     <TableCell className="capitalize">
                       {article.article_type}
                     </TableCell>
                     <TableCell>
-                      {getStatusBadge(article.status)}
+                      <Select
+                        value={article.status}
+                        onValueChange={(value) => handleUpdate(article.id, "status", value)}
+                      >
+                        <SelectTrigger className="w-[120px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="draft">Draft</SelectItem>
+                          <SelectItem value="review">Review</SelectItem>
+                          <SelectItem value="published">Published</SelectItem>
+                          <SelectItem value="archived">Archived</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </TableCell>
+                    <TableCell>
+                      <Input
+                        type="date"
+                        value={article.published_at ? new Date(article.published_at).toISOString().split('T')[0] : ""}
+                        onChange={(e) => handleUpdate(article.id, "published_at", e.target.value ? new Date(e.target.value).toISOString() : null)}
+                        className="w-[140px]"
+                      />
                     </TableCell>
                     <TableCell>
                       {article.view_count || 0}
-                    </TableCell>
-                    <TableCell>
-                      {new Date(article.created_at).toLocaleDateString("en-GB", {
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric",
-                      })}
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-2">
@@ -401,7 +483,7 @@ const Articles = () => {
                         <Button
                           variant="ghost"
                           size="icon"
-                          title="Edit"
+                          title="Edit Full Article"
                           onClick={() => navigate(`/editor?id=${article.id}`)}
                         >
                           <Edit className="h-4 w-4" />
@@ -410,7 +492,7 @@ const Articles = () => {
                           variant="ghost"
                           size="icon"
                           title="Delete"
-                          onClick={() => handleDelete(article.id, article.title)}
+                          onClick={() => setDeleteArticle({ id: article.id, title: article.title })}
                         >
                           <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>
@@ -430,6 +512,24 @@ const Articles = () => {
           </div>
         )}
       </main>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!deleteArticle} onOpenChange={() => setDeleteArticle(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete "{deleteArticle?.title}". This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
