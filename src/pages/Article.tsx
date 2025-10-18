@@ -87,50 +87,67 @@ const Article = () => {
     
     // If content is a string (markdown), convert it to HTML
     if (typeof content === 'string') {
-      // Normalize line endings and handle quotes with attributions first
-      let processedContent = content
-        // Handle blockquotes with attributions (quote followed by attribution on next line)
-        .replace(/^> (.+?)\n\n\*—\s*(.+?)\*/gm, (match, quote, attribution) => {
-          return `<blockquote class="border-l-4 border-primary pl-6 py-2 my-8 italic text-xl">${quote}<span class="block mt-2 not-italic text-base text-muted-foreground">— ${attribution}</span></blockquote>\n\n`;
-        })
-        // Handle inline blockquotes with attribution
-        .replace(/^> (.+?)\s*\*—\s*(.+?)\*/gm, (match, quote, attribution) => {
-          return `<blockquote class="border-l-4 border-primary pl-6 py-2 my-8 italic text-xl">${quote}<span class="block mt-2 not-italic text-base text-muted-foreground">— ${attribution}</span></blockquote>`;
-        })
-        // Handle simple blockquotes without attribution
-        .replace(/^> (.+)$/gm, '<blockquote class="border-l-4 border-primary pl-6 py-2 my-8 italic text-xl">$1</blockquote>');
-
-      // Now process the rest of the markdown
-      let html = processedContent
-        // Bold
-        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-        // Italic
-        .replace(/\*(.+?)\*/g, '<em>$1</em>')
-        // Headings
-        .replace(/^### (.+)$/gm, '<h3 class="text-2xl font-semibold mt-6 mb-3">$1</h3>')
-        .replace(/^## (.+)$/gm, '<h2 class="headline text-3xl mt-8 mb-4">$1</h2>')
-        .replace(/^# (.+)$/gm, '<h1 class="headline text-4xl mt-8 mb-4">$1</h1>')
-        // Links
-        .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" class="text-primary underline hover:no-underline">$1</a>')
-        // Lists - handle bullet points properly without double spacing
-        .replace(/^- (.+)$/gm, '<li class="ml-6 mb-2">$1</li>')
-        .replace(/(<li.*?<\/li>\n?)+/g, (match) => `<ul class="list-disc my-4 space-y-0">${match}</ul>`)
-        // Horizontal rules
-        .replace(/^---$/gm, '<hr class="border-t border-border my-8" />')
-        // Paragraphs (split by double newlines) - use proper <p> tags
-        .split('\n\n')
-        .map(para => {
-          if (para.startsWith('<h') || para.startsWith('<ul') || para.startsWith('<blockquote') || para.startsWith('<hr')) {
-            return para;
+      // First split by double newlines to preserve paragraph boundaries
+      const sections = content.split('\n\n');
+      
+      const processedSections = sections.map(section => {
+        const trimmed = section.trim();
+        if (!trimmed) return '';
+        
+        // Handle blockquotes with attributions (quote followed by attribution)
+        if (trimmed.startsWith('>')) {
+          // Check if next line has attribution
+          const quoteMatch = trimmed.match(/^> (.+?)(?:\n\n?\*—\s*(.+?)\*)?$/s);
+          if (quoteMatch) {
+            const [, quote, attribution] = quoteMatch;
+            if (attribution) {
+              return `<blockquote class="border-l-4 border-primary pl-6 py-2 my-8 italic text-xl">${quote}<span class="block mt-2 not-italic text-base text-muted-foreground">— ${attribution}</span></blockquote>`;
+            }
+            return `<blockquote class="border-l-4 border-primary pl-6 py-2 my-8 italic text-xl">${quote}</blockquote>`;
           }
-          // Convert single line breaks to <br> within paragraphs
-          const withBreaks = para.trim().replace(/\n/g, '<br />');
-          return withBreaks ? `<p class="leading-relaxed mb-6">${withBreaks}</p>` : '';
-        })
-        .filter(para => para) // Remove empty paragraphs
-        .join('\n');
-
-      return <div dangerouslySetInnerHTML={{ __html: html }} />;
+        }
+        
+        // Handle headings
+        if (trimmed.startsWith('### ')) {
+          return `<h3 class="text-2xl font-semibold mt-6 mb-3">${trimmed.slice(4)}</h3>`;
+        }
+        if (trimmed.startsWith('## ')) {
+          return `<h2 class="headline text-3xl mt-8 mb-4">${trimmed.slice(3)}</h2>`;
+        }
+        if (trimmed.startsWith('# ')) {
+          return `<h1 class="headline text-4xl mt-8 mb-4">${trimmed.slice(2)}</h1>`;
+        }
+        
+        // Handle horizontal rules
+        if (trimmed === '---') {
+          return '<hr class="border-t border-border my-8" />';
+        }
+        
+        // Handle lists (multiple lines starting with -)
+        if (trimmed.includes('\n-') || trimmed.startsWith('- ')) {
+          const items = trimmed.split('\n').filter(line => line.trim().startsWith('- '));
+          const listItems = items.map(item => {
+            const text = item.replace(/^- /, '').trim();
+            const processed = text
+              .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+              .replace(/\*(.+?)\*/g, '<em>$1</em>')
+              .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" class="text-primary underline hover:no-underline">$1</a>');
+            return `<li class="ml-6 mb-2">${processed}</li>`;
+          }).join('');
+          return `<ul class="list-disc my-4 space-y-0">${listItems}</ul>`;
+        }
+        
+        // Regular paragraph - process inline markdown and single line breaks
+        let processed = trimmed
+          .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+          .replace(/\*(.+?)\*/g, '<em>$1</em>')
+          .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" class="text-primary underline hover:no-underline">$1</a>')
+          .replace(/\n/g, '<br />'); // Single line breaks become <br>
+        
+        return `<p class="leading-relaxed mb-6">${processed}</p>`;
+      });
+      
+      return <div dangerouslySetInnerHTML={{ __html: processedSections.join('') }} />;
     }
     
     // Otherwise try to parse as JSON blocks (legacy format)
