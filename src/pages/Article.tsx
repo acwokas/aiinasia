@@ -1,6 +1,7 @@
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Comments from "@/components/Comments";
@@ -10,13 +11,13 @@ import { Badge } from "@/components/ui/badge";
 import { Clock, User, Share2, Bookmark, Twitter, Linkedin, Facebook, Loader2, ExternalLink } from "lucide-react";
 import { Helmet } from "react-helmet";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const Article = () => {
   const { slug } = useParams();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [isBookmarked, setIsBookmarked] = useState(false);
-  // Remove trailing slashes from slug for consistent lookups
   const cleanSlug = slug?.replace(/\/+$/g, '');
 
   const { data: article, isLoading } = useQuery({
@@ -38,6 +39,51 @@ const Article = () => {
     },
   });
 
+  useEffect(() => {
+    if (user && article?.id) {
+      checkBookmark();
+    }
+  }, [user, article?.id]);
+
+  const checkBookmark = async () => {
+    const { data } = await supabase
+      .from('bookmarks')
+      .select('id')
+      .eq('user_id', user!.id)
+      .eq('article_id', article!.id)
+      .maybeSingle();
+    
+    setIsBookmarked(!!data);
+  };
+
+  const handleBookmark = async () => {
+    if (!user) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to bookmark articles",
+      });
+      return;
+    }
+
+    if (isBookmarked) {
+      await supabase
+        .from('bookmarks')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('article_id', article!.id);
+      
+      setIsBookmarked(false);
+      toast({ title: "Bookmark removed" });
+    } else {
+      await supabase
+        .from('bookmarks')
+        .insert({ user_id: user.id, article_id: article!.id });
+      
+      setIsBookmarked(true);
+      toast({ title: "Bookmarked!" });
+    }
+  };
+
   const handleShare = async () => {
     const shareData = {
       title: article?.title || '',
@@ -58,16 +104,6 @@ const Article = () => {
     } catch (err) {
       console.error('Error sharing:', err);
     }
-  };
-
-  const handleBookmark = () => {
-    setIsBookmarked(!isBookmarked);
-    toast({
-      title: isBookmarked ? "Bookmark removed" : "Bookmarked!",
-      description: isBookmarked 
-        ? "Article removed from bookmarks" 
-        : "Article saved to bookmarks",
-    });
   };
 
   const { data: relatedArticles } = useQuery({

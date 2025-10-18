@@ -1,8 +1,9 @@
-import { Search, Menu, Moon, Sun } from "lucide-react";
+import { Search, Menu, Moon, Sun, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import logo from "@/assets/aiinasia-logo.png";
 
 const Header = () => {
@@ -10,6 +11,7 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const toggleTheme = () => {
     setIsDark(!isDark);
@@ -64,6 +66,18 @@ const Header = () => {
               {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </Button>
 
+            {user ? (
+              <Button variant="ghost" size="icon" asChild>
+                <Link to="/profile">
+                  <User className="h-5 w-5" />
+                </Link>
+              </Button>
+            ) : (
+              <Button variant="default" className="hidden md:inline-flex" asChild>
+                <Link to="/auth">Sign In</Link>
+              </Button>
+            )}
+
             <Button
               variant="ghost"
               size="icon"
@@ -71,10 +85,6 @@ const Header = () => {
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
               <Menu className="h-5 w-5" />
-            </Button>
-
-            <Button variant="default" className="hidden md:inline-flex" asChild>
-              <a href="#newsletter">Subscribe</a>
             </Button>
           </div>
         </div>
@@ -88,6 +98,20 @@ const Header = () => {
               <a href="/category/voices" className="text-sm font-medium hover:text-primary transition-colors">Voices</a>
               <a href="/about" className="text-sm font-medium hover:text-primary transition-colors">About</a>
               <a href="/contact" className="text-sm font-medium hover:text-primary transition-colors">Contact</a>
+              {!user && (
+                <div className="pt-2">
+                  <Button variant="default" className="w-full" asChild>
+                    <Link to="/auth">Sign In</Link>
+                  </Button>
+                </div>
+              )}
+              {user && (
+                <div className="pt-2">
+                  <Button variant="default" className="w-full" asChild>
+                    <Link to="/profile">Profile</Link>
+                  </Button>
+                </div>
+              )}
               <div className="pt-2">
                 <Input
                   type="search"
