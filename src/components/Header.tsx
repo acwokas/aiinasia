@@ -29,7 +29,7 @@ const Header = () => {
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center gap-8">
             <a href="/" className="flex items-center">
-              <img src={logo} alt="AI in Asia" className="h-8" />
+              <img src={logo} alt="AI in Asia" className="h-16" />
             </a>
             
             <nav className="hidden md:flex items-center space-x-6">
