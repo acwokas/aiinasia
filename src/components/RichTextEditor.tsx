@@ -3,6 +3,10 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Bold, Italic, Heading1, Heading2, Heading3, List, Quote, Link as LinkIcon, Minus, Image, Type } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface RichTextEditorProps {
   value: string;
@@ -24,6 +28,10 @@ const RichTextEditor = ({
   const editorRef = useRef<HTMLDivElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const [isEmpty, setIsEmpty] = useState(!value);
+  const [showImageDialog, setShowImageDialog] = useState(false);
+  const [showLinkDialog, setShowLinkDialog] = useState(false);
+  const [imageData, setImageData] = useState({ url: '', caption: '', alt: '', description: '' });
+  const [linkData, setLinkData] = useState({ url: '', openInNewTab: false });
 
   useEffect(() => {
     if (editorRef.current && !editorRef.current.innerHTML && value) {
@@ -116,29 +124,7 @@ const RichTextEditor = ({
         imageInputRef.current?.click();
         break;
       case 'link':
-        const url = prompt('Enter URL:');
-        if (url) {
-          const openInNewTab = confirm('Open link in new tab?');
-          execCommand('createLink', url);
-          
-          // Add target="_blank" if user wants to open in new tab
-          if (openInNewTab) {
-            setTimeout(() => {
-              const selection = window.getSelection();
-              if (selection && selection.anchorNode) {
-                let node = selection.anchorNode.parentElement;
-                while (node && node !== editorRef.current) {
-                  if (node.tagName === 'A') {
-                    node.setAttribute('target', '_blank');
-                    node.setAttribute('rel', 'noopener noreferrer');
-                    break;
-                  }
-                  node = node.parentElement;
-                }
-              }
-            }, 0);
-          }
-        }
+        setShowLinkDialog(true);
         break;
     }
   };
@@ -150,12 +136,85 @@ const RichTextEditor = ({
     const reader = new FileReader();
     reader.onload = (event) => {
       const imageUrl = event.target?.result as string;
-      execCommand('insertImage', imageUrl);
+      setImageData({ url: imageUrl, caption: '', alt: '', description: '' });
+      setShowImageDialog(true);
     };
     reader.readAsDataURL(file);
     
     // Reset input so the same file can be selected again
     e.target.value = '';
+  };
+
+  const handleInsertImage = () => {
+    if (!imageData.url) return;
+    
+    execCommand('insertImage', imageData.url);
+    
+    // Add alt text and other attributes after insertion
+    setTimeout(() => {
+      const selection = window.getSelection();
+      if (selection && selection.anchorNode) {
+        let node = selection.anchorNode;
+        if (node.nodeType === Node.TEXT_NODE) {
+          node = node.parentElement;
+        }
+        
+        // Find the img element
+        let imgElement: HTMLElement | null = node as HTMLElement;
+        while (imgElement && imgElement !== editorRef.current) {
+          if (imgElement.tagName === 'IMG') {
+            if (imageData.alt) imgElement.setAttribute('alt', imageData.alt);
+            if (imageData.description) imgElement.setAttribute('title', imageData.description);
+            
+            // Add caption as a wrapper
+            if (imageData.caption) {
+              const figure = document.createElement('figure');
+              const figcaption = document.createElement('figcaption');
+              figcaption.textContent = imageData.caption;
+              figcaption.className = 'text-sm text-muted-foreground mt-2 text-center italic';
+              
+              imgElement.parentNode?.insertBefore(figure, imgElement);
+              figure.appendChild(imgElement);
+              figure.appendChild(figcaption);
+            }
+            break;
+          }
+          imgElement = imgElement.parentElement;
+        }
+      }
+    }, 0);
+    
+    setShowImageDialog(false);
+    setImageData({ url: '', caption: '', alt: '', description: '' });
+    editorRef.current?.focus();
+  };
+
+  const handleInsertLink = () => {
+    if (!linkData.url) return;
+    
+    execCommand('createLink', linkData.url);
+    
+    // Add target="_blank" if user wants to open in new tab
+    if (linkData.openInNewTab) {
+      setTimeout(() => {
+        const selection = window.getSelection();
+        if (selection && selection.anchorNode) {
+          let node = selection.anchorNode.parentElement;
+          while (node && node !== editorRef.current) {
+            if (node.tagName === 'A') {
+              node.setAttribute('target', '_blank');
+              node.setAttribute('rel', 'noopener noreferrer');
+              break;
+            }
+            node = node.parentElement;
+          }
+        }
+      }, 0);
+    }
+    
+    setShowLinkDialog(false);
+    setLinkData({ url: '', openInNewTab: false });
+    editorRef.current?.focus();
   };
 
   const handleInput = () => {
@@ -185,6 +244,28 @@ const RichTextEditor = ({
     document.execCommand('insertText', false, text);
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+    const modKey = isMac ? e.metaKey : e.ctrlKey;
+
+    if (modKey) {
+      switch (e.key.toLowerCase()) {
+        case 'b':
+          e.preventDefault();
+          handleFormat('bold');
+          break;
+        case 'i':
+          e.preventDefault();
+          handleFormat('italic');
+          break;
+        case 'k':
+          e.preventDefault();
+          setShowLinkDialog(true);
+          break;
+      }
+    }
+  };
+
   return (
     <div className={cn("space-y-2", className)}>
       {label && <Label>{label}</Label>}
@@ -197,7 +278,7 @@ const RichTextEditor = ({
         className="hidden"
       />
       
-      <div className="flex items-center gap-1 p-2 border border-input rounded-t-md bg-muted/30 flex-wrap">
+      <div className="sticky top-0 z-10 flex items-center gap-1 p-2 border border-input rounded-t-md bg-background/95 backdrop-blur flex-wrap shadow-sm">
         <Button
           type="button"
           variant="ghost"
@@ -314,6 +395,7 @@ const RichTextEditor = ({
           onInput={handleInput}
           onSelect={handleSelection}
           onPaste={handlePaste}
+          onKeyDown={handleKeyDown}
           className={cn(
             "min-h-[400px] w-full rounded-b-md border border-t-0 border-input bg-background px-4 py-3",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
@@ -333,6 +415,100 @@ const RichTextEditor = ({
           suppressContentEditableWarning
         />
       </div>
+
+      {/* Image Dialog */}
+      <Dialog open={showImageDialog} onOpenChange={setShowImageDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Insert Image</DialogTitle>
+            <DialogDescription>
+              Add optional details for your image
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="image-caption">Caption (optional)</Label>
+              <Input
+                id="image-caption"
+                placeholder="Image caption"
+                value={imageData.caption}
+                onChange={(e) => setImageData({ ...imageData, caption: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label htmlFor="image-alt">Alt Text</Label>
+              <Input
+                id="image-alt"
+                placeholder="Describe the image"
+                value={imageData.alt}
+                onChange={(e) => setImageData({ ...imageData, alt: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label htmlFor="image-description">Description (for accessibility)</Label>
+              <Textarea
+                id="image-description"
+                placeholder="Detailed description for screen readers"
+                value={imageData.description}
+                onChange={(e) => setImageData({ ...imageData, description: e.target.value })}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowImageDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleInsertImage}>Insert Image</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Link Dialog */}
+      <Dialog open={showLinkDialog} onOpenChange={setShowLinkDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Insert Link</DialogTitle>
+            <DialogDescription>
+              Add a link to your content
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="link-url">URL</Label>
+              <Input
+                id="link-url"
+                placeholder="https://example.com"
+                value={linkData.url}
+                onChange={(e) => setLinkData({ ...linkData, url: e.target.value })}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleInsertLink();
+                  }
+                }}
+              />
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="link-newtab"
+                checked={linkData.openInNewTab}
+                onCheckedChange={(checked) => 
+                  setLinkData({ ...linkData, openInNewTab: checked as boolean })
+                }
+              />
+              <Label htmlFor="link-newtab" className="cursor-pointer">
+                Open in new tab
+              </Label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowLinkDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleInsertLink}>Insert Link</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
