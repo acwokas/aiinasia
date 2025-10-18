@@ -79,18 +79,17 @@ const Index = () => {
     },
   });
 
-  const { data: featuredAuthor } = useQuery({
-    queryKey: ["featured-author"],
+  const { data: featuredAuthors } = useQuery({
+    queryKey: ["featured-authors"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("authors")
         .select("*")
         .order("article_count", { ascending: false })
-        .limit(1)
-        .single();
+        .limit(4);
       
       if (error) throw error;
-      return data;
+      return data || [];
     },
   });
 
@@ -370,35 +369,15 @@ const Index = () => {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              {featuredAuthor && (
-                <Link to={`/author/${featuredAuthor.slug}`} className="bg-card border border-border rounded-lg p-6 text-center hover:shadow-lg transition-shadow">
-                  {featuredAuthor.avatar_url ? (
-                    <img 
-                      src={featuredAuthor.avatar_url} 
-                      alt={featuredAuthor.name}
-                      className="w-20 h-20 rounded-full object-cover mx-auto mb-4 ring-2 ring-primary"
-                    />
-                  ) : (
-                    <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-secondary mx-auto mb-4" />
-                  )}
-                  <h3 className="font-semibold mb-1">{featuredAuthor.name}</h3>
-                  <p className="text-sm text-muted-foreground mb-2">Digital & AI Transformation</p>
-                  <p className="text-xs text-muted-foreground">{featuredAuthor.article_count || 0} articles</p>
-                </Link>
-              )}
-              {[
-                { name: "Koo Ping Shung", title: "Guest Contributor", articles: 0, slug: "koo-ping-shung", avatar: "https://ppvifagplcdjpdpqknzt.supabase.co/storage/v1/object/public/article-images/avatars/cz2wxs758nn-1760809457366.jpg" },
-                { name: "Kenji Sato", title: "Robotics Expert", articles: 31 },
-                { name: "Maya Patel", title: "Tech Journalist", articles: 42 },
-              ].map((author, i) => (
+              {featuredAuthors?.map((author) => (
                 <Link 
-                  key={i} 
-                  to={author.slug ? `/author/${author.slug}` : "#"}
+                  key={author.id} 
+                  to={`/author/${author.slug}`}
                   className="bg-card border border-border rounded-lg p-6 text-center hover:shadow-lg transition-shadow"
                 >
-                  {author.avatar ? (
+                  {author.avatar_url ? (
                     <img 
-                      src={author.avatar} 
+                      src={author.avatar_url} 
                       alt={author.name}
                       className="w-20 h-20 rounded-full object-cover mx-auto mb-4 ring-2 ring-primary"
                     />
@@ -406,8 +385,8 @@ const Index = () => {
                     <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-secondary mx-auto mb-4" />
                   )}
                   <h3 className="font-semibold mb-1">{author.name}</h3>
-                  <p className="text-sm text-muted-foreground mb-2">{author.title}</p>
-                  <p className="text-xs text-muted-foreground">{author.articles} articles</p>
+                  <p className="text-sm text-muted-foreground mb-2">{author.job_title || "Contributor"}</p>
+                  <p className="text-xs text-muted-foreground">{author.article_count || 0} articles</p>
                 </Link>
               ))}
             </div>
