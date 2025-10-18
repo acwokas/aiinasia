@@ -87,8 +87,12 @@ const Article = () => {
     
     // If content is a string (markdown), convert it to HTML with proper parsing
     if (typeof content === 'string') {
+      // First, consolidate bullet points that are separated by blank lines
+      // Convert "- item\n\n- item" into "- item\n- item"
+      let consolidated = content.replace(/^(- .+?)(\n\n)(- )/gm, '$1\n$3');
+      
       // Process inline formatting FIRST (before splitting into blocks)
-      let processed = content
+      let processed = consolidated
         // Remove empty bold markers (** ** or ** with only spaces)
         .replace(/\*\*\s*\*\*/g, '')
         // Convert actual bold text
