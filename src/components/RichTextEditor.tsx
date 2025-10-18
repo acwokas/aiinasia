@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Bold, Italic, Heading1, Heading2, Heading3, List, Quote, Link } from "lucide-react";
+import { Bold, Italic, Heading1, Heading2, Heading3, List, Quote, Link as LinkIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface RichTextEditorProps {
@@ -23,151 +23,39 @@ const RichTextEditor = ({
 }: RichTextEditorProps) => {
   const editorRef = useRef<HTMLDivElement>(null);
   const [isEmpty, setIsEmpty] = useState(!value);
-  const lastValueRef = useRef(value);
-  const formatTimeoutRef = useRef<NodeJS.Timeout>();
 
-  const formatContent = (text: string) => {
-    if (!text) return '';
+  useEffect(() => {
+    if (editorRef.current && !editorRef.current.innerHTML && value) {
+      editorRef.current.innerHTML = convertMarkdownToHtml(value);
+    }
+  }, []);
+
+  const convertMarkdownToHtml = (markdown: string): string => {
+    if (!markdown) return '';
     
-    let formatted = text
+    return markdown
       .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.+?)\*/g, '<em>$1</em>')
-      .replace(/^### (.+)$/gm, '<h3 class="text-xl font-semibold mt-6 mb-3">$1</h3>')
-      .replace(/^## (.+)$/gm, '<h2 class="text-2xl font-semibold mt-8 mb-4">$1</h2>')
-      .replace(/^# (.+)$/gm, '<h1 class="text-3xl font-bold mt-10 mb-5">$1</h1>')
-      .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" class="text-primary underline hover:no-underline">$1</a>')
-      .replace(/^- (.+)$/gm, '<li class="ml-4">$1</li>')
-      .replace(/(<li.*?<\/li>\s*)+/gs, '<ul class="list-disc space-y-1 my-4">$&</ul>')
-      .replace(/^> (.+)$/gm, '<blockquote class="border-l-4 border-primary pl-4 italic my-4 text-muted-foreground">$1</blockquote>')
-      .replace(/\n\n/g, '</p><p class="mb-4">')
-      .replace(/\n/g, '<br/>');
-    
-    return `<p class="mb-4">${formatted}</p>`.replace(/<p class="mb-4"><\/p>/g, '');
+      .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+      .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+      .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+      .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2">$1</a>')
+      .replace(/^- (.+)$/gm, '<li>$1</li>')
+      .replace(/(<li>.*?<\/li>\s*)+/gs, '<ul>$&</ul>')
+      .replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>')
+      .replace(/\n\n/g, '</p><p>')
+      .replace(/\n/g, '<br>');
   };
 
-  // Initialize content only once
-  useEffect(() => {
-    if (editorRef.current && value && !editorRef.current.textContent) {
-      editorRef.current.innerHTML = formatContent(value);
-      lastValueRef.current = value;
-    }
-  }, []);
-
-  useEffect(() => {
-    return () => {
-      if (formatTimeoutRef.current) {
-        clearTimeout(formatTimeoutRef.current);
-      }
-    };
-  }, []);
-
-  const saveCursorPosition = () => {
-    const selection = window.getSelection();
-    if (!selection?.rangeCount || !editorRef.current) return null;
+  const convertHtmlToMarkdown = (html: string): string => {
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = html;
     
-    const range = selection.getRangeAt(0);
-    const preRange = range.cloneRange();
-    preRange.selectNodeContents(editorRef.current);
-    preRange.setEnd(range.endContainer, range.endOffset);
-    
-    return preRange.toString().length;
-  };
-
-  const restoreCursorPosition = (pos: number) => {
-    if (!editorRef.current) return;
-    
-    const selection = window.getSelection();
-    if (!selection) return;
-    
-    let charIndex = 0;
-    const nodeStack: Node[] = [editorRef.current];
-    let node: Node | undefined;
-    let foundStart = false;
-    
-    while (!foundStart && (node = nodeStack.pop())) {
-      if (node.nodeType === Node.TEXT_NODE) {
-        const textLength = node.textContent?.length || 0;
-        if (charIndex + textLength >= pos) {
-          const range = document.createRange();
-          range.setStart(node, pos - charIndex);
-          range.collapse(true);
-          selection.removeAllRanges();
-          selection.addRange(range);
-          foundStart = true;
-        } else {
-          charIndex += textLength;
-        }
-      } else {
-        for (let i = node.childNodes.length - 1; i >= 0; i--) {
-          nodeStack.push(node.childNodes[i]);
-        }
-      }
-    }
-  };
-
-  const insertFormatting = (before: string, after: string = '') => {
-    if (!editorRef.current) return;
-    
-    editorRef.current.focus();
-    const selection = window.getSelection();
-    if (!selection || selection.rangeCount === 0) return;
-    
-    const range = selection.getRangeAt(0);
-    const selectedText = range.toString();
-    
-    const formattedText = before + selectedText + after;
-    range.deleteContents();
-    
-    const textNode = document.createTextNode(formattedText);
-    range.insertNode(textNode);
-    
-    // Move cursor after inserted text
-    range.setStartAfter(textNode);
-    range.collapse(true);
-    selection.removeAllRanges();
-    selection.addRange(range);
-    
-    // Trigger input event
-    const event = new Event('input', { bubbles: true });
-    editorRef.current.dispatchEvent(event);
-  };
-
-  const handleFormat = (format: string) => {
-    switch (format) {
-      case 'bold':
-        insertFormatting('**', '**');
-        break;
-      case 'italic':
-        insertFormatting('*', '*');
-        break;
-      case 'h1':
-        insertFormatting('# ', '\n');
-        break;
-      case 'h2':
-        insertFormatting('## ', '\n');
-        break;
-      case 'h3':
-        insertFormatting('### ', '\n');
-        break;
-      case 'list':
-        insertFormatting('- ', '\n');
-        break;
-      case 'quote':
-        insertFormatting('> ', '\n');
-        break;
-      case 'link':
-        insertFormatting('[', '](url)');
-        break;
-    }
-  };
-
-  const stripHtmlToMarkdown = (html: string): string => {
-    const temp = document.createElement('div');
-    temp.innerHTML = html;
-    
-    let markdown = temp.innerHTML
+    let markdown = html
       .replace(/<strong>(.*?)<\/strong>/g, '**$1**')
+      .replace(/<b>(.*?)<\/b>/g, '**$1**')
       .replace(/<em>(.*?)<\/em>/g, '*$1*')
+      .replace(/<i>(.*?)<\/i>/g, '*$1*')
       .replace(/<h1[^>]*>(.*?)<\/h1>/g, '# $1\n\n')
       .replace(/<h2[^>]*>(.*?)<\/h2>/g, '## $1\n\n')
       .replace(/<h3[^>]*>(.*?)<\/h3>/g, '### $1\n\n')
@@ -177,6 +65,7 @@ const RichTextEditor = ({
       .replace(/<blockquote[^>]*>(.*?)<\/blockquote>/g, '> $1\n\n')
       .replace(/<p[^>]*>(.*?)<\/p>/g, '$1\n\n')
       .replace(/<br\s*\/?>/g, '\n')
+      .replace(/<div[^>]*>(.*?)<\/div>/gs, '$1\n')
       .replace(/<[^>]+>/g, '')
       .replace(/&nbsp;/g, ' ')
       .replace(/&amp;/g, '&')
@@ -188,43 +77,53 @@ const RichTextEditor = ({
     return markdown;
   };
 
+  const execCommand = (command: string, value: string | undefined = undefined) => {
+    document.execCommand(command, false, value);
+    editorRef.current?.focus();
+  };
+
+  const handleFormat = (format: string) => {
+    switch (format) {
+      case 'bold':
+        execCommand('bold');
+        break;
+      case 'italic':
+        execCommand('italic');
+        break;
+      case 'h1':
+        execCommand('formatBlock', '<h1>');
+        break;
+      case 'h2':
+        execCommand('formatBlock', '<h2>');
+        break;
+      case 'h3':
+        execCommand('formatBlock', '<h3>');
+        break;
+      case 'list':
+        execCommand('insertUnorderedList');
+        break;
+      case 'quote':
+        execCommand('formatBlock', '<blockquote>');
+        break;
+      case 'link':
+        const url = prompt('Enter URL:');
+        if (url) {
+          execCommand('createLink', url);
+        }
+        break;
+    }
+  };
 
   const handleInput = () => {
     if (!editorRef.current) return;
     
+    const content = editorRef.current.innerHTML;
     const text = editorRef.current.innerText || '';
+    
     setIsEmpty(text.trim().length === 0);
-    lastValueRef.current = text;
-    onChange(text);
-  };
-
-  const handleBlur = () => {
-    if (!editorRef.current) return;
     
-    const text = editorRef.current.innerText || '';
-    const cursorPos = saveCursorPosition();
-    
-    // Apply formatting when user clicks away
-    editorRef.current.innerHTML = formatContent(text);
-    
-    // Restore cursor if they return focus
-    if (cursorPos !== null) {
-      setTimeout(() => restoreCursorPosition(cursorPos), 0);
-    }
-  };
-
-  const handleFocus = () => {
-    if (!editorRef.current) return;
-    
-    // If content is formatted, convert back to plain text for editing
-    const text = editorRef.current.innerText || '';
-    if (editorRef.current.innerHTML.includes('<') && text) {
-      const cursorPos = saveCursorPosition();
-      editorRef.current.textContent = text;
-      if (cursorPos !== null) {
-        setTimeout(() => restoreCursorPosition(cursorPos), 0);
-      }
-    }
+    const markdown = convertHtmlToMarkdown(content);
+    onChange(markdown);
   };
 
   const handleSelection = () => {
@@ -252,7 +151,7 @@ const RichTextEditor = ({
           variant="ghost"
           size="sm"
           onClick={() => handleFormat('bold')}
-          title="Bold (** **)"
+          title="Bold"
         >
           <Bold className="h-4 w-4" />
         </Button>
@@ -261,7 +160,7 @@ const RichTextEditor = ({
           variant="ghost"
           size="sm"
           onClick={() => handleFormat('italic')}
-          title="Italic (* *)"
+          title="Italic"
         >
           <Italic className="h-4 w-4" />
         </Button>
@@ -271,7 +170,7 @@ const RichTextEditor = ({
           variant="ghost"
           size="sm"
           onClick={() => handleFormat('h1')}
-          title="Heading 1 (#)"
+          title="Heading 1"
         >
           <Heading1 className="h-4 w-4" />
         </Button>
@@ -280,7 +179,7 @@ const RichTextEditor = ({
           variant="ghost"
           size="sm"
           onClick={() => handleFormat('h2')}
-          title="Heading 2 (##)"
+          title="Heading 2"
         >
           <Heading2 className="h-4 w-4" />
         </Button>
@@ -289,7 +188,7 @@ const RichTextEditor = ({
           variant="ghost"
           size="sm"
           onClick={() => handleFormat('h3')}
-          title="Heading 3 (###)"
+          title="Heading 3"
         >
           <Heading3 className="h-4 w-4" />
         </Button>
@@ -299,7 +198,7 @@ const RichTextEditor = ({
           variant="ghost"
           size="sm"
           onClick={() => handleFormat('list')}
-          title="List (- )"
+          title="List"
         >
           <List className="h-4 w-4" />
         </Button>
@@ -308,7 +207,7 @@ const RichTextEditor = ({
           variant="ghost"
           size="sm"
           onClick={() => handleFormat('quote')}
-          title="Quote (> )"
+          title="Quote"
         >
           <Quote className="h-4 w-4" />
         </Button>
@@ -317,9 +216,9 @@ const RichTextEditor = ({
           variant="ghost"
           size="sm"
           onClick={() => handleFormat('link')}
-          title="Link ([text](url))"
+          title="Link"
         >
-          <Link className="h-4 w-4" />
+          <LinkIcon className="h-4 w-4" />
         </Button>
       </div>
 
@@ -333,14 +232,21 @@ const RichTextEditor = ({
           ref={editorRef}
           contentEditable
           onInput={handleInput}
-          onBlur={handleBlur}
-          onFocus={handleFocus}
           onSelect={handleSelection}
           onPaste={handlePaste}
           className={cn(
             "min-h-[400px] w-full rounded-b-md border border-t-0 border-input bg-background px-4 py-3",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-            "prose prose-slate max-w-none [&>*:first-child]:mt-0 whitespace-pre-wrap"
+            "prose prose-slate max-w-none",
+            "[&_h1]:text-3xl [&_h1]:font-bold [&_h1]:mt-6 [&_h1]:mb-4",
+            "[&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:mt-5 [&_h2]:mb-3",
+            "[&_h3]:text-xl [&_h3]:font-semibold [&_h3]:mt-4 [&_h3]:mb-2",
+            "[&_ul]:list-disc [&_ul]:ml-6 [&_ul]:my-4",
+            "[&_li]:my-1",
+            "[&_blockquote]:border-l-4 [&_blockquote]:border-primary [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:my-4",
+            "[&_a]:text-primary [&_a]:underline [&_a]:hover:no-underline",
+            "[&_strong]:font-bold",
+            "[&_em]:italic"
           )}
           suppressContentEditableWarning
         />
