@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Bold, Italic, Heading1, Heading2, Heading3, List, Quote, Link as LinkIcon, Minus, Image, Type } from "lucide-react";
+import { Bold, Italic, Heading1, Heading2, Heading3, List, Quote, Link as LinkIcon, Minus, Image, Type, Table as TableIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -31,8 +31,10 @@ const RichTextEditor = ({
   const [isEmpty, setIsEmpty] = useState(!value);
   const [showImageDialog, setShowImageDialog] = useState(false);
   const [showLinkDialog, setShowLinkDialog] = useState(false);
+  const [showTableDialog, setShowTableDialog] = useState(false);
   const [imageData, setImageData] = useState({ url: '', caption: '', alt: '', description: '' });
   const [linkData, setLinkData] = useState({ url: '', text: '', openInNewTab: false });
+  const [tableData, setTableData] = useState({ rows: 3, columns: 3, hasHeader: true });
   const [isEditingLink, setIsEditingLink] = useState(false);
   const [selectedLinkElement, setSelectedLinkElement] = useState<HTMLAnchorElement | null>(null);
 
@@ -150,6 +152,14 @@ const RichTextEditor = ({
         break;
       case 'hr':
         execCommand('insertHorizontalRule');
+        break;
+      case 'table':
+        // Save the current selection before opening dialog
+        const tableSel = window.getSelection();
+        if (tableSel && tableSel.rangeCount > 0) {
+          savedSelectionRef.current = tableSel.getRangeAt(0);
+        }
+        setShowTableDialog(true);
         break;
       case 'image':
         // Save the current selection before opening dialog
@@ -337,6 +347,51 @@ const RichTextEditor = ({
     setIsEditingLink(false);
     setSelectedLinkElement(null);
     editorRef.current?.focus();
+  };
+
+  const handleInsertTable = () => {
+    if (!tableData.rows || !tableData.columns) return;
+    
+    // Restore the saved selection
+    if (savedSelectionRef.current) {
+      const selection = window.getSelection();
+      if (selection) {
+        selection.removeAllRanges();
+        selection.addRange(savedSelectionRef.current);
+      }
+    }
+    
+    // Focus the editor before inserting
+    editorRef.current?.focus();
+    
+    // Create table HTML
+    let tableHtml = '<table class="editor-table"><tbody>';
+    
+    for (let i = 0; i < tableData.rows; i++) {
+      tableHtml += '<tr>';
+      for (let j = 0; j < tableData.columns; j++) {
+        if (i === 0 && tableData.hasHeader) {
+          tableHtml += '<th>Header</th>';
+        } else {
+          tableHtml += '<td>Cell</td>';
+        }
+      }
+      tableHtml += '</tr>';
+    }
+    
+    tableHtml += '</tbody></table><p><br></p>';
+    
+    // Insert the table
+    execCommand('insertHTML', tableHtml);
+    
+    // Trigger input event to update the markdown
+    setTimeout(() => {
+      handleInput();
+    }, 100);
+    
+    setShowTableDialog(false);
+    setTableData({ rows: 3, columns: 3, hasHeader: true });
+    savedSelectionRef.current = null;
   };
 
   const handleInput = () => {
@@ -546,6 +601,15 @@ const RichTextEditor = ({
         >
           <Image className="h-4 w-4" />
         </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => handleFormat('table')}
+          title="Insert Table"
+        >
+          <TableIcon className="h-4 w-4" />
+        </Button>
       </div>
 
         <div className="relative">
@@ -575,7 +639,10 @@ const RichTextEditor = ({
               "[&_strong]:font-bold",
               "[&_em]:italic",
               "[&_hr]:border-t [&_hr]:border-border [&_hr]:my-4",
-              "[&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-md [&_img]:my-4"
+              "[&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-md [&_img]:my-4",
+              "[&_table]:w-full [&_table]:border-collapse [&_table]:my-4",
+              "[&_th]:border [&_th]:border-border [&_th]:bg-muted [&_th]:px-4 [&_th]:py-2 [&_th]:text-left [&_th]:font-semibold",
+              "[&_td]:border [&_td]:border-border [&_td]:px-4 [&_td]:py-2"
             )}
             suppressContentEditableWarning
           />
@@ -626,6 +693,62 @@ const RichTextEditor = ({
               Cancel
             </Button>
             <Button onClick={handleInsertImage}>Insert Image</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Table Dialog */}
+      <Dialog open={showTableDialog} onOpenChange={setShowTableDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Insert Table</DialogTitle>
+            <DialogDescription>
+              Configure your table dimensions
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="table-rows">Number of Rows</Label>
+              <Input
+                id="table-rows"
+                type="number"
+                min="1"
+                max="20"
+                placeholder="3"
+                value={tableData.rows}
+                onChange={(e) => setTableData({ ...tableData, rows: parseInt(e.target.value) || 3 })}
+              />
+            </div>
+            <div>
+              <Label htmlFor="table-columns">Number of Columns</Label>
+              <Input
+                id="table-columns"
+                type="number"
+                min="1"
+                max="10"
+                placeholder="3"
+                value={tableData.columns}
+                onChange={(e) => setTableData({ ...tableData, columns: parseInt(e.target.value) || 3 })}
+              />
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="table-header"
+                checked={tableData.hasHeader}
+                onCheckedChange={(checked) => 
+                  setTableData({ ...tableData, hasHeader: checked as boolean })
+                }
+              />
+              <Label htmlFor="table-header" className="cursor-pointer">
+                Include header row
+              </Label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowTableDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleInsertTable}>Insert Table</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
