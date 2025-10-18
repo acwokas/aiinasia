@@ -373,7 +373,7 @@ const Article = () => {
           {relatedArticles && relatedArticles.length > 0 && (
             <section className="bg-muted/30 py-12 mt-12">
               <div className="container mx-auto px-4 max-w-6xl">
-                <h2 className="headline text-3xl mb-8">Related Articles</h2>
+                <h2 className="headline text-3xl mb-8">You may also like:</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {relatedArticles.map((relatedArticle: any) => (
                     <ArticleCard
