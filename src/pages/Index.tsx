@@ -256,21 +256,21 @@ const Index = () => {
               {/* Large Featured Article */}
               {featuredArticle && featuredArticle.slug ? (
                 <Link to={`/article/${featuredArticle.slug}`} className="block group">
-                  <div className="relative h-[350px] overflow-hidden rounded-lg">
+                  <div className="relative h-[700px] overflow-hidden rounded-lg">
                     <img 
                       src={featuredArticle.featured_image_url || "/placeholder.svg"} 
                       alt={featuredArticle.title}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
-                    <div className="absolute bottom-0 left-0 right-0 p-6">
-                      <Badge className="bg-primary text-primary-foreground mb-2">
+                    <div className="absolute bottom-0 left-0 right-0 p-8">
+                      <Badge className="bg-primary text-primary-foreground mb-3">
                         {featuredArticle.categories?.name}
                       </Badge>
-                      <h2 className="text-white font-bold text-2xl md:text-3xl mb-3 line-clamp-2 group-hover:text-primary transition-colors">
+                      <h2 className="text-white font-bold text-3xl md:text-4xl mb-4 line-clamp-3 group-hover:text-primary transition-colors">
                         {featuredArticle.title}
                       </h2>
-                      <p className="text-white/90 text-sm line-clamp-2">
+                      <p className="text-white/90 text-base line-clamp-3">
                         {featuredArticle.excerpt}
                       </p>
                     </div>
@@ -279,21 +279,21 @@ const Index = () => {
               ) : (
                 trendingArticles?.[0]?.slug && (
                   <Link to={`/article/${trendingArticles[0].slug}`} className="block group">
-                    <div className="relative h-[350px] overflow-hidden rounded-lg">
+                    <div className="relative h-[700px] overflow-hidden rounded-lg">
                       <img 
                         src={trendingArticles[0].featured_image_url || "/placeholder.svg"} 
                         alt={trendingArticles[0].title}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
-                      <div className="absolute bottom-0 left-0 right-0 p-6">
-                        <Badge className="bg-primary text-primary-foreground mb-2">
+                      <div className="absolute bottom-0 left-0 right-0 p-8">
+                        <Badge className="bg-primary text-primary-foreground mb-3">
                           {trendingArticles[0].categories?.name}
                         </Badge>
-                        <h2 className="text-white font-bold text-2xl md:text-3xl mb-3 line-clamp-2 group-hover:text-primary transition-colors">
+                        <h2 className="text-white font-bold text-3xl md:text-4xl mb-4 line-clamp-3 group-hover:text-primary transition-colors">
                           {trendingArticles[0].title}
                         </h2>
-                        <p className="text-white/90 text-sm line-clamp-2">
+                        <p className="text-white/90 text-base line-clamp-3">
                           {trendingArticles[0].excerpt}
                         </p>
                       </div>
@@ -302,8 +302,8 @@ const Index = () => {
                 )
               )}
 
-              {/* Two Medium Articles Below */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Two Medium Articles Stacked */}
+              <div className="space-y-6">
                 {latestArticles?.filter((article: any) => 
                   article.slug && article.id !== featuredArticle?.id
                 ).slice(0, 2).map((article: any) => (
@@ -312,20 +312,23 @@ const Index = () => {
                     to={`/article/${article.slug}`}
                     className="block group"
                   >
-                    <div className="relative h-[220px] overflow-hidden rounded-lg mb-3">
+                    <div className="relative h-[280px] overflow-hidden rounded-lg">
                       <img 
                         src={article.featured_image_url || "/placeholder.svg"} 
                         alt={article.title}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
-                      <div className="absolute bottom-0 left-0 right-0 p-4">
+                      <div className="absolute bottom-0 left-0 right-0 p-6">
                         <Badge className="bg-primary text-primary-foreground text-xs mb-2">
                           {article.categories?.name}
                         </Badge>
-                        <h3 className="text-white font-bold text-base line-clamp-2 group-hover:text-primary transition-colors">
+                        <h3 className="text-white font-bold text-xl mb-2 line-clamp-2 group-hover:text-primary transition-colors">
                           {article.title}
                         </h3>
+                        <p className="text-white/80 text-sm line-clamp-2">
+                          {article.excerpt}
+                        </p>
                       </div>
                     </div>
                   </Link>
