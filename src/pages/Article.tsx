@@ -87,108 +87,103 @@ const Article = () => {
     
     // If content is a string (markdown), convert it to HTML
     if (typeof content === 'string') {
-      // Process line by line but group into blocks
       const lines = content.split('\n');
       const blocks: string[] = [];
-      let currentBlock = '';
+      let currentParagraph = '';
       let inList = false;
+      let listItems: string[] = [];
+      
+      const finishParagraph = () => {
+        if (currentParagraph.trim()) {
+          const processed = currentParagraph.trim()
+            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.+?)\*/g, '<em>$1</em>')
+            .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" class="text-primary underline hover:no-underline">$1</a>');
+          blocks.push(`<p class="leading-relaxed mb-6">${processed}</p>`);
+          currentParagraph = '';
+        }
+      };
+      
+      const finishList = () => {
+        if (listItems.length > 0) {
+          blocks.push(`<ul class="list-disc ml-6 my-6 space-y-2">${listItems.join('')}</ul>`);
+          listItems = [];
+          inList = false;
+        }
+      };
       
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
         const trimmed = line.trim();
         
-        // Empty line - paragraph break
+        // Empty line - finish current block
         if (!trimmed) {
-          if (currentBlock) {
-            blocks.push(currentBlock);
-            currentBlock = '';
-          }
-          inList = false;
+          finishParagraph();
+          finishList();
           continue;
         }
         
-        // Headings - always start new block
-        if (trimmed.match(/^#{1,3}\s/)) {
-          if (currentBlock) {
-            blocks.push(currentBlock);
-            currentBlock = '';
-          }
-          inList = false;
-          
-          if (trimmed.startsWith('### ')) {
-            blocks.push(`<h3 class="text-2xl font-semibold mt-6 mb-3">${trimmed.slice(4)}</h3>`);
-          } else if (trimmed.startsWith('## ')) {
-            blocks.push(`<h2 class="headline text-3xl mt-8 mb-4">${trimmed.slice(3)}</h2>`);
-          } else if (trimmed.startsWith('# ')) {
-            blocks.push(`<h1 class="headline text-4xl mt-8 mb-4">${trimmed.slice(2)}</h1>`);
-          }
+        // H1 Heading
+        if (trimmed.startsWith('# ') && !trimmed.startsWith('## ')) {
+          finishParagraph();
+          finishList();
+          blocks.push(`<h1 class="headline text-4xl mt-8 mb-4">${trimmed.slice(2)}</h1>`);
+          continue;
+        }
+        
+        // H2 Heading
+        if (trimmed.startsWith('## ') && !trimmed.startsWith('### ')) {
+          finishParagraph();
+          finishList();
+          blocks.push(`<h2 class="headline text-3xl mt-8 mb-4">${trimmed.slice(3)}</h2>`);
+          continue;
+        }
+        
+        // H3 Heading
+        if (trimmed.startsWith('### ')) {
+          finishParagraph();
+          finishList();
+          blocks.push(`<h3 class="text-2xl font-semibold mt-6 mb-3">${trimmed.slice(4)}</h3>`);
           continue;
         }
         
         // Blockquote
-        if (trimmed.startsWith('>')) {
-          if (currentBlock) {
-            blocks.push(currentBlock);
-            currentBlock = '';
-          }
-          inList = false;
-          const quote = trimmed.slice(1).trim();
+        if (trimmed.startsWith('> ')) {
+          finishParagraph();
+          finishList();
+          const quote = trimmed.slice(2).trim()
+            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.+?)\*/g, '<em>$1</em>');
           blocks.push(`<blockquote class="border-l-4 border-primary pl-6 py-2 my-8 italic text-xl">${quote}</blockquote>`);
           continue;
         }
         
         // List item
         if (trimmed.startsWith('- ')) {
+          finishParagraph();
           if (!inList) {
-            if (currentBlock) {
-              blocks.push(currentBlock);
-              currentBlock = '';
-            }
             inList = true;
-            currentBlock = '<ul class="list-disc my-4 space-y-0">';
           }
           const text = trimmed.slice(2).trim()
             .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
             .replace(/\*(.+?)\*/g, '<em>$1</em>')
             .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" class="text-primary underline hover:no-underline">$1</a>');
-          currentBlock += `<li class="ml-6 mb-2">${text}</li>`;
+          listItems.push(`<li>${text}</li>`);
           continue;
         }
         
-        // Regular text line
-        if (inList) {
-          currentBlock += '</ul>';
-          blocks.push(currentBlock);
-          currentBlock = '';
-          inList = false;
-        }
-        
-        if (currentBlock) {
-          currentBlock += '<br />';
+        // Regular text - add to current paragraph
+        finishList();
+        if (currentParagraph) {
+          currentParagraph += ' ' + trimmed;
         } else {
-          currentBlock = '<p class="leading-relaxed mb-6">';
+          currentParagraph = trimmed;
         }
-        
-        const processed = trimmed
-          .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-          .replace(/\*(.+?)\*/g, '<em>$1</em>')
-          .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" class="text-primary underline hover:no-underline">$1</a>');
-        
-        currentBlock += processed;
       }
       
-      // Close any remaining block
-      if (currentBlock) {
-        if (inList) {
-          currentBlock += '</ul>';
-        } else if (!currentBlock.includes('<p')) {
-          currentBlock = `<p class="leading-relaxed mb-6">${currentBlock}`;
-        }
-        if (currentBlock.startsWith('<p') && !currentBlock.endsWith('</p>')) {
-          currentBlock += '</p>';
-        }
-        blocks.push(currentBlock);
-      }
+      // Finish any remaining blocks
+      finishParagraph();
+      finishList();
       
       return <div dangerouslySetInnerHTML={{ __html: blocks.join('') }} />;
     }
