@@ -123,27 +123,27 @@ const Article = () => {
           continue;
         }
         
-        // H1 Heading
-        if (trimmed.startsWith('# ') && !trimmed.startsWith('## ')) {
+        // H3 Heading (check longest first)
+        if (trimmed.startsWith('### ')) {
           finishParagraph();
           finishList();
-          blocks.push(`<h1 class="headline text-4xl mt-8 mb-4">${trimmed.slice(2)}</h1>`);
+          blocks.push(`<h3 class="text-2xl font-semibold mt-6 mb-3">${trimmed.slice(4)}</h3>`);
           continue;
         }
         
         // H2 Heading
-        if (trimmed.startsWith('## ') && !trimmed.startsWith('### ')) {
+        if (trimmed.startsWith('## ')) {
           finishParagraph();
           finishList();
           blocks.push(`<h2 class="headline text-3xl mt-8 mb-4">${trimmed.slice(3)}</h2>`);
           continue;
         }
         
-        // H3 Heading
-        if (trimmed.startsWith('### ')) {
+        // H1 Heading
+        if (trimmed.startsWith('# ')) {
           finishParagraph();
           finishList();
-          blocks.push(`<h3 class="text-2xl font-semibold mt-6 mb-3">${trimmed.slice(4)}</h3>`);
+          blocks.push(`<h1 class="headline text-4xl mt-8 mb-4">${trimmed.slice(2)}</h1>`);
           continue;
         }
         
