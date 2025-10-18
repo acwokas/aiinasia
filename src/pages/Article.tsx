@@ -316,17 +316,17 @@ const Article = () => {
               </div>
 
               {article.authors && (
-                <div className="bg-muted/50 rounded-lg p-6 flex items-center gap-4">
+                <div className="bg-muted/50 rounded-lg p-8 flex flex-col md:flex-row items-center md:items-start gap-6">
                   {article.authors.slug ? (
-                    <Link to={`/author/${article.authors.slug}`}>
+                    <Link to={`/author/${article.authors.slug}`} className="flex-shrink-0">
                       {article.authors.avatar_url ? (
                         <img 
                           src={article.authors.avatar_url} 
                           alt={article.authors.name}
-                          className="w-20 h-20 rounded-full object-cover flex-shrink-0 hover:opacity-80 transition-opacity"
+                          className="w-32 h-32 rounded-full object-cover hover:opacity-80 transition-opacity ring-4 ring-background shadow-lg"
                         />
                       ) : (
-                        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-secondary flex-shrink-0 hover:opacity-80 transition-opacity" />
+                        <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary to-secondary hover:opacity-80 transition-opacity ring-4 ring-background shadow-lg" />
                       )}
                     </Link>
                   ) : (
@@ -334,14 +334,14 @@ const Article = () => {
                       <img 
                         src={article.authors.avatar_url} 
                         alt={article.authors.name}
-                        className="w-20 h-20 rounded-full object-cover flex-shrink-0"
+                        className="w-32 h-32 rounded-full object-cover flex-shrink-0 ring-4 ring-background shadow-lg"
                       />
                     ) : (
-                      <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-secondary flex-shrink-0" />
+                      <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary to-secondary flex-shrink-0 ring-4 ring-background shadow-lg" />
                     )
                   )}
-                  <div>
-                    <h4 className="font-semibold text-lg mb-2">
+                  <div className="flex-1 text-center md:text-left">
+                    <h4 className="font-semibold text-xl mb-2">
                       {article.authors.slug ? (
                         <Link to={`/author/${article.authors.slug}`} className="hover:text-primary transition-colors">
                           {article.authors.name}
@@ -351,12 +351,12 @@ const Article = () => {
                       )}
                     </h4>
                     {article.authors.job_title && (
-                      <p className="text-sm text-muted-foreground mb-2">
+                      <p className="text-base text-muted-foreground mb-3">
                         {article.authors.job_title}
                       </p>
                     )}
                     {article.authors.bio && (
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-base text-muted-foreground leading-relaxed">
                         {article.authors.bio}
                       </p>
                     )}
