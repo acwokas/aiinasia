@@ -27,7 +27,7 @@ const ConsentBanner = () => {
   if (!isVisible) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border shadow-lg">
+    <div className="fixed bottom-0 left-0 right-0 z-[60] bg-card border-t border-border shadow-lg">
       <div className="container mx-auto px-4 py-4">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="flex-1">
