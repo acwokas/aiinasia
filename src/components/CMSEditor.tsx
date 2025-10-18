@@ -8,7 +8,11 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Save, Upload, Loader2, Info, Plus, Pencil } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { Save, Upload, Loader2, Info, Plus, Pencil, CalendarIcon, Clock } from "lucide-react";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 import ScoutWritingAssistant from "@/components/ScoutWritingAssistant";
 import RichTextEditor from "@/components/RichTextEditor";
 import { supabase } from "@/integrations/supabase/client";
@@ -38,6 +42,14 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
   const [featuredOnHomepage, setFeaturedOnHomepage] = useState(initialData?.featured_on_homepage || false);
   const [sticky, setSticky] = useState(initialData?.sticky || false);
   const [authorId, setAuthorId] = useState(initialData?.author_id || "");
+  const [scheduledFor, setScheduledFor] = useState<Date | undefined>(
+    initialData?.scheduled_for ? new Date(initialData.scheduled_for) : undefined
+  );
+  const [scheduledTime, setScheduledTime] = useState(
+    initialData?.scheduled_for 
+      ? format(new Date(initialData.scheduled_for), "HH:mm")
+      : "09:00"
+  );
   const [selectedText, setSelectedText] = useState("");
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [showAuthorDialog, setShowAuthorDialog] = useState(false);
@@ -314,6 +326,14 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
   };
 
   const handleSave = () => {
+    let scheduledDateTime = null;
+    if (scheduledFor && scheduledTime) {
+      const [hours, minutes] = scheduledTime.split(':').map(Number);
+      const dateTime = new Date(scheduledFor);
+      dateTime.setHours(hours, minutes, 0, 0);
+      scheduledDateTime = dateTime.toISOString();
+    }
+
     const data = {
       title,
       slug,
@@ -331,6 +351,7 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
       featured_on_homepage: featuredOnHomepage,
       sticky,
       author_id: authorId || null,
+      scheduled_for: scheduledDateTime,
     };
     onSave?.(data);
   };
@@ -614,6 +635,62 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
                   checked={sticky}
                   onCheckedChange={setSticky}
                 />
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <Label>Schedule for Publishing</Label>
+                  <p className="text-xs text-muted-foreground mb-2">
+                    Set a date and time to automatically publish this article
+                  </p>
+                  <div className="flex gap-2">
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "flex-1 justify-start text-left font-normal",
+                            !scheduledFor && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {scheduledFor ? format(scheduledFor, "PPP") : "Pick a date"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={scheduledFor}
+                          onSelect={setScheduledFor}
+                          disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                          initialFocus
+                          className="pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-4 w-4 text-muted-foreground" />
+                      <Input
+                        type="time"
+                        value={scheduledTime}
+                        onChange={(e) => setScheduledTime(e.target.value)}
+                        className="w-32"
+                      />
+                    </div>
+                    {scheduledFor && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setScheduledFor(undefined);
+                          setScheduledTime("09:00");
+                        }}
+                      >
+                        Clear
+                      </Button>
+                    )}
+                  </div>
+                </div>
               </div>
 
               <div>
