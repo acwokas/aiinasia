@@ -387,16 +387,28 @@ const Index = () => {
                 </Link>
               )}
               {[
-                { name: "Aisha Rahman", title: "ML Engineer", articles: 18 },
+                { name: "Koo Ping Shung", title: "Guest Contributor", articles: 0, slug: "koo-ping-shung", avatar: "https://ppvifagplcdjpdpqknzt.supabase.co/storage/v1/object/public/article-images/avatars/cz2wxs758nn-1760809457366.jpg" },
                 { name: "Kenji Sato", title: "Robotics Expert", articles: 31 },
                 { name: "Maya Patel", title: "Tech Journalist", articles: 42 },
               ].map((author, i) => (
-                <div key={i} className="bg-card border border-border rounded-lg p-6 text-center">
-                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-secondary mx-auto mb-4" />
+                <Link 
+                  key={i} 
+                  to={author.slug ? `/author/${author.slug}` : "#"}
+                  className="bg-card border border-border rounded-lg p-6 text-center hover:shadow-lg transition-shadow"
+                >
+                  {author.avatar ? (
+                    <img 
+                      src={author.avatar} 
+                      alt={author.name}
+                      className="w-20 h-20 rounded-full object-cover mx-auto mb-4 ring-2 ring-primary"
+                    />
+                  ) : (
+                    <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-secondary mx-auto mb-4" />
+                  )}
                   <h3 className="font-semibold mb-1">{author.name}</h3>
                   <p className="text-sm text-muted-foreground mb-2">{author.title}</p>
                   <p className="text-xs text-muted-foreground">{author.articles} articles</p>
-                </div>
+                </Link>
               ))}
             </div>
           </div>
