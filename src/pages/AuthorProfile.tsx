@@ -1,5 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { Helmet } from "react-helmet";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -61,6 +62,14 @@ const AuthorProfile = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <Helmet>
+        <title>{author?.name} - Author Profile | AI Scout News</title>
+        <meta name="description" content={author?.bio || `Read articles by ${author?.name}. ${articles?.length || 0} articles published.`} />
+        <meta property="og:title" content={`${author?.name} - Author Profile`} />
+        <meta property="og:description" content={author?.bio || `Read articles by ${author?.name}`} />
+        {author?.avatar_url && <meta property="og:image" content={author.avatar_url} />}
+        <meta property="og:type" content="profile" />
+      </Helmet>
       <Header />
       
       <main className="flex-1">
