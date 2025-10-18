@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { TrendingUp, Users, Calendar, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { PromptAndGoBanner } from "@/components/PromptAndGoBanner";
 
 const Index = () => {
   const [newsletterEmail, setNewsletterEmail] = useState("");
@@ -312,11 +313,9 @@ const Index = () => {
         </section>
 
         {/* Ad Banner */}
-        <section className="container mx-auto px-4 py-4">
-          <div className="bg-muted border border-border rounded-lg p-8 text-center">
-            <p className="text-sm text-muted-foreground mb-2">Advertisement</p>
-            <p className="text-muted-foreground">728 × 90 Banner Placement</p>
-          </div>
+        <section className="container mx-auto px-4 py-8">
+          <p className="text-sm text-muted-foreground text-center mb-2">Advertisement</p>
+          <PromptAndGoBanner />
         </section>
 
         {/* Trending Tools Section */}
