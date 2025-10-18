@@ -15,6 +15,26 @@ const Article = () => {
   // Remove trailing slashes from slug for consistent lookups
   const cleanSlug = slug?.replace(/\/+$/g, '');
 
+  const handleShare = async () => {
+    const shareData = {
+      title: article?.title || '',
+      text: article?.excerpt || '',
+      url: window.location.href
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        // Could add a toast notification here
+        alert('Link copied to clipboard!');
+      }
+    } catch (err) {
+      console.error('Error sharing:', err);
+    }
+  };
+
   const { data: article, isLoading } = useQuery({
     queryKey: ["article", cleanSlug],
     queryFn: async () => {
@@ -318,7 +338,7 @@ const Article = () => {
                   <Button variant="outline" size="icon">
                     <Bookmark className="h-4 w-4" />
                   </Button>
-                  <Button variant="outline" size="icon">
+                  <Button variant="outline" size="icon" onClick={handleShare}>
                     <Share2 className="h-4 w-4" />
                   </Button>
                 </div>
