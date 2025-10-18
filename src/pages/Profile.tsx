@@ -55,15 +55,26 @@ const Profile = () => {
       
       setStats(statsData);
 
-      // Fetch achievements
-      const { data: achievementsData } = await supabase
+      // Fetch ALL achievements
+      const { data: allAchievementsData } = await supabase
+        .from('achievements')
+        .select('*')
+        .order('points_required', { ascending: true });
+
+      // Fetch user's earned achievements
+      const { data: earnedAchievementsData } = await supabase
         .from('user_achievements')
-        .select('*, achievements(*)')
+        .select('achievement_id, earned_at')
         .eq('user_id', user!.id);
-      
-      setAchievements(achievementsData?.map(ua => ({
-        ...ua.achievements,
-        earned_at: ua.earned_at
+
+      // Map all achievements with earned status
+      const earnedMap = new Map(
+        earnedAchievementsData?.map(ea => [ea.achievement_id, ea.earned_at]) || []
+      );
+
+      setAchievements(allAchievementsData?.map(achievement => ({
+        ...achievement,
+        earned_at: earnedMap.get(achievement.id)
       })) || []);
 
       // Fetch bookmarks with article details
@@ -162,7 +173,9 @@ const Profile = () => {
                 <Award className="h-8 w-8 text-yellow-500" />
                 <div>
                   <p className="text-sm text-muted-foreground">Achievements</p>
-                  <p className="text-2xl font-bold">{achievements.length}</p>
+                  <p className="text-2xl font-bold">
+                    {achievements.filter(a => a.earned_at).length}/{achievements.length}
+                  </p>
                 </div>
               </div>
             </Card>
@@ -207,23 +220,38 @@ const Profile = () => {
 
           <TabsContent value="achievements" className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {achievements.map((achievement) => (
-                <Card key={achievement.id} className="p-6">
-                  <div className="text-4xl mb-3">{achievement.badge_icon}</div>
-                  <h3 className="font-semibold text-lg mb-2">{achievement.name}</h3>
-                  <p className="text-sm text-muted-foreground mb-2">{achievement.description}</p>
-                  {achievement.earned_at && (
-                    <p className="text-xs text-muted-foreground">
-                      Earned {new Date(achievement.earned_at).toLocaleDateString()}
+              {achievements.map((achievement) => {
+                const isEarned = !!achievement.earned_at;
+                return (
+                  <Card 
+                    key={achievement.id} 
+                    className={`p-6 transition-all ${
+                      isEarned 
+                        ? 'border-primary/50 shadow-md' 
+                        : 'opacity-50 grayscale border-dashed'
+                    }`}
+                  >
+                    <div className={`text-4xl mb-3 ${!isEarned && 'opacity-40'}`}>
+                      {achievement.badge_icon}
+                    </div>
+                    <h3 className={`font-semibold text-lg mb-2 ${!isEarned && 'text-muted-foreground'}`}>
+                      {achievement.name}
+                    </h3>
+                    <p className="text-sm text-muted-foreground mb-2">
+                      {achievement.description}
                     </p>
-                  )}
-                </Card>
-              ))}
-              {achievements.length === 0 && (
-                <Card className="p-8 text-center col-span-full">
-                  <p className="text-muted-foreground">Start reading to unlock achievements!</p>
-                </Card>
-              )}
+                    {isEarned ? (
+                      <p className="text-xs text-primary font-medium">
+                        ✓ Earned {new Date(achievement.earned_at).toLocaleDateString()}
+                      </p>
+                    ) : (
+                      <p className="text-xs text-muted-foreground italic">
+                        🔒 Not yet unlocked
+                      </p>
+                    )}
+                  </Card>
+                );
+              })}
             </div>
           </TabsContent>
 
