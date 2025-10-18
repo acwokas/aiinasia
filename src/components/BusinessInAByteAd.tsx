@@ -32,11 +32,7 @@ export const BusinessInAByteAd = () => {
             </div>
             
             <p className="text-white text-sm leading-snug">
-              Everything founders need: business planning, funding guides, legal templates & AI mentorship
-            </p>
-            
-            <p className="text-white font-bold text-base">
-              100% Free
+              Free tools and playbooks. Built for entrepreneurs who move fast.
             </p>
           </div>
 
