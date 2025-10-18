@@ -187,8 +187,9 @@ const RichTextEditor = ({
   useEffect(() => {
     if (!editorRef.current || isUpdatingFromProps.current) return;
     
+    // Only set content if editor is empty and we have initial value
     const currentText = editorRef.current.innerText || '';
-    if (currentText !== value && !currentText && value) {
+    if (!currentText && value) {
       isUpdatingFromProps.current = true;
       editorRef.current.innerHTML = formatContent(value);
       setIsEmpty(false);
@@ -352,8 +353,9 @@ const RichTextEditor = ({
             "prose prose-slate max-w-none [&>*:first-child]:mt-0"
           )}
           suppressContentEditableWarning
-          dangerouslySetInnerHTML={{ __html: value ? formatContent(value) : '' }}
-        />
+        >
+          {!value && <br />}
+        </div>
       </div>
     </div>
   );
