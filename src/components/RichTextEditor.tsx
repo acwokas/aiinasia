@@ -23,7 +23,7 @@ const RichTextEditor = ({
 }: RichTextEditorProps) => {
   const editorRef = useRef<HTMLDivElement>(null);
   const [isEmpty, setIsEmpty] = useState(!value);
-  const [displayContent, setDisplayContent] = useState(value);
+  const lastValueRef = useRef(value);
 
   const formatContent = (text: string) => {
     if (!text) return '';
@@ -44,11 +44,57 @@ const RichTextEditor = ({
     return `<p class="mb-4">${formatted}</p>`.replace(/<p class="mb-4"><\/p>/g, '');
   };
 
+  // Initialize content only once
   useEffect(() => {
-    if (value !== displayContent) {
-      setDisplayContent(value);
+    if (editorRef.current && value && !editorRef.current.textContent) {
+      editorRef.current.innerHTML = formatContent(value);
+      lastValueRef.current = value;
     }
-  }, [value]);
+  }, []);
+
+  const saveCursorPosition = () => {
+    const selection = window.getSelection();
+    if (!selection?.rangeCount || !editorRef.current) return null;
+    
+    const range = selection.getRangeAt(0);
+    const preRange = range.cloneRange();
+    preRange.selectNodeContents(editorRef.current);
+    preRange.setEnd(range.endContainer, range.endOffset);
+    
+    return preRange.toString().length;
+  };
+
+  const restoreCursorPosition = (pos: number) => {
+    if (!editorRef.current) return;
+    
+    const selection = window.getSelection();
+    if (!selection) return;
+    
+    let charIndex = 0;
+    const nodeStack: Node[] = [editorRef.current];
+    let node: Node | undefined;
+    let foundStart = false;
+    
+    while (!foundStart && (node = nodeStack.pop())) {
+      if (node.nodeType === Node.TEXT_NODE) {
+        const textLength = node.textContent?.length || 0;
+        if (charIndex + textLength >= pos) {
+          const range = document.createRange();
+          range.setStart(node, pos - charIndex);
+          range.collapse(true);
+          selection.removeAllRanges();
+          selection.addRange(range);
+          foundStart = true;
+        } else {
+          charIndex += textLength;
+        }
+      } else {
+        for (let i = node.childNodes.length - 1; i >= 0; i--) {
+          nodeStack.push(node.childNodes[i]);
+        }
+      }
+    }
+  };
 
   const insertFormatting = (before: string, after: string = '') => {
     if (!editorRef.current) return;
@@ -139,14 +185,23 @@ const RichTextEditor = ({
     
     const text = editorRef.current.innerText || '';
     setIsEmpty(text.trim().length === 0);
-    setDisplayContent(text);
+    lastValueRef.current = text;
     onChange(text);
   };
 
   const handleBlur = () => {
     if (!editorRef.current) return;
+    
     const text = editorRef.current.innerText || '';
-    setDisplayContent(text);
+    const cursorPos = saveCursorPosition();
+    
+    // Apply formatting on blur
+    editorRef.current.innerHTML = formatContent(text);
+    
+    // Restore cursor
+    if (cursorPos !== null) {
+      setTimeout(() => restoreCursorPosition(cursorPos), 0);
+    }
   };
 
   const handleSelection = () => {
@@ -261,10 +316,9 @@ const RichTextEditor = ({
           className={cn(
             "min-h-[400px] w-full rounded-b-md border border-t-0 border-input bg-background px-4 py-3",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-            "prose prose-slate max-w-none [&>*:first-child]:mt-0 whitespace-pre-wrap"
+            "prose prose-slate max-w-none [&>*:first-child]:mt-0"
           )}
           suppressContentEditableWarning
-          dangerouslySetInnerHTML={{ __html: formatContent(displayContent) }}
         />
       </div>
     </div>
