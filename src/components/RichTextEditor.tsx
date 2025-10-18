@@ -22,9 +22,8 @@ const RichTextEditor = ({
   className,
 }: RichTextEditorProps) => {
   const editorRef = useRef<HTMLDivElement>(null);
-  const isUpdatingFromProps = useRef(false);
   const [isEmpty, setIsEmpty] = useState(!value);
-  const formatTimeoutRef = useRef<NodeJS.Timeout>();
+  const [displayContent, setDisplayContent] = useState(value);
 
   const formatContent = (text: string) => {
     if (!text) return '';
@@ -45,61 +44,11 @@ const RichTextEditor = ({
     return `<p class="mb-4">${formatted}</p>`.replace(/<p class="mb-4"><\/p>/g, '');
   };
 
-  const applyFormattingDebounced = useCallback(() => {
-    if (formatTimeoutRef.current) {
-      clearTimeout(formatTimeoutRef.current);
-    }
-
-    formatTimeoutRef.current = setTimeout(() => {
-      if (!editorRef.current || isUpdatingFromProps.current) return;
-      
-      const text = editorRef.current.innerText || '';
-      const selection = window.getSelection();
-      const cursorOffset = selection?.focusOffset || 0;
-      const focusNode = selection?.focusNode;
-      
-      isUpdatingFromProps.current = true;
-      editorRef.current.innerHTML = formatContent(text);
-      isUpdatingFromProps.current = false;
-      
-      // Try to restore cursor
-      if (selection && focusNode) {
-        try {
-          const range = document.createRange();
-          const textNodes: Text[] = [];
-          
-          const getTextNodes = (node: Node) => {
-            if (node.nodeType === Node.TEXT_NODE) {
-              textNodes.push(node as Text);
-            } else {
-              node.childNodes.forEach(getTextNodes);
-            }
-          };
-          
-          if (editorRef.current) {
-            getTextNodes(editorRef.current);
-            if (textNodes.length > 0) {
-              const lastNode = textNodes[textNodes.length - 1];
-              range.setStart(lastNode, Math.min(cursorOffset, lastNode.length));
-              range.collapse(true);
-              selection.removeAllRanges();
-              selection.addRange(range);
-            }
-          }
-        } catch (e) {
-          // Cursor restoration failed, not critical
-        }
-      }
-    }, 1000);
-  }, []);
-
   useEffect(() => {
-    return () => {
-      if (formatTimeoutRef.current) {
-        clearTimeout(formatTimeoutRef.current);
-      }
-    };
-  }, []);
+    if (value !== displayContent) {
+      setDisplayContent(value);
+    }
+  }, [value]);
 
   const insertFormatting = (before: string, after: string = '') => {
     if (!editorRef.current) return;
@@ -184,58 +133,20 @@ const RichTextEditor = ({
     return markdown;
   };
 
-  useEffect(() => {
-    if (!editorRef.current || isUpdatingFromProps.current) return;
-    
-    // Only set content if editor is empty and we have initial value
-    const currentText = editorRef.current.innerText || '';
-    if (!currentText && value) {
-      isUpdatingFromProps.current = true;
-      editorRef.current.innerHTML = formatContent(value);
-      setIsEmpty(false);
-      isUpdatingFromProps.current = false;
-    }
-  }, [value]);
 
   const handleInput = () => {
-    if (!editorRef.current || isUpdatingFromProps.current) return;
+    if (!editorRef.current) return;
     
     const text = editorRef.current.innerText || '';
     setIsEmpty(text.trim().length === 0);
+    setDisplayContent(text);
     onChange(text);
-    
-    applyFormattingDebounced();
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      
-      const selection = window.getSelection();
-      if (!selection || selection.rangeCount === 0) return;
-      
-      const range = selection.getRangeAt(0);
-      range.deleteContents();
-      
-      const br = document.createElement('br');
-      range.insertNode(br);
-      
-      // Insert a second br if at the end of the content to ensure the cursor moves down
-      const afterBr = document.createElement('br');
-      range.insertNode(afterBr);
-      
-      // Move cursor after the line break
-      range.setStartAfter(br);
-      range.setEndAfter(br);
-      selection.removeAllRanges();
-      selection.addRange(range);
-      
-      // Trigger input event
-      if (editorRef.current) {
-        const event = new Event('input', { bubbles: true });
-        editorRef.current.dispatchEvent(event);
-      }
-    }
+  const handleBlur = () => {
+    if (!editorRef.current) return;
+    const text = editorRef.current.innerText || '';
+    setDisplayContent(text);
   };
 
   const handleSelection = () => {
@@ -344,18 +255,17 @@ const RichTextEditor = ({
           ref={editorRef}
           contentEditable
           onInput={handleInput}
-          onKeyDown={handleKeyDown}
+          onBlur={handleBlur}
           onSelect={handleSelection}
           onPaste={handlePaste}
           className={cn(
             "min-h-[400px] w-full rounded-b-md border border-t-0 border-input bg-background px-4 py-3",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-            "prose prose-slate max-w-none [&>*:first-child]:mt-0"
+            "prose prose-slate max-w-none [&>*:first-child]:mt-0 whitespace-pre-wrap"
           )}
           suppressContentEditableWarning
-        >
-          {!value && <br />}
-        </div>
+          dangerouslySetInnerHTML={{ __html: formatContent(displayContent) }}
+        />
       </div>
     </div>
   );
