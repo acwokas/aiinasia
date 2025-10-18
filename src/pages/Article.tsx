@@ -123,8 +123,9 @@ const Article = () => {
           if (para.startsWith('<h') || para.startsWith('<ul') || para.startsWith('<blockquote') || para.startsWith('<hr')) {
             return para;
           }
-          // Only use <br> for single line breaks within a paragraph
-          return para.trim() ? `<p class="leading-relaxed mb-6">${para.trim()}</p>` : '';
+          // Convert single line breaks to <br> within paragraphs
+          const withBreaks = para.trim().replace(/\n/g, '<br />');
+          return withBreaks ? `<p class="leading-relaxed mb-6">${withBreaks}</p>` : '';
         })
         .filter(para => para) // Remove empty paragraphs
         .join('\n');
