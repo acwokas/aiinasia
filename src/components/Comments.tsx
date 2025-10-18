@@ -4,7 +4,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { MessageCircle, User } from "lucide-react";
+import { MessageCircle, User, ChevronDown } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface Comment {
   id: string;
@@ -25,6 +26,7 @@ const Comments = ({ articleId }: CommentsProps) => {
   const [authorName, setAuthorName] = useState("");
   const [authorEmail, setAuthorEmail] = useState("");
   const [content, setContent] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -86,14 +88,18 @@ const Comments = ({ articleId }: CommentsProps) => {
   };
 
   return (
-    <div className="mt-12 pt-8 border-t border-border">
-      <div className="flex items-center gap-2 mb-8">
-        <MessageCircle className="h-6 w-6 text-primary" />
-        <h2 className="headline text-3xl">Comments ({comments.length})</h2>
-      </div>
+    <Collapsible open={isOpen} onOpenChange={setIsOpen} className="mt-12 pt-8 border-t border-border">
+      <CollapsibleTrigger className="flex items-center justify-between w-full group mb-8">
+        <div className="flex items-center gap-2">
+          <MessageCircle className="h-6 w-6 text-primary" />
+          <h2 className="headline text-3xl">Comments ({comments.length})</h2>
+        </div>
+        <ChevronDown className={`h-6 w-6 text-primary transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+      </CollapsibleTrigger>
 
-      {/* Comment Form */}
-      <div className="bg-muted/30 rounded-lg p-6 mb-8">
+      <CollapsibleContent>
+        {/* Comment Form */}
+        <div className="bg-muted/30 rounded-lg p-6 mb-8">
         <h3 className="font-semibold text-lg mb-4">Leave a Comment</h3>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid md:grid-cols-2 gap-4">
@@ -179,7 +185,8 @@ const Comments = ({ articleId }: CommentsProps) => {
           ))}
         </div>
       )}
-    </div>
+      </CollapsibleContent>
+    </Collapsible>
   );
 };
 
