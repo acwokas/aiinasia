@@ -24,11 +24,6 @@ const ScoutChatbot = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
-  // Hide on admin and editor pages
-  if (location.pathname === '/admin' || location.pathname === '/editor') {
-    return null;
-  }
-
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -124,6 +119,11 @@ const ScoutChatbot = () => {
       setIsLoading(false);
     }
   };
+
+  // Hide on admin and editor pages
+  if (location.pathname === '/admin' || location.pathname === '/editor' || location.pathname.startsWith('/admin/')) {
+    return null;
+  }
 
   if (!isOpen) {
     return (
