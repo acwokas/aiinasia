@@ -7,7 +7,7 @@ import Comments from "@/components/Comments";
 import ArticleCard from "@/components/ArticleCard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Clock, User, Share2, Bookmark, Twitter, Linkedin, Facebook, Loader2 } from "lucide-react";
+import { Clock, User, Share2, Bookmark, Twitter, Linkedin, Facebook, Loader2, ExternalLink } from "lucide-react";
 import { Helmet } from "react-helmet";
 
 const Article = () => {
@@ -99,7 +99,9 @@ const Article = () => {
         .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
         // Convert italic text
         .replace(/\*(.+?)\*/g, '<em>$1</em>')
-        // Convert links
+        // Convert links with new tab marker (^) - add external link icon
+        .replace(/\[(.+?)\]\((.+?)\)\^/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-primary underline hover:no-underline inline-flex items-center gap-1">$1<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" x2="21" y1="14" y2="3"></line></svg></a>')
+        // Convert regular links
         .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" class="text-primary underline hover:no-underline">$1</a>');
       
       // Split into blocks by double line breaks
