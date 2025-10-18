@@ -351,7 +351,7 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
 
     const data = {
       title,
-      slug,
+      slug: slug.replace(/\//g, ''),
       excerpt,
       content,
       article_type: articleType,
