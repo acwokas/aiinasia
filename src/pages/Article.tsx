@@ -99,20 +99,26 @@ const Article = () => {
         .replace(/^# (.+)$/gm, '<h1 class="headline text-4xl mt-8 mb-4">$1</h1>')
         // Links
         .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" class="text-primary underline hover:no-underline">$1</a>')
-        // Lists
-        .replace(/^- (.+)$/gm, '<li class="ml-6">$1</li>')
-        .replace(/(<li.*<\/li>\s*)+/g, '<ul class="list-disc my-4">$&</ul>')
-        // Blockquotes
-        .replace(/^> (.+)$/gm, '<blockquote class="border-l-4 border-primary pl-6 py-2 my-8 italic text-xl">$1</blockquote>')
+        // Lists - handle bullet points properly without double spacing
+        .replace(/^- (.+)$/gm, '<li class="ml-6 mb-2">$1</li>')
+        .replace(/(<li.*?<\/li>\n?)+/g, (match) => `<ul class="list-disc my-4 space-y-0">${match}</ul>`)
+        // Blockquotes - keep attribution on same line
+        .replace(/^> (.+?)(\n> — .+)?$/gm, (match, quote, attribution) => {
+          if (attribution) {
+            return `<blockquote class="border-l-4 border-primary pl-6 py-2 my-8 italic text-xl">${quote}<span class="block mt-2 not-italic text-base text-muted-foreground">${attribution.replace(/^> /, '')}</span></blockquote>`;
+          }
+          return `<blockquote class="border-l-4 border-primary pl-6 py-2 my-8 italic text-xl">${quote}</blockquote>`;
+        })
         // Horizontal rules
         .replace(/^---$/gm, '<hr class="border-t border-border my-8" />')
-        // Paragraphs (split by double newlines)
+        // Paragraphs (split by double newlines) - use proper <p> tags
         .split('\n\n')
         .map(para => {
           if (para.startsWith('<h') || para.startsWith('<ul') || para.startsWith('<blockquote') || para.startsWith('<hr')) {
             return para;
           }
-          return `<p class="leading-relaxed mb-6">${para.replace(/\n/g, '<br />')}</p>`;
+          // Only use <br> for single line breaks within a paragraph
+          return `<p class="leading-relaxed mb-6">${para.trim()}</p>`;
         })
         .join('\n');
 
