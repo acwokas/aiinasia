@@ -27,6 +27,7 @@ const RichTextEditor = ({
 }: RichTextEditorProps) => {
   const editorRef = useRef<HTMLDivElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
+  const savedSelectionRef = useRef<Range | null>(null);
   const [isEmpty, setIsEmpty] = useState(!value);
   const [showImageDialog, setShowImageDialog] = useState(false);
   const [showLinkDialog, setShowLinkDialog] = useState(false);
@@ -124,6 +125,11 @@ const RichTextEditor = ({
         imageInputRef.current?.click();
         break;
       case 'link':
+        // Save the current selection before opening dialog
+        const selection = window.getSelection();
+        if (selection && selection.rangeCount > 0) {
+          savedSelectionRef.current = selection.getRangeAt(0);
+        }
         setShowLinkDialog(true);
         break;
     }
@@ -192,6 +198,15 @@ const RichTextEditor = ({
   const handleInsertLink = () => {
     if (!linkData.url) return;
     
+    // Restore the saved selection
+    if (savedSelectionRef.current) {
+      const selection = window.getSelection();
+      if (selection) {
+        selection.removeAllRanges();
+        selection.addRange(savedSelectionRef.current);
+      }
+    }
+    
     execCommand('createLink', linkData.url);
     
     // Add target="_blank" if user wants to open in new tab
@@ -214,6 +229,7 @@ const RichTextEditor = ({
     
     setShowLinkDialog(false);
     setLinkData({ url: '', openInNewTab: false });
+    savedSelectionRef.current = null;
     editorRef.current?.focus();
   };
 
@@ -260,6 +276,11 @@ const RichTextEditor = ({
           break;
         case 'k':
           e.preventDefault();
+          // Save the current selection before opening dialog
+          const sel = window.getSelection();
+          if (sel && sel.rangeCount > 0) {
+            savedSelectionRef.current = sel.getRangeAt(0);
+          }
           setShowLinkDialog(true);
           break;
       }
