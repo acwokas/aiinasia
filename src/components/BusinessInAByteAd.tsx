@@ -3,12 +3,12 @@ import businessInAByteLogo from "@/assets/businessinabyte-logo.png";
 
 export const BusinessInAByteAd = () => {
   return (
-    <div className="w-[300px] h-[250px]">
+    <div className="w-[300px] h-[250px] mx-auto">
       <a
         href="https://www.businessinabyte.com"
         target="_blank"
         rel="noopener noreferrer sponsored"
-        className="block relative group overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 h-full bg-gradient-to-br from-teal-500 via-cyan-500 to-blue-500"
+        className="block relative group overflow-hidden rounded-lg shadow-md hover:shadow-lg transition-all duration-300 h-full bg-gradient-to-br from-teal-500 via-cyan-500 to-blue-500"
         aria-label="Visit Business in a Byte - Launch Your Startup in 7 Days"
       >
         <div className="absolute inset-0 flex flex-col items-center justify-between p-6 text-center">
