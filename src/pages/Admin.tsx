@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, FileText, Users, Tag, Folder, MessageSquare, Mail, BarChart } from "lucide-react";
+import { Loader2, FileText, Users, Tag, Folder, MessageSquare, Mail, BarChart, Home } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const Admin = () => {
@@ -175,6 +175,16 @@ const Admin = () => {
       <Header />
       
       <main className="flex-1 container mx-auto px-4 py-8">
+        {/* Breadcrumbs */}
+        <nav className="text-sm text-muted-foreground mb-6">
+          <Link to="/" className="hover:text-primary inline-flex items-center gap-1">
+            <Home className="h-3 w-3" />
+            Home
+          </Link>
+          <span className="mx-2">›</span>
+          <span>Admin Dashboard</span>
+        </nav>
+
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>

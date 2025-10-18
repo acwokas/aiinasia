@@ -1,11 +1,11 @@
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import CMSEditor from "@/components/CMSEditor";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, Home } from "lucide-react";
 
 const Editor = () => {
   const [searchParams] = useSearchParams();
@@ -115,6 +115,20 @@ const Editor = () => {
       <Header />
       
       <main className="flex-1 container mx-auto px-4 py-8">
+        {/* Breadcrumbs */}
+        <nav className="text-sm text-muted-foreground mb-6">
+          <Link to="/" className="hover:text-primary inline-flex items-center gap-1">
+            <Home className="h-3 w-3" />
+            Home
+          </Link>
+          <span className="mx-2">›</span>
+          <Link to="/admin" className="hover:text-primary">
+            Admin
+          </Link>
+          <span className="mx-2">›</span>
+          <span>{articleId ? "Edit Article" : "Create Article"}</span>
+        </nav>
+
         <div className="mb-8">
           <h1 className="headline text-4xl mb-2">
             {articleId ? "Edit Article" : "Create New Article"}
