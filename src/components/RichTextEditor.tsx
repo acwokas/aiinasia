@@ -498,7 +498,7 @@ const RichTextEditor = ({
       
       <div className="border border-input rounded-md overflow-hidden">
         <div className="max-h-[700px] overflow-y-auto">
-          <div className="sticky top-0 z-10 flex items-center gap-1 p-2 border-b border-input bg-background/95 backdrop-blur flex-wrap shadow-sm">
+          <div className="sticky top-0 z-40 flex items-center gap-1 p-2 border-b border-input bg-background/95 backdrop-blur flex-wrap shadow-sm">
         <Button
           type="button"
           variant="ghost"
