@@ -17,6 +17,7 @@ const Articles = () => {
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [typeFilter, setTypeFilter] = useState<string>("all");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [authorFilter, setAuthorFilter] = useState<string>("all");
   const [sortBy, setSortBy] = useState("created_at");
@@ -54,7 +55,7 @@ const Articles = () => {
   };
 
   const { data: articles, isLoading, refetch } = useQuery({
-    queryKey: ["articles-list", searchQuery, statusFilter, categoryFilter, authorFilter, sortBy, sortOrder],
+    queryKey: ["articles-list", searchQuery, statusFilter, typeFilter, categoryFilter, authorFilter, sortBy, sortOrder],
     enabled: isAdmin === true,
     queryFn: async () => {
       let query = supabase
@@ -79,6 +80,10 @@ const Articles = () => {
 
       if (statusFilter !== "all") {
         query = query.eq("status", statusFilter as "draft" | "published" | "review" | "archived");
+      }
+
+      if (typeFilter !== "all") {
+        query = query.eq("article_type", typeFilter as "feature" | "life" | "news" | "opinion" | "tools");
       }
 
       if (categoryFilter !== "all") {
@@ -220,7 +225,7 @@ const Articles = () => {
             Filters & Search
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -241,6 +246,20 @@ const Articles = () => {
                 <SelectItem value="draft">Draft</SelectItem>
                 <SelectItem value="review">In Review</SelectItem>
                 <SelectItem value="archived">Archived</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={typeFilter} onValueChange={setTypeFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="Article Type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Types</SelectItem>
+                <SelectItem value="news">News</SelectItem>
+                <SelectItem value="feature">Feature</SelectItem>
+                <SelectItem value="opinion">Opinion</SelectItem>
+                <SelectItem value="life">Life</SelectItem>
+                <SelectItem value="tools">Tools</SelectItem>
               </SelectContent>
             </Select>
 
@@ -277,6 +296,7 @@ const Articles = () => {
               onClick={() => {
                 setSearchQuery("");
                 setStatusFilter("all");
+                setTypeFilter("all");
                 setCategoryFilter("all");
                 setAuthorFilter("all");
               }}
