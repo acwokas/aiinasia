@@ -299,7 +299,9 @@ const RichTextEditor = ({
         className="hidden"
       />
       
-      <div className="sticky top-0 z-10 flex items-center gap-1 p-2 border border-input rounded-t-md bg-background/95 backdrop-blur flex-wrap shadow-sm">
+      <div className="border border-input rounded-md overflow-hidden">
+        <div className="max-h-[600px] overflow-y-auto">
+          <div className="sticky top-0 z-10 flex items-center gap-1 p-2 border-b border-input bg-background/95 backdrop-blur flex-wrap shadow-sm">
         <Button
           type="button"
           variant="ghost"
@@ -404,38 +406,40 @@ const RichTextEditor = ({
         </Button>
       </div>
 
-      <div className="relative">
-        {isEmpty && (
-          <div className="absolute top-3 left-4 text-muted-foreground pointer-events-none z-10">
-            {placeholder}
-          </div>
-        )}
-        <div
-          ref={editorRef}
-          contentEditable
-          onInput={handleInput}
-          onSelect={handleSelection}
-          onPaste={handlePaste}
-          onKeyDown={handleKeyDown}
-          className={cn(
-            "min-h-[400px] w-full rounded-b-md border border-t-0 border-input bg-background px-4 py-3",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-            "prose prose-slate max-w-none",
-            "[&_h1]:text-3xl [&_h1]:font-bold [&_h1]:mt-6 [&_h1]:mb-4",
-            "[&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:mt-5 [&_h2]:mb-3",
-            "[&_h3]:text-xl [&_h3]:font-semibold [&_h3]:mt-4 [&_h3]:mb-2",
-            "[&_ul]:list-disc [&_ul]:ml-6 [&_ul]:my-4",
-            "[&_li]:my-1",
-            "[&_blockquote]:border-l-4 [&_blockquote]:border-primary [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:my-4",
-            "[&_a]:text-primary [&_a]:underline [&_a]:hover:no-underline",
-            "[&_strong]:font-bold",
-            "[&_em]:italic",
-            "[&_hr]:border-t [&_hr]:border-border [&_hr]:my-4",
-            "[&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-md [&_img]:my-4"
+        <div className="relative">
+          {isEmpty && (
+            <div className="absolute top-3 left-4 text-muted-foreground pointer-events-none z-10">
+              {placeholder}
+            </div>
           )}
-          suppressContentEditableWarning
-        />
+          <div
+            ref={editorRef}
+            contentEditable
+            onInput={handleInput}
+            onSelect={handleSelection}
+            onPaste={handlePaste}
+            onKeyDown={handleKeyDown}
+            className={cn(
+              "min-h-[400px] w-full bg-background px-4 py-3",
+              "focus-visible:outline-none",
+              "prose prose-slate max-w-none",
+              "[&_h1]:text-3xl [&_h1]:font-bold [&_h1]:mt-6 [&_h1]:mb-4",
+              "[&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:mt-5 [&_h2]:mb-3",
+              "[&_h3]:text-xl [&_h3]:font-semibold [&_h3]:mt-4 [&_h3]:mb-2",
+              "[&_ul]:list-disc [&_ul]:ml-6 [&_ul]:my-4",
+              "[&_li]:my-1",
+              "[&_blockquote]:border-l-4 [&_blockquote]:border-primary [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:my-4",
+              "[&_a]:text-primary [&_a]:underline [&_a]:hover:no-underline",
+              "[&_strong]:font-bold",
+              "[&_em]:italic",
+              "[&_hr]:border-t [&_hr]:border-border [&_hr]:my-4",
+              "[&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-md [&_img]:my-4"
+            )}
+            suppressContentEditableWarning
+          />
+        </div>
       </div>
+    </div>
 
       {/* Image Dialog */}
       <Dialog open={showImageDialog} onOpenChange={setShowImageDialog}>
