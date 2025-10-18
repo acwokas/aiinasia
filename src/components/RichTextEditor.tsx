@@ -122,6 +122,11 @@ const RichTextEditor = ({
         execCommand('insertHorizontalRule');
         break;
       case 'image':
+        // Save the current selection before opening dialog
+        const sel = window.getSelection();
+        if (sel && sel.rangeCount > 0) {
+          savedSelectionRef.current = sel.getRangeAt(0);
+        }
         imageInputRef.current?.click();
         break;
       case 'link':
@@ -154,45 +159,50 @@ const RichTextEditor = ({
   const handleInsertImage = () => {
     if (!imageData.url) return;
     
+    // Restore the saved selection
+    if (savedSelectionRef.current) {
+      const selection = window.getSelection();
+      if (selection) {
+        selection.removeAllRanges();
+        selection.addRange(savedSelectionRef.current);
+      }
+    }
+    
+    // Focus the editor before inserting
+    editorRef.current?.focus();
+    
     execCommand('insertImage', imageData.url);
     
     // Add alt text and other attributes after insertion
     setTimeout(() => {
-      const selection = window.getSelection();
-      if (selection && selection.anchorNode) {
-        let node = selection.anchorNode;
-        if (node.nodeType === Node.TEXT_NODE) {
-          node = node.parentElement;
-        }
+      const imgs = editorRef.current?.querySelectorAll('img');
+      if (imgs && imgs.length > 0) {
+        // Get the last inserted image
+        const imgElement = imgs[imgs.length - 1] as HTMLImageElement;
         
-        // Find the img element
-        let imgElement: HTMLElement | null = node as HTMLElement;
-        while (imgElement && imgElement !== editorRef.current) {
-          if (imgElement.tagName === 'IMG') {
-            if (imageData.alt) imgElement.setAttribute('alt', imageData.alt);
-            if (imageData.description) imgElement.setAttribute('title', imageData.description);
-            
-            // Add caption as a wrapper
-            if (imageData.caption) {
-              const figure = document.createElement('figure');
-              const figcaption = document.createElement('figcaption');
-              figcaption.textContent = imageData.caption;
-              figcaption.className = 'text-sm text-muted-foreground mt-2 text-center italic';
-              
-              imgElement.parentNode?.insertBefore(figure, imgElement);
-              figure.appendChild(imgElement);
-              figure.appendChild(figcaption);
-            }
-            break;
-          }
-          imgElement = imgElement.parentElement;
+        if (imageData.alt) imgElement.setAttribute('alt', imageData.alt);
+        if (imageData.description) imgElement.setAttribute('title', imageData.description);
+        
+        // Add caption as a wrapper
+        if (imageData.caption) {
+          const figure = document.createElement('figure');
+          const figcaption = document.createElement('figcaption');
+          figcaption.textContent = imageData.caption;
+          figcaption.className = 'text-sm text-muted-foreground mt-2 text-center italic';
+          
+          imgElement.parentNode?.insertBefore(figure, imgElement);
+          figure.appendChild(imgElement);
+          figure.appendChild(figcaption);
         }
       }
-    }, 0);
+      
+      // Trigger input event to update the markdown
+      handleInput();
+    }, 100);
     
     setShowImageDialog(false);
     setImageData({ url: '', caption: '', alt: '', description: '' });
-    editorRef.current?.focus();
+    savedSelectionRef.current = null;
   };
 
   const handleInsertLink = () => {
