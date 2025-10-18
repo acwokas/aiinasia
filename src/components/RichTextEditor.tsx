@@ -196,25 +196,35 @@ const RichTextEditor = ({
     setIsEmpty(text.trim().length === 0);
     lastValueRef.current = text;
     onChange(text);
+  };
+
+  const handleBlur = () => {
+    if (!editorRef.current) return;
     
-    // Clear existing timeout
-    if (formatTimeoutRef.current) {
-      clearTimeout(formatTimeoutRef.current);
+    const text = editorRef.current.innerText || '';
+    const cursorPos = saveCursorPosition();
+    
+    // Apply formatting when user clicks away
+    editorRef.current.innerHTML = formatContent(text);
+    
+    // Restore cursor if they return focus
+    if (cursorPos !== null) {
+      setTimeout(() => restoreCursorPosition(cursorPos), 0);
     }
+  };
+
+  const handleFocus = () => {
+    if (!editorRef.current) return;
     
-    // Apply formatting after user stops typing (500ms delay)
-    formatTimeoutRef.current = setTimeout(() => {
-      if (!editorRef.current) return;
-      
+    // If content is formatted, convert back to plain text for editing
+    const text = editorRef.current.innerText || '';
+    if (editorRef.current.innerHTML.includes('<') && text) {
       const cursorPos = saveCursorPosition();
-      const currentText = editorRef.current.innerText || '';
-      editorRef.current.innerHTML = formatContent(currentText);
-      
-      // Restore cursor position
+      editorRef.current.textContent = text;
       if (cursorPos !== null) {
-        requestAnimationFrame(() => restoreCursorPosition(cursorPos));
+        setTimeout(() => restoreCursorPosition(cursorPos), 0);
       }
-    }, 500);
+    }
   };
 
   const handleSelection = () => {
@@ -323,12 +333,14 @@ const RichTextEditor = ({
           ref={editorRef}
           contentEditable
           onInput={handleInput}
+          onBlur={handleBlur}
+          onFocus={handleFocus}
           onSelect={handleSelection}
           onPaste={handlePaste}
           className={cn(
             "min-h-[400px] w-full rounded-b-md border border-t-0 border-input bg-background px-4 py-3",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-            "prose prose-slate max-w-none [&>*:first-child]:mt-0"
+            "prose prose-slate max-w-none [&>*:first-child]:mt-0 whitespace-pre-wrap"
           )}
           suppressContentEditableWarning
         />
