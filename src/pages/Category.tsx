@@ -25,23 +25,18 @@ const Category = () => {
 
   const { data: articles, isLoading: articlesLoading } = useQuery({
     queryKey: ["category-articles", slug],
+    enabled: !!category?.id,
     queryFn: async () => {
-      const { data: categoryData } = await supabase
-        .from("categories")
-        .select("id")
-        .eq("slug", slug)
-        .single();
-
-      if (!categoryData) return [];
+      if (!category?.id) return [];
 
       const { data, error } = await supabase
         .from("articles")
         .select(`
           *,
           authors (name, slug),
-          article_categories!inner (category_id)
+          categories:primary_category_id (name, slug)
         `)
-        .eq("article_categories.category_id", categoryData.id)
+        .eq("primary_category_id", category.id)
         .eq("status", "published")
         .order("published_at", { ascending: false })
         .limit(20);
