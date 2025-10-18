@@ -10,8 +10,9 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Loader2, FileText, Users, Tag, Folder, MessageSquare, Mail, BarChart, Home, Pencil, Trash2, Plus } from "lucide-react";
+import { Loader2, FileText, Users, Tag, Folder, MessageSquare, Mail, BarChart, Home, Pencil, Trash2, Plus, Upload, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { compressImage } from "@/lib/imageCompression";
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -21,6 +22,7 @@ const Admin = () => {
   const [user, setUser] = useState<any>(null);
   const [authorsDialogOpen, setAuthorsDialogOpen] = useState(false);
   const [editingAuthor, setEditingAuthor] = useState<any>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [authorForm, setAuthorForm] = useState({
     name: "",
     slug: "",
@@ -298,6 +300,64 @@ const Admin = () => {
         variant: "destructive",
       });
     }
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setUploadingImage(true);
+
+      // Compress the image
+      const compressedFile = await compressImage(file, {
+        maxWidth: 400,
+        maxHeight: 400,
+        quality: 0.9,
+        maxSizeMB: 0.5,
+      });
+
+      // Generate unique filename
+      const fileExt = compressedFile.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+      const filePath = `avatars/${fileName}`;
+
+      // Upload to Supabase Storage
+      const { error: uploadError, data } = await supabase.storage
+        .from('article-images')
+        .upload(filePath, compressedFile, {
+          cacheControl: '3600',
+          upsert: false,
+        });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('article-images')
+        .getPublicUrl(filePath);
+
+      // Update form with the new URL
+      setAuthorForm({ ...authorForm, avatar_url: publicUrl });
+
+      toast({
+        title: "Image uploaded",
+        description: "Avatar image has been uploaded successfully",
+      });
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast({
+        title: "Upload failed",
+        description: "Failed to upload image. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const handleRemoveAvatar = () => {
+    setAuthorForm({ ...authorForm, avatar_url: "" });
   };
 
   if (isAdmin === null) {
@@ -603,14 +663,54 @@ const Admin = () => {
                     />
                   </div>
                   
-                  <div className="space-y-2">
-                    <Label htmlFor="avatar_url">Avatar URL</Label>
-                    <Input
-                      id="avatar_url"
-                      value={authorForm.avatar_url}
-                      onChange={(e) => setAuthorForm({ ...authorForm, avatar_url: e.target.value })}
-                      placeholder="https://..."
-                    />
+                  <div className="space-y-2 md:col-span-2">
+                    <Label htmlFor="avatar">Avatar Image</Label>
+                    {authorForm.avatar_url ? (
+                      <div className="space-y-2">
+                        <div className="relative inline-block">
+                          <img 
+                            src={authorForm.avatar_url} 
+                            alt="Avatar preview" 
+                            className="h-24 w-24 rounded-full object-cover border-2 border-border"
+                          />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0"
+                            onClick={handleRemoveAvatar}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                        <Input
+                          value={authorForm.avatar_url}
+                          onChange={(e) => setAuthorForm({ ...authorForm, avatar_url: e.target.value })}
+                          placeholder="Or enter URL directly"
+                          className="text-sm"
+                        />
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <Input
+                            id="avatar"
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageUpload}
+                            disabled={uploadingImage}
+                            className="flex-1"
+                          />
+                          {uploadingImage && <Loader2 className="h-4 w-4 animate-spin" />}
+                        </div>
+                        <Input
+                          value={authorForm.avatar_url}
+                          onChange={(e) => setAuthorForm({ ...authorForm, avatar_url: e.target.value })}
+                          placeholder="Or enter URL directly"
+                          className="text-sm"
+                        />
+                      </div>
+                    )}
                   </div>
                   
                   <div className="space-y-2">
