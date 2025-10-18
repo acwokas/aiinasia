@@ -36,8 +36,29 @@ const Article = () => {
 
   const { data: relatedArticles } = useQuery({
     queryKey: ["related-articles", article?.primary_category_id, article?.id],
-    enabled: !!article?.primary_category_id,
+    enabled: !!article?.id,
     queryFn: async () => {
+      // If article has a category, prioritize same category
+      if (article?.primary_category_id) {
+        const { data, error } = await supabase
+          .from("articles")
+          .select(`
+            *,
+            authors (name, slug),
+            categories:primary_category_id (name)
+          `)
+          .eq("primary_category_id", article.primary_category_id)
+          .neq("id", article.id)
+          .eq("status", "published")
+          .order("view_count", { ascending: false })
+          .order("published_at", { ascending: false })
+          .limit(3);
+        
+        if (error) throw error;
+        return data;
+      }
+      
+      // Otherwise, just show recent popular articles
       const { data, error } = await supabase
         .from("articles")
         .select(`
@@ -45,8 +66,7 @@ const Article = () => {
           authors (name, slug),
           categories:primary_category_id (name)
         `)
-        .eq("primary_category_id", article?.primary_category_id)
-        .neq("id", article?.id)
+        .neq("id", article.id)
         .eq("status", "published")
         .order("view_count", { ascending: false })
         .order("published_at", { ascending: false })
@@ -82,7 +102,7 @@ const Article = () => {
     }
   };
 
-  const externalLink = getExternalLink();
+  const externalLink = article ? getExternalLink() : null;
 
   if (isLoading) {
     return (
