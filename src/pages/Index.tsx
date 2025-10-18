@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { TrendingUp, Users, Calendar, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { PromptAndGoBanner } from "@/components/PromptAndGoBanner";
+import { BusinessInAByteAd } from "@/components/BusinessInAByteAd";
 
 const Index = () => {
   const [newsletterEmail, setNewsletterEmail] = useState("");
@@ -279,6 +280,12 @@ const Index = () => {
 
             {/* Latest Articles - Right */}
             <div className="lg:col-span-3 space-y-4">
+              {/* Advertisement Slot */}
+              <div className="mb-6">
+                <p className="text-xs text-muted-foreground text-center mb-2">Advertisement</p>
+                <BusinessInAByteAd />
+              </div>
+
               <div className="flex items-center gap-2 mb-4">
                 <div className="bg-secondary text-secondary-foreground px-3 py-1 text-xs font-bold uppercase">
                   Latest
