@@ -87,67 +87,110 @@ const Article = () => {
     
     // If content is a string (markdown), convert it to HTML
     if (typeof content === 'string') {
-      // First split by double newlines to preserve paragraph boundaries
-      const sections = content.split('\n\n');
+      // Process line by line but group into blocks
+      const lines = content.split('\n');
+      const blocks: string[] = [];
+      let currentBlock = '';
+      let inList = false;
       
-      const processedSections = sections.map(section => {
-        const trimmed = section.trim();
-        if (!trimmed) return '';
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        const trimmed = line.trim();
         
-        // Handle blockquotes with attributions (quote followed by attribution)
-        if (trimmed.startsWith('>')) {
-          // Check if next line has attribution
-          const quoteMatch = trimmed.match(/^> (.+?)(?:\n\n?\*—\s*(.+?)\*)?$/s);
-          if (quoteMatch) {
-            const [, quote, attribution] = quoteMatch;
-            if (attribution) {
-              return `<blockquote class="border-l-4 border-primary pl-6 py-2 my-8 italic text-xl">${quote}<span class="block mt-2 not-italic text-base text-muted-foreground">— ${attribution}</span></blockquote>`;
-            }
-            return `<blockquote class="border-l-4 border-primary pl-6 py-2 my-8 italic text-xl">${quote}</blockquote>`;
+        // Empty line - paragraph break
+        if (!trimmed) {
+          if (currentBlock) {
+            blocks.push(currentBlock);
+            currentBlock = '';
           }
+          inList = false;
+          continue;
         }
         
-        // Handle headings
-        if (trimmed.startsWith('### ')) {
-          return `<h3 class="text-2xl font-semibold mt-6 mb-3">${trimmed.slice(4)}</h3>`;
-        }
-        if (trimmed.startsWith('## ')) {
-          return `<h2 class="headline text-3xl mt-8 mb-4">${trimmed.slice(3)}</h2>`;
-        }
-        if (trimmed.startsWith('# ')) {
-          return `<h1 class="headline text-4xl mt-8 mb-4">${trimmed.slice(2)}</h1>`;
-        }
-        
-        // Handle horizontal rules
-        if (trimmed === '---') {
-          return '<hr class="border-t border-border my-8" />';
-        }
-        
-        // Handle lists (multiple lines starting with -)
-        if (trimmed.includes('\n-') || trimmed.startsWith('- ')) {
-          const items = trimmed.split('\n').filter(line => line.trim().startsWith('- '));
-          const listItems = items.map(item => {
-            const text = item.replace(/^- /, '').trim();
-            const processed = text
-              .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-              .replace(/\*(.+?)\*/g, '<em>$1</em>')
-              .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" class="text-primary underline hover:no-underline">$1</a>');
-            return `<li class="ml-6 mb-2">${processed}</li>`;
-          }).join('');
-          return `<ul class="list-disc my-4 space-y-0">${listItems}</ul>`;
+        // Headings - always start new block
+        if (trimmed.match(/^#{1,3}\s/)) {
+          if (currentBlock) {
+            blocks.push(currentBlock);
+            currentBlock = '';
+          }
+          inList = false;
+          
+          if (trimmed.startsWith('### ')) {
+            blocks.push(`<h3 class="text-2xl font-semibold mt-6 mb-3">${trimmed.slice(4)}</h3>`);
+          } else if (trimmed.startsWith('## ')) {
+            blocks.push(`<h2 class="headline text-3xl mt-8 mb-4">${trimmed.slice(3)}</h2>`);
+          } else if (trimmed.startsWith('# ')) {
+            blocks.push(`<h1 class="headline text-4xl mt-8 mb-4">${trimmed.slice(2)}</h1>`);
+          }
+          continue;
         }
         
-        // Regular paragraph - process inline markdown and single line breaks
-        let processed = trimmed
+        // Blockquote
+        if (trimmed.startsWith('>')) {
+          if (currentBlock) {
+            blocks.push(currentBlock);
+            currentBlock = '';
+          }
+          inList = false;
+          const quote = trimmed.slice(1).trim();
+          blocks.push(`<blockquote class="border-l-4 border-primary pl-6 py-2 my-8 italic text-xl">${quote}</blockquote>`);
+          continue;
+        }
+        
+        // List item
+        if (trimmed.startsWith('- ')) {
+          if (!inList) {
+            if (currentBlock) {
+              blocks.push(currentBlock);
+              currentBlock = '';
+            }
+            inList = true;
+            currentBlock = '<ul class="list-disc my-4 space-y-0">';
+          }
+          const text = trimmed.slice(2).trim()
+            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.+?)\*/g, '<em>$1</em>')
+            .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" class="text-primary underline hover:no-underline">$1</a>');
+          currentBlock += `<li class="ml-6 mb-2">${text}</li>`;
+          continue;
+        }
+        
+        // Regular text line
+        if (inList) {
+          currentBlock += '</ul>';
+          blocks.push(currentBlock);
+          currentBlock = '';
+          inList = false;
+        }
+        
+        if (currentBlock) {
+          currentBlock += '<br />';
+        } else {
+          currentBlock = '<p class="leading-relaxed mb-6">';
+        }
+        
+        const processed = trimmed
           .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
           .replace(/\*(.+?)\*/g, '<em>$1</em>')
-          .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" class="text-primary underline hover:no-underline">$1</a>')
-          .replace(/\n/g, '<br />'); // Single line breaks become <br>
+          .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" class="text-primary underline hover:no-underline">$1</a>');
         
-        return `<p class="leading-relaxed mb-6">${processed}</p>`;
-      });
+        currentBlock += processed;
+      }
       
-      return <div dangerouslySetInnerHTML={{ __html: processedSections.join('') }} />;
+      // Close any remaining block
+      if (currentBlock) {
+        if (inList) {
+          currentBlock += '</ul>';
+        } else if (!currentBlock.includes('<p')) {
+          currentBlock = `<p class="leading-relaxed mb-6">${currentBlock}`;
+        }
+        if (currentBlock.startsWith('<p') && !currentBlock.endsWith('</p>')) {
+          currentBlock += '</p>';
+        }
+        blocks.push(currentBlock);
+      }
+      
+      return <div dangerouslySetInnerHTML={{ __html: blocks.join('') }} />;
     }
     
     // Otherwise try to parse as JSON blocks (legacy format)
