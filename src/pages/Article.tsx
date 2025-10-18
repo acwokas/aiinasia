@@ -87,8 +87,21 @@ const Article = () => {
     
     // If content is a string (markdown), convert it to HTML
     if (typeof content === 'string') {
-      // Convert markdown to HTML
-      let html = content
+      // Normalize line endings and handle quotes with attributions first
+      let processedContent = content
+        // Handle blockquotes with attributions (quote followed by attribution on next line)
+        .replace(/^> (.+?)\n\n\*—\s*(.+?)\*/gm, (match, quote, attribution) => {
+          return `<blockquote class="border-l-4 border-primary pl-6 py-2 my-8 italic text-xl">${quote}<span class="block mt-2 not-italic text-base text-muted-foreground">— ${attribution}</span></blockquote>\n\n`;
+        })
+        // Handle inline blockquotes with attribution
+        .replace(/^> (.+?)\s*\*—\s*(.+?)\*/gm, (match, quote, attribution) => {
+          return `<blockquote class="border-l-4 border-primary pl-6 py-2 my-8 italic text-xl">${quote}<span class="block mt-2 not-italic text-base text-muted-foreground">— ${attribution}</span></blockquote>`;
+        })
+        // Handle simple blockquotes without attribution
+        .replace(/^> (.+)$/gm, '<blockquote class="border-l-4 border-primary pl-6 py-2 my-8 italic text-xl">$1</blockquote>');
+
+      // Now process the rest of the markdown
+      let html = processedContent
         // Bold
         .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
         // Italic
@@ -102,13 +115,6 @@ const Article = () => {
         // Lists - handle bullet points properly without double spacing
         .replace(/^- (.+)$/gm, '<li class="ml-6 mb-2">$1</li>')
         .replace(/(<li.*?<\/li>\n?)+/g, (match) => `<ul class="list-disc my-4 space-y-0">${match}</ul>`)
-        // Blockquotes - keep attribution on same line
-        .replace(/^> (.+?)(\n> — .+)?$/gm, (match, quote, attribution) => {
-          if (attribution) {
-            return `<blockquote class="border-l-4 border-primary pl-6 py-2 my-8 italic text-xl">${quote}<span class="block mt-2 not-italic text-base text-muted-foreground">${attribution.replace(/^> /, '')}</span></blockquote>`;
-          }
-          return `<blockquote class="border-l-4 border-primary pl-6 py-2 my-8 italic text-xl">${quote}</blockquote>`;
-        })
         // Horizontal rules
         .replace(/^---$/gm, '<hr class="border-t border-border my-8" />')
         // Paragraphs (split by double newlines) - use proper <p> tags
@@ -118,8 +124,9 @@ const Article = () => {
             return para;
           }
           // Only use <br> for single line breaks within a paragraph
-          return `<p class="leading-relaxed mb-6">${para.trim()}</p>`;
+          return para.trim() ? `<p class="leading-relaxed mb-6">${para.trim()}</p>` : '';
         })
+        .filter(para => para) // Remove empty paragraphs
         .join('\n');
 
       return <div dangerouslySetInnerHTML={{ __html: html }} />;
