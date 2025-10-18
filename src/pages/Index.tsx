@@ -1,7 +1,8 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
+import { format } from "date-fns";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import StockTicker from "@/components/StockTicker";
@@ -15,6 +16,7 @@ const Index = () => {
   const [newsletterEmail, setNewsletterEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: featuredArticle } = useQuery({
     queryKey: ["featured-article"],
@@ -89,6 +91,44 @@ const Index = () => {
       return data;
     },
   });
+
+  const { data: upcomingEvents } = useQuery({
+    queryKey: ["upcoming-events"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("events")
+        .select("*")
+        .eq("status", "upcoming")
+        .order("start_date", { ascending: true })
+        .limit(3);
+      
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Subscribe to realtime event updates
+  useEffect(() => {
+    const channel = supabase
+      .channel('homepage-events')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'events'
+        },
+        () => {
+          // Refetch events when there's a change
+          queryClient.invalidateQueries({ queryKey: ["upcoming-events"] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   const handleNewsletterSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -362,27 +402,41 @@ const Index = () => {
               <Calendar className="h-8 w-8 text-primary" />
               Upcoming Events
             </h2>
-            <Button variant="outline">Full Calendar</Button>
+            <Button variant="outline" asChild>
+              <Link to="/events">Full Calendar</Link>
+            </Button>
           </div>
           
           <div className="space-y-4">
-            {[
-              { title: "AI Summit Asia 2025", date: "15-17 March", location: "Singapore" },
-              { title: "Neural Networks Workshop", date: "22 March", location: "Virtual" },
-              { title: "Ethics in AI Symposium", date: "5-6 April", location: "Tokyo" },
-            ].map((event, i) => (
-              <div key={i} className="article-card p-6 flex items-center justify-between">
-                <div>
-                  <h3 className="font-semibold text-lg mb-2">{event.title}</h3>
-                  <div className="flex gap-4 text-sm text-muted-foreground">
-                    <span>{event.date}</span>
-                    <span>•</span>
-                    <span>{event.location}</span>
+            {upcomingEvents && upcomingEvents.length > 0 ? (
+              upcomingEvents.map((event) => (
+                <div key={event.id} className="article-card p-6 flex items-center justify-between">
+                  <div>
+                    <h3 className="font-semibold text-lg mb-2">{event.title}</h3>
+                    <div className="flex gap-4 text-sm text-muted-foreground">
+                      <span>{format(new Date(event.start_date), 'dd MMM yyyy')}</span>
+                      <span>•</span>
+                      <span>{event.city}, {event.country}</span>
+                    </div>
                   </div>
+                  {event.website_url ? (
+                    <Button variant="outline" asChild>
+                      <a href={event.website_url} target="_blank" rel="noopener noreferrer">
+                        Learn More
+                      </a>
+                    </Button>
+                  ) : (
+                    <Button variant="outline" asChild>
+                      <Link to="/events">View Details</Link>
+                    </Button>
+                  )}
                 </div>
-                <Button variant="outline">Register</Button>
+              ))
+            ) : (
+              <div className="article-card p-6 text-center text-muted-foreground">
+                No upcoming events at the moment. Check back soon!
               </div>
-            ))}
+            )}
           </div>
         </section>
 

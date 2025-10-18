@@ -20,6 +20,7 @@ import Terms from "./pages/Terms";
 import CookiePolicy from "./pages/CookiePolicy";
 import Redirects from "./pages/Redirects";
 import NotFound from "./pages/NotFound";
+import Events from "./pages/Events";
 import NewsletterPopup from "./components/NewsletterPopup";
 import ScoutChatbot from "./components/ScoutChatbot";
 import GoogleAnalytics from "./components/GoogleAnalytics";
@@ -54,6 +55,7 @@ const App = () => (
           <Route path="/editor/:id" element={<Editor />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/events" element={<Events />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/cookie-policy" element={<CookiePolicy />} />

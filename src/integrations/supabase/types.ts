@@ -391,6 +391,81 @@ export type Database = {
         }
         Relationships: []
       }
+      events: {
+        Row: {
+          city: string
+          country: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          end_date: string | null
+          event_type: string
+          id: string
+          image_url: string | null
+          is_featured: boolean | null
+          location: string
+          organizer: string | null
+          region: string
+          registration_url: string | null
+          slug: string
+          start_date: string
+          status: string
+          title: string
+          updated_at: string
+          updated_by: string | null
+          venue: string | null
+          website_url: string | null
+        }
+        Insert: {
+          city: string
+          country: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_date?: string | null
+          event_type?: string
+          id?: string
+          image_url?: string | null
+          is_featured?: boolean | null
+          location: string
+          organizer?: string | null
+          region?: string
+          registration_url?: string | null
+          slug: string
+          start_date: string
+          status?: string
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+          venue?: string | null
+          website_url?: string | null
+        }
+        Update: {
+          city?: string
+          country?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_date?: string | null
+          event_type?: string
+          id?: string
+          image_url?: string | null
+          is_featured?: boolean | null
+          location?: string
+          organizer?: string | null
+          region?: string
+          registration_url?: string | null
+          slug?: string
+          start_date?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+          venue?: string | null
+          website_url?: string | null
+        }
+        Relationships: []
+      }
       newsletter_subscribers: {
         Row: {
           confirmed: boolean | null
