@@ -226,11 +226,11 @@ const Index = () => {
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                     <Badge className="absolute top-3 left-3 bg-primary text-primary-foreground text-xs">
-                      {article.categories?.name}
+                      {article.categories?.name || "Uncategorized"}
                     </Badge>
                     {index === 0 && (
                       <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-                        <p className="text-white text-xs mb-1">{article.categories?.name} | {article.reading_time_minutes || 5} min read</p>
+                        <p className="text-white text-xs mb-1">{article.categories?.name || "Uncategorized"} | {article.reading_time_minutes || 5} min read</p>
                         <h3 className="text-white font-bold text-lg line-clamp-2 group-hover:text-primary transition-colors">
                           {article.title}
                         </h3>
@@ -240,7 +240,7 @@ const Index = () => {
                   {index > 0 && (
                     <>
                       <p className="text-xs text-muted-foreground mb-1">
-                        {article.categories?.name} | {article.reading_time_minutes || 5} min read
+                        {article.categories?.name || "Uncategorized"} | {article.reading_time_minutes || 5} min read
                       </p>
                       <h3 className="font-bold text-sm line-clamp-2 group-hover:text-primary transition-colors">
                         {article.title}
@@ -265,7 +265,7 @@ const Index = () => {
                     <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
                     <div className="absolute bottom-0 left-0 right-0 p-8">
                       <Badge className="bg-primary text-primary-foreground mb-3">
-                        {featuredArticle.categories?.name}
+                        {featuredArticle.categories?.name || "Uncategorized"}
                       </Badge>
                       <h2 className="text-white font-bold text-3xl md:text-4xl mb-4 line-clamp-3 group-hover:text-primary transition-colors">
                         {featuredArticle.title}
@@ -288,7 +288,7 @@ const Index = () => {
                       <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
                       <div className="absolute bottom-0 left-0 right-0 p-8">
                         <Badge className="bg-primary text-primary-foreground mb-3">
-                          {trendingArticles[0].categories?.name}
+                          {trendingArticles[0].categories?.name || "Uncategorized"}
                         </Badge>
                         <h2 className="text-white font-bold text-3xl md:text-4xl mb-4 line-clamp-3 group-hover:text-primary transition-colors">
                           {trendingArticles[0].title}
@@ -321,7 +321,7 @@ const Index = () => {
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
                       <div className="absolute bottom-0 left-0 right-0 p-6">
                         <Badge className="bg-primary text-primary-foreground text-xs mb-2">
-                          {article.categories?.name}
+                          {article.categories?.name || "Uncategorized"}
                         </Badge>
                         <h3 className="text-white font-bold text-xl mb-2 line-clamp-2 group-hover:text-primary transition-colors">
                           {article.title}
@@ -365,7 +365,7 @@ const Index = () => {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs text-muted-foreground uppercase mb-1">
-                      {article.categories?.name} | {article.reading_time_minutes || 5} days ago
+                      {article.categories?.name || "Uncategorized"} | {article.reading_time_minutes || 5} days ago
                     </p>
                     <h3 className="font-bold text-sm line-clamp-2 group-hover:text-primary transition-colors">
                       {article.title}
