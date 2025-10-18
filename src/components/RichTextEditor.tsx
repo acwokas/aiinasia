@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Bold, Italic, Heading1, Heading2, Heading3, List, Quote, Link as LinkIcon } from "lucide-react";
+import { Bold, Italic, Heading1, Heading2, Heading3, List, Quote, Link as LinkIcon, Minus, Image, Type } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface RichTextEditorProps {
@@ -22,6 +22,7 @@ const RichTextEditor = ({
   className,
 }: RichTextEditorProps) => {
   const editorRef = useRef<HTMLDivElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
   const [isEmpty, setIsEmpty] = useState(!value);
 
   useEffect(() => {
@@ -99,19 +100,62 @@ const RichTextEditor = ({
       case 'h3':
         execCommand('formatBlock', '<h3>');
         break;
+      case 'paragraph':
+        execCommand('formatBlock', '<p>');
+        break;
       case 'list':
         execCommand('insertUnorderedList');
         break;
       case 'quote':
         execCommand('formatBlock', '<blockquote>');
         break;
+      case 'hr':
+        execCommand('insertHorizontalRule');
+        break;
+      case 'image':
+        imageInputRef.current?.click();
+        break;
       case 'link':
         const url = prompt('Enter URL:');
         if (url) {
+          const openInNewTab = confirm('Open link in new tab?');
           execCommand('createLink', url);
+          
+          // Add target="_blank" if user wants to open in new tab
+          if (openInNewTab) {
+            setTimeout(() => {
+              const selection = window.getSelection();
+              if (selection && selection.anchorNode) {
+                let node = selection.anchorNode.parentElement;
+                while (node && node !== editorRef.current) {
+                  if (node.tagName === 'A') {
+                    node.setAttribute('target', '_blank');
+                    node.setAttribute('rel', 'noopener noreferrer');
+                    break;
+                  }
+                  node = node.parentElement;
+                }
+              }
+            }, 0);
+          }
         }
         break;
     }
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const imageUrl = event.target?.result as string;
+      execCommand('insertImage', imageUrl);
+    };
+    reader.readAsDataURL(file);
+    
+    // Reset input so the same file can be selected again
+    e.target.value = '';
   };
 
   const handleInput = () => {
@@ -145,7 +189,15 @@ const RichTextEditor = ({
     <div className={cn("space-y-2", className)}>
       {label && <Label>{label}</Label>}
       
-      <div className="flex items-center gap-1 p-2 border border-input rounded-t-md bg-muted/30">
+      <input
+        ref={imageInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleImageUpload}
+        className="hidden"
+      />
+      
+      <div className="flex items-center gap-1 p-2 border border-input rounded-t-md bg-muted/30 flex-wrap">
         <Button
           type="button"
           variant="ghost"
@@ -192,6 +244,15 @@ const RichTextEditor = ({
         >
           <Heading3 className="h-4 w-4" />
         </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => handleFormat('paragraph')}
+          title="Paragraph"
+        >
+          <Type className="h-4 w-4" />
+        </Button>
         <div className="w-px h-6 bg-border mx-1" />
         <Button
           type="button"
@@ -220,6 +281,25 @@ const RichTextEditor = ({
         >
           <LinkIcon className="h-4 w-4" />
         </Button>
+        <div className="w-px h-6 bg-border mx-1" />
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => handleFormat('hr')}
+          title="Horizontal Line"
+        >
+          <Minus className="h-4 w-4" />
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => handleFormat('image')}
+          title="Insert Image"
+        >
+          <Image className="h-4 w-4" />
+        </Button>
       </div>
 
       <div className="relative">
@@ -246,7 +326,9 @@ const RichTextEditor = ({
             "[&_blockquote]:border-l-4 [&_blockquote]:border-primary [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:my-4",
             "[&_a]:text-primary [&_a]:underline [&_a]:hover:no-underline",
             "[&_strong]:font-bold",
-            "[&_em]:italic"
+            "[&_em]:italic",
+            "[&_hr]:border-t [&_hr]:border-border [&_hr]:my-4",
+            "[&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-md [&_img]:my-4"
           )}
           suppressContentEditableWarning
         />
