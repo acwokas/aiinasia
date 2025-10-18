@@ -92,6 +92,8 @@ const Article = () => {
       let currentParagraph = '';
       let inList = false;
       let listItems: string[] = [];
+      let inBlockquote = false;
+      let blockquoteLines: string[] = [];
       
       const finishParagraph = () => {
         if (currentParagraph.trim()) {
@@ -112,14 +114,26 @@ const Article = () => {
         }
       };
       
+      const finishBlockquote = () => {
+        if (blockquoteLines.length > 0) {
+          const quote = blockquoteLines.join(' ')
+            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.+?)\*/g, '<em>$1</em>');
+          blocks.push(`<blockquote class="border-l-4 border-primary pl-6 py-2 my-8 italic text-xl">${quote}</blockquote>`);
+          blockquoteLines = [];
+          inBlockquote = false;
+        }
+      };
+      
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
         const trimmed = line.trim();
         
-        // Empty line - finish current block
+        // Empty line - finish current block and add spacing
         if (!trimmed) {
           finishParagraph();
           finishList();
+          finishBlockquote();
           continue;
         }
         
@@ -127,7 +141,8 @@ const Article = () => {
         if (trimmed.startsWith('### ')) {
           finishParagraph();
           finishList();
-          blocks.push(`<h3 class="text-2xl font-semibold mt-6 mb-3">${trimmed.slice(4)}</h3>`);
+          finishBlockquote();
+          blocks.push(`<h3 class="text-2xl font-semibold mt-8 mb-4">${trimmed.slice(4)}</h3>`);
           continue;
         }
         
@@ -135,6 +150,7 @@ const Article = () => {
         if (trimmed.startsWith('## ')) {
           finishParagraph();
           finishList();
+          finishBlockquote();
           blocks.push(`<h2 class="headline text-3xl mt-8 mb-4">${trimmed.slice(3)}</h2>`);
           continue;
         }
@@ -143,6 +159,7 @@ const Article = () => {
         if (trimmed.startsWith('# ')) {
           finishParagraph();
           finishList();
+          finishBlockquote();
           blocks.push(`<h1 class="headline text-4xl mt-8 mb-4">${trimmed.slice(2)}</h1>`);
           continue;
         }
@@ -151,16 +168,21 @@ const Article = () => {
         if (trimmed.startsWith('> ')) {
           finishParagraph();
           finishList();
-          const quote = trimmed.slice(2).trim()
-            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-            .replace(/\*(.+?)\*/g, '<em>$1</em>');
-          blocks.push(`<blockquote class="border-l-4 border-primary pl-6 py-2 my-8 italic text-xl">${quote}</blockquote>`);
+          inBlockquote = true;
+          blockquoteLines.push(trimmed.slice(2).trim());
+          continue;
+        }
+        
+        // Continue blockquote if we're in one
+        if (inBlockquote && !trimmed.startsWith('- ') && !trimmed.startsWith('#')) {
+          blockquoteLines.push(trimmed);
           continue;
         }
         
         // List item
         if (trimmed.startsWith('- ')) {
           finishParagraph();
+          finishBlockquote();
           if (!inList) {
             inList = true;
           }
@@ -174,6 +196,7 @@ const Article = () => {
         
         // Regular text - add to current paragraph
         finishList();
+        finishBlockquote();
         if (currentParagraph) {
           currentParagraph += ' ' + trimmed;
         } else {
@@ -184,6 +207,7 @@ const Article = () => {
       // Finish any remaining blocks
       finishParagraph();
       finishList();
+      finishBlockquote();
       
       return <div dangerouslySetInnerHTML={{ __html: blocks.join('') }} />;
     }
