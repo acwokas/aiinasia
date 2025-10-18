@@ -25,6 +25,59 @@ const RichTextEditor = ({
   const isUpdatingFromProps = useRef(false);
   const [isEmpty, setIsEmpty] = useState(!value);
 
+  const getCursorPosition = (): number => {
+    const selection = window.getSelection();
+    if (!selection || !selection.rangeCount || !editorRef.current) return 0;
+    
+    const range = selection.getRangeAt(0);
+    const preCaretRange = range.cloneRange();
+    preCaretRange.selectNodeContents(editorRef.current);
+    preCaretRange.setEnd(range.endContainer, range.endOffset);
+    
+    return preCaretRange.toString().length;
+  };
+
+  const setCursorPosition = (position: number) => {
+    if (!editorRef.current) return;
+    
+    const selection = window.getSelection();
+    if (!selection) return;
+    
+    let charCount = 0;
+    const nodeIterator = document.createNodeIterator(
+      editorRef.current,
+      NodeFilter.SHOW_TEXT,
+      null
+    );
+    
+    let currentNode;
+    let found = false;
+    
+    while ((currentNode = nodeIterator.nextNode())) {
+      const textLength = currentNode.textContent?.length || 0;
+      
+      if (charCount + textLength >= position) {
+        const range = document.createRange();
+        range.setStart(currentNode, Math.min(position - charCount, textLength));
+        range.collapse(true);
+        selection.removeAllRanges();
+        selection.addRange(range);
+        found = true;
+        break;
+      }
+      
+      charCount += textLength;
+    }
+    
+    if (!found && editorRef.current.lastChild) {
+      const range = document.createRange();
+      range.selectNodeContents(editorRef.current);
+      range.collapse(false);
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }
+  };
+
   const formatContent = (text: string) => {
     if (!text) return '';
     
@@ -126,8 +179,8 @@ const RichTextEditor = ({
   useEffect(() => {
     if (!editorRef.current || isUpdatingFromProps.current) return;
     
-    const currentMarkdown = stripHtmlToMarkdown(editorRef.current.innerHTML);
-    if (currentMarkdown !== value && value !== '') {
+    const currentText = editorRef.current.innerText || '';
+    if (currentText !== value && !currentText && value) {
       isUpdatingFromProps.current = true;
       editorRef.current.innerHTML = formatContent(value);
       setIsEmpty(false);
@@ -141,19 +194,22 @@ const RichTextEditor = ({
     const text = editorRef.current.innerText || '';
     setIsEmpty(text.trim().length === 0);
     
-    const html = editorRef.current.innerHTML;
-    const markdown = stripHtmlToMarkdown(html);
-    onChange(markdown);
-  };
-
-  const handleBlur = () => {
-    if (!editorRef.current || isUpdatingFromProps.current) return;
+    // Save cursor position
+    const cursorPos = getCursorPosition();
     
-    // Reformat on blur to apply all formatting
-    const markdown = stripHtmlToMarkdown(editorRef.current.innerHTML);
+    // Get the plain text content
+    const plainText = text;
+    
+    // Apply formatting
     isUpdatingFromProps.current = true;
-    editorRef.current.innerHTML = formatContent(markdown);
+    editorRef.current.innerHTML = formatContent(plainText);
     isUpdatingFromProps.current = false;
+    
+    // Restore cursor position
+    setCursorPosition(cursorPos);
+    
+    // Update parent with markdown
+    onChange(plainText);
   };
 
   const handleSelection = () => {
@@ -262,7 +318,6 @@ const RichTextEditor = ({
           ref={editorRef}
           contentEditable
           onInput={handleInput}
-          onBlur={handleBlur}
           onSelect={handleSelection}
           onPaste={handlePaste}
           className={cn(
@@ -271,7 +326,6 @@ const RichTextEditor = ({
             "prose prose-slate max-w-none"
           )}
           suppressContentEditableWarning
-          dangerouslySetInnerHTML={{ __html: formatContent(value) }}
         />
       </div>
     </div>
