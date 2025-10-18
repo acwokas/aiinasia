@@ -162,6 +162,12 @@ const Admin = () => {
     }
   };
 
+  const getFirstName = (email: string | undefined) => {
+    if (!email) return "User";
+    const username = email.split("@")[0];
+    return username.charAt(0).toUpperCase() + username.slice(1);
+  };
+
   if (isAdmin === null) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -189,7 +195,7 @@ const Admin = () => {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="headline text-4xl mb-2">Admin Dashboard</h1>
-              <p className="text-muted-foreground">Welcome back, {user?.email}</p>
+              <p className="text-muted-foreground">Welcome back, {getFirstName(user?.email)}</p>
             </div>
             <Button onClick={() => navigate("/editor")} size="lg">
               <FileText className="h-4 w-4 mr-2" />
