@@ -53,6 +53,8 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
     linkedin_url: "",
     website_url: ""
   });
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string>("");
   const contentRef = useRef<HTMLTextAreaElement>(null);
   const excerptRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -196,6 +198,7 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
         linkedin_url: author.linkedin_url || "",
         website_url: author.website_url || ""
       });
+      setAvatarPreview(author.avatar_url || "");
     } else {
       setIsEditingAuthor(false);
       setAuthorForm({
@@ -209,18 +212,53 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
         linkedin_url: "",
         website_url: ""
       });
+      setAvatarPreview("");
     }
+    setAvatarFile(null);
     setShowAuthorDialog(true);
+  };
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setAvatarFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAvatarPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleSaveAuthor = async () => {
     try {
+      let avatarUrl = authorForm.avatar_url;
+
+      // Upload avatar if a new file was selected
+      if (avatarFile) {
+        const fileExt = avatarFile.name.split('.').pop();
+        const fileName = `${crypto.randomUUID()}.${fileExt}`;
+        const filePath = `avatars/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('article-images')
+          .upload(filePath, avatarFile);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('article-images')
+          .getPublicUrl(filePath);
+
+        avatarUrl = publicUrl;
+      }
+
       const authorData = {
         name: authorForm.name,
         slug: authorForm.slug || generateSlug(authorForm.name),
         bio: authorForm.bio || null,
         email: authorForm.email || null,
-        avatar_url: authorForm.avatar_url || null,
+        avatar_url: avatarUrl || null,
         twitter_handle: authorForm.twitter_handle || null,
         linkedin_url: authorForm.linkedin_url || null,
         website_url: authorForm.website_url || null
@@ -256,6 +294,8 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
 
       queryClient.invalidateQueries({ queryKey: ['authors'] });
       setShowAuthorDialog(false);
+      setAvatarFile(null);
+      setAvatarPreview("");
     } catch (error) {
       console.error('Error saving author:', error);
       toast({
@@ -663,13 +703,23 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
               />
             </div>
             <div>
-              <Label htmlFor="author-avatar">Avatar URL</Label>
+              <Label htmlFor="author-avatar">Avatar Image</Label>
               <Input
                 id="author-avatar"
-                value={authorForm.avatar_url}
-                onChange={(e) => setAuthorForm({ ...authorForm, avatar_url: e.target.value })}
-                placeholder="https://example.com/avatar.jpg"
+                type="file"
+                accept="image/*"
+                onChange={handleAvatarChange}
+                className="cursor-pointer"
               />
+              {(avatarPreview || authorForm.avatar_url) && (
+                <div className="mt-2">
+                  <img
+                    src={avatarPreview || authorForm.avatar_url}
+                    alt="Avatar preview"
+                    className="w-20 h-20 rounded-full object-cover border border-border"
+                  />
+                </div>
+              )}
             </div>
             <div>
               <Label htmlFor="author-twitter">Twitter Handle</Label>
