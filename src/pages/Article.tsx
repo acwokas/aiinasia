@@ -362,59 +362,60 @@ const Article = () => {
                   </Button>
                 </div>
               </div>
-
-              {article.authors && (
-                <div className="bg-muted/50 rounded-lg p-8 flex flex-col md:flex-row items-center md:items-start gap-6">
-                  {article.authors.slug ? (
-                    <Link to={`/author/${article.authors.slug}`} className="flex-shrink-0">
-                      {article.authors.avatar_url ? (
-                        <img 
-                          src={article.authors.avatar_url} 
-                          alt={article.authors.name}
-                          className="w-32 h-32 rounded-full object-cover hover:opacity-80 transition-opacity ring-4 ring-background shadow-lg"
-                        />
-                      ) : (
-                        <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary to-secondary hover:opacity-80 transition-opacity ring-4 ring-background shadow-lg" />
-                      )}
-                    </Link>
-                  ) : (
-                    article.authors.avatar_url ? (
-                      <img 
-                        src={article.authors.avatar_url} 
-                        alt={article.authors.name}
-                        className="w-32 h-32 rounded-full object-cover flex-shrink-0 ring-4 ring-background shadow-lg"
-                      />
-                    ) : (
-                      <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary to-secondary flex-shrink-0 ring-4 ring-background shadow-lg" />
-                    )
-                  )}
-                  <div className="flex-1 text-center md:text-left">
-                    <h4 className="font-semibold text-xl mb-2">
-                      {article.authors.slug ? (
-                        <Link to={`/author/${article.authors.slug}`} className="hover:text-primary transition-colors">
-                          {article.authors.name}
-                        </Link>
-                      ) : (
-                        article.authors.name
-                      )}
-                    </h4>
-                    {article.authors.job_title && (
-                      <p className="text-base text-muted-foreground mb-3">
-                        {article.authors.job_title}
-                      </p>
-                    )}
-                    {article.authors.bio && (
-                      <p className="text-base text-muted-foreground leading-relaxed">
-                        {article.authors.bio}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              )}
             </footer>
 
             {/* Comments Section */}
             <Comments articleId={article.id} />
+
+            {/* Author Bio */}
+            {article.authors && (
+              <div className="bg-muted/50 rounded-lg p-8 flex flex-col md:flex-row items-center md:items-start gap-6 mt-8">
+                {article.authors.slug ? (
+                  <Link to={`/author/${article.authors.slug}`} className="flex-shrink-0">
+                    {article.authors.avatar_url ? (
+                      <img 
+                        src={article.authors.avatar_url} 
+                        alt={article.authors.name}
+                        className="w-32 h-32 rounded-full object-cover hover:opacity-80 transition-opacity ring-4 ring-background shadow-lg"
+                      />
+                    ) : (
+                      <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary to-secondary hover:opacity-80 transition-opacity ring-4 ring-background shadow-lg" />
+                    )}
+                  </Link>
+                ) : (
+                  article.authors.avatar_url ? (
+                    <img 
+                      src={article.authors.avatar_url} 
+                      alt={article.authors.name}
+                      className="w-32 h-32 rounded-full object-cover flex-shrink-0 ring-4 ring-background shadow-lg"
+                    />
+                  ) : (
+                    <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary to-secondary flex-shrink-0 ring-4 ring-background shadow-lg" />
+                  )
+                )}
+                <div className="flex-1 text-center md:text-left">
+                  <h4 className="font-semibold text-xl mb-2">
+                    {article.authors.slug ? (
+                      <Link to={`/author/${article.authors.slug}`} className="hover:text-primary transition-colors">
+                        {article.authors.name}
+                      </Link>
+                    ) : (
+                      article.authors.name
+                    )}
+                  </h4>
+                  {article.authors.job_title && (
+                    <p className="text-base text-muted-foreground mb-3">
+                      {article.authors.job_title}
+                    </p>
+                  )}
+                  {article.authors.bio && (
+                    <p className="text-base text-muted-foreground leading-relaxed">
+                      {article.authors.bio}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
           </article>
 
           {/* Related Articles */}
