@@ -186,9 +186,10 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
   };
 
   const handleOpenAuthorDialog = (author?: any) => {
+    console.log('Opening author dialog with:', author);
     if (author) {
       setIsEditingAuthor(true);
-      setAuthorForm({
+      const formData = {
         id: author.id,
         name: author.name,
         slug: author.slug,
@@ -199,7 +200,9 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
         twitter_handle: author.twitter_handle || "",
         linkedin_url: author.linkedin_url || "",
         website_url: author.website_url || ""
-      });
+      };
+      console.log('Author form data:', formData);
+      setAuthorForm(formData);
       setAvatarPreview(author.avatar_url || "");
     } else {
       setIsEditingAuthor(false);
