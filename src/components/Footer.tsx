@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import logo from "@/assets/aiinasia-logo.png";
 
 const Footer = () => {
   const [email, setEmail] = useState("");
@@ -50,11 +51,7 @@ const Footer = () => {
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
           <div>
-            <h3 className="font-serif text-xl font-bold mb-4">
-              <span className="text-primary">AI</span>
-              <span className="text-foreground">in</span>
-              <span className="text-secondary">ASIA</span>
-            </h3>
+            <img src={logo} alt="AI in Asia" className="h-16 mb-4" />
             <p className="text-sm text-muted-foreground mb-4">
               Your trusted source for AI news, insights and innovation across Asia.
             </p>
