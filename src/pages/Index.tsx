@@ -159,7 +159,7 @@ const Index = () => {
             <div className="flex items-center justify-between mb-8">
               <h2 className="headline text-3xl flex items-center gap-2">
                 <Users className="h-8 w-8 text-secondary" />
-                Digital Transformation
+                Featured Voices
               </h2>
               <Button variant="outline">All Contributors</Button>
             </div>
@@ -177,8 +177,8 @@ const Index = () => {
                     <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-secondary mx-auto mb-4" />
                   )}
                   <h3 className="font-semibold mb-1">{featuredAuthor.name}</h3>
-                  <p className="text-sm text-muted-foreground mb-2">{featuredAuthor.job_title}</p>
-                  <p className="text-xs text-muted-foreground">{featuredAuthor.article_count} articles</p>
+                  <p className="text-sm text-muted-foreground mb-2">Digital & AI Transformation</p>
+                  <p className="text-xs text-muted-foreground">{featuredAuthor.article_count || 0} articles</p>
                 </Link>
               )}
               {[
