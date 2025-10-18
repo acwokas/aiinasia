@@ -89,8 +89,13 @@ const Article = () => {
     if (typeof content === 'string') {
       // Process inline formatting FIRST (before splitting into blocks)
       let processed = content
+        // Remove empty bold markers (** ** or ** with only spaces)
+        .replace(/\*\*\s*\*\*/g, '')
+        // Convert actual bold text
         .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        // Convert italic text
         .replace(/\*(.+?)\*/g, '<em>$1</em>')
+        // Convert links
         .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" class="text-primary underline hover:no-underline">$1</a>');
       
       // Split into blocks by double line breaks
@@ -120,7 +125,7 @@ const Article = () => {
             .filter(line => line.trim().startsWith('- '))
             .map(line => `<li class="ml-6">${line.trim().substring(2)}</li>`)
             .join('\n');
-          return `<ul class="list-disc ml-6 my-6 space-y-3">${items}</ul>`;
+          return `<ul class="list-disc ml-6 my-6 space-y-1">${items}</ul>`;
         }
         
         // Default to paragraph
