@@ -11,6 +11,7 @@ import AuthorProfile from "./pages/AuthorProfile";
 import Search from "./pages/Search";
 import Auth from "./pages/Auth";
 import Admin from "./pages/Admin";
+import Articles from "./pages/Articles";
 import Editor from "./pages/Editor";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
@@ -48,6 +49,7 @@ const App = () => (
           <Route path="/search" element={<Search />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/admin/articles" element={<Articles />} />
           <Route path="/editor" element={<Editor />} />
           <Route path="/editor/:id" element={<Editor />} />
           <Route path="/about" element={<About />} />
