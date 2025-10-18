@@ -13,7 +13,7 @@ export const BusinessInAByteAd = () => {
       >
         <div className="absolute inset-0 flex flex-col items-center justify-between p-4 text-center">
           {/* Logo */}
-          <div className="bg-white rounded-lg p-2 w-full transition-all duration-300 group-hover:scale-105">
+          <div className="bg-white rounded-lg p-2 w-full max-w-[260px] transition-all duration-300 group-hover:scale-105">
             <img
               src={businessInAByteLogo}
               alt="Business in a Byte"
@@ -23,7 +23,7 @@ export const BusinessInAByteAd = () => {
           </div>
 
           {/* Content */}
-          <div className="flex-1 flex flex-col justify-center space-y-1.5 mt-2">
+          <div className="flex-1 flex flex-col justify-center space-y-2 mt-2">
             <div className="flex items-center justify-center gap-2">
               <Rocket className="w-4 h-4 text-white" />
               <p className="text-white font-bold text-base leading-tight">
@@ -37,7 +37,7 @@ export const BusinessInAByteAd = () => {
           </div>
 
           {/* CTA */}
-          <div className="w-full bg-black/90 text-white rounded-lg px-4 py-1.5 font-bold text-xs flex items-center justify-center gap-2 group-hover:bg-black transition-colors mt-2">
+          <div className="w-full bg-black/90 text-white rounded-lg px-4 py-2 font-bold text-xs flex items-center justify-center gap-2 group-hover:bg-black transition-colors mt-2 mb-1">
             Get Started Free
             <ExternalLink className="w-3 h-3" />
           </div>
