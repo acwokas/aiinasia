@@ -4,8 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import ArticleCard from "@/components/ArticleCard";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { TrendingUp, Users, Calendar, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -15,8 +15,48 @@ const Index = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
-  const { data: topStories, isLoading } = useQuery({
-    queryKey: ["homepage-articles"],
+  const { data: featuredArticle } = useQuery({
+    queryKey: ["featured-article"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("articles")
+        .select(`
+          *,
+          authors (name, slug),
+          categories:primary_category_id (name)
+        `)
+        .eq("status", "published")
+        .eq("featured_on_homepage", true)
+        .order("published_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: trendingArticles } = useQuery({
+    queryKey: ["trending-articles"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("articles")
+        .select(`
+          *,
+          authors (name, slug),
+          categories:primary_category_id (name)
+        `)
+        .eq("status", "published")
+        .order("view_count", { ascending: false })
+        .limit(4);
+      
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
+  const { data: latestArticles, isLoading } = useQuery({
+    queryKey: ["latest-articles"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("articles")
@@ -27,7 +67,7 @@ const Index = () => {
         `)
         .eq("status", "published")
         .order("published_at", { ascending: false })
-        .limit(6);
+        .limit(8);
       
       if (error) throw error;
       return data || [];
@@ -89,28 +129,144 @@ const Index = () => {
       <Header />
       
       <main className="flex-1">
-        {/* Hero Section */}
+        {/* Hero Grid Section */}
         <section className="container mx-auto px-4 py-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {topStories?.map((article: any) => (
-              <ArticleCard
-                key={article.id}
-                title={article.title}
-                excerpt={article.excerpt || ""}
-                category={article.categories?.name || ""}
-                author={article.authors?.name || ""}
-                readTime={`${article.reading_time_minutes || 5} min read`}
-                image={article.featured_image_url || ""}
-                slug={article.slug}
-                featured={article.featured_on_homepage}
-              />
-            ))}
-          </div>
-          {(!topStories || topStories.length === 0) && (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">No articles published yet.</p>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* Trending Section - Left */}
+            <div className="lg:col-span-3 space-y-6">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="bg-primary text-primary-foreground px-3 py-1 text-xs font-bold uppercase">
+                  Trending
+                </div>
+              </div>
+              {trendingArticles?.slice(0, 3).map((article: any, index: number) => (
+                <Link 
+                  key={article.id}
+                  to={`/article/${article.slug}`}
+                  className="block group"
+                >
+                  <div className="relative aspect-video overflow-hidden rounded-lg mb-3">
+                    <img 
+                      src={article.featured_image_url || "/placeholder.svg"} 
+                      alt={article.title}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                    <Badge className="absolute top-3 left-3 bg-primary text-primary-foreground text-xs">
+                      {article.categories?.name}
+                    </Badge>
+                    {index === 0 && (
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+                        <p className="text-white text-xs mb-1">{article.categories?.name} | {article.reading_time_minutes || 5} min read</p>
+                        <h3 className="text-white font-bold text-lg line-clamp-2 group-hover:text-primary transition-colors">
+                          {article.title}
+                        </h3>
+                      </div>
+                    )}
+                  </div>
+                  {index > 0 && (
+                    <>
+                      <p className="text-xs text-muted-foreground mb-1">
+                        {article.categories?.name} | {article.reading_time_minutes || 5} min read
+                      </p>
+                      <h3 className="font-bold text-sm line-clamp-2 group-hover:text-primary transition-colors">
+                        {article.title}
+                      </h3>
+                    </>
+                  )}
+                </Link>
+              ))}
             </div>
-          )}
+
+            {/* Featured Article - Center */}
+            <div className="lg:col-span-6">
+              {featuredArticle ? (
+                <Link to={`/article/${featuredArticle.slug}`} className="block group h-full">
+                  <div className="relative h-full min-h-[500px] overflow-hidden rounded-lg">
+                    <img 
+                      src={featuredArticle.featured_image_url || "/placeholder.svg"} 
+                      alt={featuredArticle.title}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
+                    <div className="absolute bottom-0 left-0 right-0 p-8">
+                      <Badge className="bg-primary text-primary-foreground mb-3">
+                        {featuredArticle.categories?.name}
+                      </Badge>
+                      <p className="text-white/80 text-sm mb-2">
+                        {featuredArticle.reading_time_minutes || 5} min ago
+                      </p>
+                      <h2 className="text-white font-bold text-3xl md:text-4xl mb-4 group-hover:text-primary transition-colors">
+                        {featuredArticle.title}
+                      </h2>
+                      <p className="text-white/90 text-base line-clamp-2 mb-4">
+                        {featuredArticle.excerpt}
+                      </p>
+                    </div>
+                  </div>
+                </Link>
+              ) : (
+                trendingArticles?.[0] && (
+                  <Link to={`/article/${trendingArticles[0].slug}`} className="block group h-full">
+                    <div className="relative h-full min-h-[500px] overflow-hidden rounded-lg">
+                      <img 
+                        src={trendingArticles[0].featured_image_url || "/placeholder.svg"} 
+                        alt={trendingArticles[0].title}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
+                      <div className="absolute bottom-0 left-0 right-0 p-8">
+                        <Badge className="bg-primary text-primary-foreground mb-3">
+                          {trendingArticles[0].categories?.name}
+                        </Badge>
+                        <p className="text-white/80 text-sm mb-2">
+                          {trendingArticles[0].reading_time_minutes || 5} min ago
+                        </p>
+                        <h2 className="text-white font-bold text-3xl md:text-4xl mb-4 group-hover:text-primary transition-colors">
+                          {trendingArticles[0].title}
+                        </h2>
+                        <p className="text-white/90 text-base line-clamp-2 mb-4">
+                          {trendingArticles[0].excerpt}
+                        </p>
+                      </div>
+                    </div>
+                  </Link>
+                )
+              )}
+            </div>
+
+            {/* Latest Articles - Right */}
+            <div className="lg:col-span-3 space-y-4">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="bg-secondary text-secondary-foreground px-3 py-1 text-xs font-bold uppercase">
+                  Latest
+                </div>
+                <span className="text-xs text-muted-foreground">Videos</span>
+              </div>
+              {latestArticles?.map((article: any) => (
+                <Link 
+                  key={article.id}
+                  to={`/article/${article.slug}`}
+                  className="flex gap-3 group"
+                >
+                  <div className="relative w-20 h-20 flex-shrink-0 overflow-hidden rounded">
+                    <img 
+                      src={article.featured_image_url || "/placeholder.svg"} 
+                      alt={article.title}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs text-muted-foreground uppercase mb-1">
+                      {article.categories?.name} | {article.reading_time_minutes || 5} days ago
+                    </p>
+                    <h3 className="font-bold text-sm line-clamp-2 group-hover:text-primary transition-colors">
+                      {article.title}
+                    </h3>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
         </section>
 
         {/* Ad Banner */}
