@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Bold, Italic, Heading1, Heading2, Heading3, List, Quote, Link } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface RichTextEditorProps {
@@ -42,44 +44,56 @@ const RichTextEditor = ({
     return `<p class="mb-4">${formatted}</p>`.replace(/<p class="mb-4"><\/p>/g, '');
   };
 
-  const saveCursorPosition = () => {
+  const insertFormatting = (before: string, after: string = '') => {
+    if (!editorRef.current) return;
+    
+    editorRef.current.focus();
     const selection = window.getSelection();
-    if (!selection || !editorRef.current) return null;
+    if (!selection || selection.rangeCount === 0) return;
     
     const range = selection.getRangeAt(0);
-    const preCaretRange = range.cloneRange();
-    preCaretRange.selectNodeContents(editorRef.current);
-    preCaretRange.setEnd(range.endContainer, range.endOffset);
-    return preCaretRange.toString().length;
+    const selectedText = range.toString();
+    
+    const formattedText = before + selectedText + after;
+    range.deleteContents();
+    range.insertNode(document.createTextNode(formattedText));
+    
+    // Move cursor after inserted text
+    range.collapse(false);
+    selection.removeAllRanges();
+    selection.addRange(range);
+    
+    // Trigger input event to update the content
+    editorRef.current.dispatchEvent(new Event('input', { bubbles: true }));
   };
 
-  const restoreCursorPosition = (position: number) => {
-    if (!editorRef.current) return;
-
-    const selection = window.getSelection();
-    const range = document.createRange();
-    
-    let currentPos = 0;
-    const walk = (node: Node): boolean => {
-      if (node.nodeType === Node.TEXT_NODE) {
-        const textLength = node.textContent?.length || 0;
-        if (currentPos + textLength >= position) {
-          range.setStart(node, position - currentPos);
-          range.collapse(true);
-          selection?.removeAllRanges();
-          selection?.addRange(range);
-          return true;
-        }
-        currentPos += textLength;
-      } else {
-        for (let i = 0; i < node.childNodes.length; i++) {
-          if (walk(node.childNodes[i])) return true;
-        }
-      }
-      return false;
-    };
-
-    walk(editorRef.current);
+  const handleFormat = (format: string) => {
+    switch (format) {
+      case 'bold':
+        insertFormatting('**', '**');
+        break;
+      case 'italic':
+        insertFormatting('*', '*');
+        break;
+      case 'h1':
+        insertFormatting('# ', '\n');
+        break;
+      case 'h2':
+        insertFormatting('## ', '\n');
+        break;
+      case 'h3':
+        insertFormatting('### ', '\n');
+        break;
+      case 'list':
+        insertFormatting('- ', '\n');
+        break;
+      case 'quote':
+        insertFormatting('> ', '\n');
+        break;
+      case 'link':
+        insertFormatting('[', '](url)');
+        break;
+    }
   };
 
   const stripHtmlToMarkdown = (html: string): string => {
@@ -113,9 +127,10 @@ const RichTextEditor = ({
     if (!editorRef.current || isUpdatingFromProps.current) return;
     
     const currentMarkdown = stripHtmlToMarkdown(editorRef.current.innerHTML);
-    if (currentMarkdown !== value) {
+    if (currentMarkdown !== value && value !== '') {
       isUpdatingFromProps.current = true;
       editorRef.current.innerHTML = formatContent(value);
+      setIsEmpty(false);
       isUpdatingFromProps.current = false;
     }
   }, [value]);
@@ -126,18 +141,19 @@ const RichTextEditor = ({
     const text = editorRef.current.innerText || '';
     setIsEmpty(text.trim().length === 0);
     
-    const cursorPos = saveCursorPosition();
-    const markdown = stripHtmlToMarkdown(editorRef.current.innerHTML);
+    const html = editorRef.current.innerHTML;
+    const markdown = stripHtmlToMarkdown(html);
+    onChange(markdown);
+  };
+
+  const handleBlur = () => {
+    if (!editorRef.current || isUpdatingFromProps.current) return;
     
+    // Reformat on blur to apply all formatting
+    const markdown = stripHtmlToMarkdown(editorRef.current.innerHTML);
     isUpdatingFromProps.current = true;
     editorRef.current.innerHTML = formatContent(markdown);
     isUpdatingFromProps.current = false;
-    
-    if (cursorPos !== null) {
-      restoreCursorPosition(cursorPos);
-    }
-    
-    onChange(markdown);
   };
 
   const handleSelection = () => {
@@ -158,9 +174,87 @@ const RichTextEditor = ({
   return (
     <div className={cn("space-y-2", className)}>
       {label && <Label>{label}</Label>}
+      
+      <div className="flex items-center gap-1 p-2 border border-input rounded-t-md bg-muted/30">
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => handleFormat('bold')}
+          title="Bold (** **)"
+        >
+          <Bold className="h-4 w-4" />
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => handleFormat('italic')}
+          title="Italic (* *)"
+        >
+          <Italic className="h-4 w-4" />
+        </Button>
+        <div className="w-px h-6 bg-border mx-1" />
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => handleFormat('h1')}
+          title="Heading 1 (#)"
+        >
+          <Heading1 className="h-4 w-4" />
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => handleFormat('h2')}
+          title="Heading 2 (##)"
+        >
+          <Heading2 className="h-4 w-4" />
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => handleFormat('h3')}
+          title="Heading 3 (###)"
+        >
+          <Heading3 className="h-4 w-4" />
+        </Button>
+        <div className="w-px h-6 bg-border mx-1" />
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => handleFormat('list')}
+          title="List (- )"
+        >
+          <List className="h-4 w-4" />
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => handleFormat('quote')}
+          title="Quote (> )"
+        >
+          <Quote className="h-4 w-4" />
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => handleFormat('link')}
+          title="Link ([text](url))"
+        >
+          <Link className="h-4 w-4" />
+        </Button>
+      </div>
+
       <div className="relative">
         {isEmpty && (
-          <div className="absolute top-3 left-4 text-muted-foreground pointer-events-none">
+          <div className="absolute top-3 left-4 text-muted-foreground pointer-events-none z-10">
             {placeholder}
           </div>
         )}
@@ -168,10 +262,11 @@ const RichTextEditor = ({
           ref={editorRef}
           contentEditable
           onInput={handleInput}
+          onBlur={handleBlur}
           onSelect={handleSelection}
           onPaste={handlePaste}
           className={cn(
-            "min-h-[400px] w-full rounded-md border border-input bg-background px-4 py-3",
+            "min-h-[400px] w-full rounded-b-md border border-t-0 border-input bg-background px-4 py-3",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
             "prose prose-slate max-w-none"
           )}
