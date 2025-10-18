@@ -85,131 +85,40 @@ const Article = () => {
   const renderContent = (content: any) => {
     if (!content) return null;
     
-    // If content is a string (markdown), convert it to HTML
+    // If content is a string (markdown), convert it to HTML with proper parsing
     if (typeof content === 'string') {
-      const lines = content.split('\n');
-      const blocks: string[] = [];
-      let currentParagraph = '';
-      let inList = false;
-      let listItems: string[] = [];
-      let inBlockquote = false;
-      let blockquoteLines: string[] = [];
-      
-      const finishParagraph = () => {
-        if (currentParagraph.trim()) {
-          const processed = currentParagraph.trim()
-            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-            .replace(/\*(.+?)\*/g, '<em>$1</em>')
-            .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" class="text-primary underline hover:no-underline">$1</a>');
-          blocks.push(`<p class="leading-relaxed mb-6">${processed}</p>`);
-          currentParagraph = '';
-        }
-      };
-      
-      const finishList = () => {
-        if (listItems.length > 0) {
-          blocks.push(`<ul class="list-disc ml-6 my-6 space-y-2">${listItems.join('')}</ul>`);
-          listItems = [];
-          inList = false;
-        }
-      };
-      
-      const finishBlockquote = () => {
-        if (blockquoteLines.length > 0) {
-          const quote = blockquoteLines.join(' ')
-            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-            .replace(/\*(.+?)\*/g, '<em>$1</em>');
-          blocks.push(`<blockquote class="border-l-4 border-primary pl-6 py-2 my-8 italic text-xl">${quote}</blockquote>`);
-          blockquoteLines = [];
-          inBlockquote = false;
-        }
-      };
-      
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
-        const trimmed = line.trim();
-        
-        // Empty line - finish current block and add spacing
-        if (!trimmed) {
-          finishParagraph();
-          finishList();
-          finishBlockquote();
-          continue;
-        }
-        
-        // H3 Heading (check longest first)
-        if (trimmed.startsWith('### ')) {
-          finishParagraph();
-          finishList();
-          finishBlockquote();
-          blocks.push(`<h3 class="text-2xl font-semibold mt-8 mb-4">${trimmed.slice(4)}</h3>`);
-          continue;
-        }
-        
-        // H2 Heading
-        if (trimmed.startsWith('## ')) {
-          finishParagraph();
-          finishList();
-          finishBlockquote();
-          blocks.push(`<h2 class="headline text-3xl mt-8 mb-4">${trimmed.slice(3)}</h2>`);
-          continue;
-        }
-        
-        // H1 Heading
-        if (trimmed.startsWith('# ')) {
-          finishParagraph();
-          finishList();
-          finishBlockquote();
-          blocks.push(`<h1 class="headline text-4xl mt-8 mb-4">${trimmed.slice(2)}</h1>`);
-          continue;
-        }
-        
-        // Blockquote
-        if (trimmed.startsWith('> ')) {
-          finishParagraph();
-          finishList();
-          inBlockquote = true;
-          blockquoteLines.push(trimmed.slice(2).trim());
-          continue;
-        }
-        
-        // Continue blockquote if we're in one
-        if (inBlockquote && !trimmed.startsWith('- ') && !trimmed.startsWith('#')) {
-          blockquoteLines.push(trimmed);
-          continue;
-        }
-        
-        // List item
-        if (trimmed.startsWith('- ')) {
-          finishParagraph();
-          finishBlockquote();
-          if (!inList) {
-            inList = true;
+      const html = content
+        // Process headings - MUST check longest patterns first
+        .replace(/^### (.+)$/gm, '<h3 class="text-2xl font-semibold mt-8 mb-4">$1</h3>')
+        .replace(/^## (.+)$/gm, '<h2 class="text-3xl font-bold mt-8 mb-4">$1</h2>')
+        .replace(/^# (.+)$/gm, '<h1 class="text-4xl font-bold mt-8 mb-4">$1</h1>')
+        // Process blockquotes - handle lines starting with >
+        .replace(/^> (.+)$/gm, '<blockquote class="border-l-4 border-primary pl-6 py-2 my-8 italic text-xl">$1</blockquote>')
+        // Process lists
+        .replace(/^- (.+)$/gm, '<li class="ml-6">$1</li>')
+        // Wrap consecutive list items in ul
+        .replace(/(<li class="ml-6">.+<\/li>\n?)+/g, (match) => `<ul class="list-disc ml-6 my-6 space-y-2">${match}</ul>`)
+        // Process inline formatting
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.+?)\*/g, '<em>$1</em>')
+        .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" class="text-primary underline hover:no-underline">$1</a>')
+        // Process paragraphs - split by double line breaks
+        .split('\n\n')
+        .map(block => {
+          // Skip if already formatted (heading, blockquote, list)
+          if (block.match(/^<(h1|h2|h3|blockquote|ul)/)) {
+            return block;
           }
-          const text = trimmed.slice(2).trim()
-            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-            .replace(/\*(.+?)\*/g, '<em>$1</em>')
-            .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" class="text-primary underline hover:no-underline">$1</a>');
-          listItems.push(`<li>${text}</li>`);
-          continue;
-        }
-        
-        // Regular text - add to current paragraph
-        finishList();
-        finishBlockquote();
-        if (currentParagraph) {
-          currentParagraph += ' ' + trimmed;
-        } else {
-          currentParagraph = trimmed;
-        }
-      }
+          // Wrap in paragraph if it's plain text
+          const trimmed = block.trim();
+          if (trimmed && !trimmed.startsWith('<')) {
+            return `<p class="leading-relaxed mb-6">${trimmed.replace(/\n/g, ' ')}</p>`;
+          }
+          return block;
+        })
+        .join('\n');
       
-      // Finish any remaining blocks
-      finishParagraph();
-      finishList();
-      finishBlockquote();
-      
-      return <div dangerouslySetInnerHTML={{ __html: blocks.join('') }} />;
+      return <div dangerouslySetInnerHTML={{ __html: html }} />;
     }
     
     // Otherwise try to parse as JSON blocks (legacy format)
