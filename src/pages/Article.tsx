@@ -22,7 +22,7 @@ const Article = () => {
         .from("articles")
         .select(`
           *,
-          authors (name, slug, bio, avatar_url),
+          authors (name, slug, bio, avatar_url, job_title),
           categories:primary_category_id (name, slug)
         `)
         .eq("slug", cleanSlug)
@@ -350,6 +350,11 @@ const Article = () => {
                         article.authors.name
                       )}
                     </h4>
+                    {article.authors.job_title && (
+                      <p className="text-sm text-muted-foreground mb-2">
+                        {article.authors.job_title}
+                      </p>
+                    )}
                     {article.authors.bio && (
                       <p className="text-sm text-muted-foreground">
                         {article.authors.bio}

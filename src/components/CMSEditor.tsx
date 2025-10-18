@@ -46,6 +46,7 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
     id: "",
     name: "",
     slug: "",
+    job_title: "",
     bio: "",
     email: "",
     avatar_url: "",
@@ -191,6 +192,7 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
         id: author.id,
         name: author.name,
         slug: author.slug,
+        job_title: author.job_title || "",
         bio: author.bio || "",
         email: author.email || "",
         avatar_url: author.avatar_url || "",
@@ -205,6 +207,7 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
         id: "",
         name: "",
         slug: "",
+        job_title: "",
         bio: "",
         email: "",
         avatar_url: "",
@@ -256,6 +259,7 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
       const authorData = {
         name: authorForm.name,
         slug: authorForm.slug || generateSlug(authorForm.name),
+        job_title: authorForm.job_title || null,
         bio: authorForm.bio || null,
         email: authorForm.email || null,
         avatar_url: avatarUrl || null,
@@ -680,6 +684,15 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
                 value={authorForm.slug}
                 onChange={(e) => setAuthorForm({ ...authorForm, slug: e.target.value })}
                 placeholder="author-slug (auto-generated if empty)"
+              />
+            </div>
+            <div>
+              <Label htmlFor="author-job-title">Job Title</Label>
+              <Input
+                id="author-job-title"
+                value={authorForm.job_title}
+                onChange={(e) => setAuthorForm({ ...authorForm, job_title: e.target.value })}
+                placeholder="Chief Editor, Senior Writer, etc."
               />
             </div>
             <div>

@@ -220,6 +220,7 @@ export type Database = {
           created_at: string
           email: string | null
           id: string
+          job_title: string | null
           linkedin_url: string | null
           name: string
           slug: string
@@ -235,6 +236,7 @@ export type Database = {
           created_at?: string
           email?: string | null
           id?: string
+          job_title?: string | null
           linkedin_url?: string | null
           name: string
           slug: string
@@ -250,6 +252,7 @@ export type Database = {
           created_at?: string
           email?: string | null
           id?: string
+          job_title?: string | null
           linkedin_url?: string | null
           name?: string
           slug?: string

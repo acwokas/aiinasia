@@ -81,6 +81,11 @@ const AuthorProfile = () => {
                 <h1 className="headline text-4xl md:text-5xl mb-3">
                   {author?.name}
                 </h1>
+                {author?.job_title && (
+                  <p className="text-xl text-muted-foreground mb-4">
+                    {author.job_title}
+                  </p>
+                )}
                 {author?.bio && (
                   <p className="text-lg text-muted-foreground mb-4 max-w-2xl">
                     {author.bio}
