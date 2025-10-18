@@ -1,5 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -13,6 +14,83 @@ serve(async (req) => {
 
   try {
     const { messages } = await req.json();
+    const authHeader = req.headers.get('Authorization');
+    
+    // Initialize Supabase client
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseKey, {
+      global: {
+        headers: authHeader ? { Authorization: authHeader } : {},
+      },
+    });
+
+    // Get user session
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    // Query limit logic
+    let queryLimit = 3; // Default for non-logged in users
+    
+    if (user) {
+      // Get user stats to determine level
+      const { data: stats } = await supabase
+        .from('user_stats')
+        .select('points, level')
+        .eq('user_id', user.id)
+        .single();
+      
+      if (stats) {
+        const points = stats.points || 0;
+        if (points >= 1000) {
+          queryLimit = 999999; // Unlimited for Thought Leaders
+        } else if (points >= 500) {
+          queryLimit = 50; // Expert
+        } else if (points >= 100) {
+          queryLimit = 25; // Enthusiast
+        } else {
+          queryLimit = 10; // Explorer
+        }
+      }
+    }
+
+    // Check today's query count
+    const today = new Date().toISOString().split('T')[0];
+    const { data: queryData } = await supabase
+      .from('scout_queries')
+      .select('query_count')
+      .eq('query_date', today)
+      .eq('user_id', user?.id || null)
+      .maybeSingle();
+
+    const currentCount = queryData?.query_count || 0;
+
+    if (currentCount >= queryLimit) {
+      return new Response(
+        JSON.stringify({ 
+          error: user 
+            ? `Daily query limit reached (${queryLimit} queries). Read more articles to unlock more queries!`
+            : 'Daily query limit reached (3 queries). Sign in for more queries!' 
+        }),
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Update query count
+    if (queryData) {
+      await supabase
+        .from('scout_queries')
+        .update({ query_count: currentCount + 1 })
+        .eq('query_date', today)
+        .eq('user_id', user?.id || null);
+    } else {
+      await supabase
+        .from('scout_queries')
+        .insert({ 
+          user_id: user?.id || null, 
+          query_date: today, 
+          query_count: 1 
+        });
+    }
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     
     if (!LOVABLE_API_KEY) {

@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MessageCircle, X, Send, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Message {
   role: "user" | "assistant";
@@ -12,7 +14,9 @@ interface Message {
 
 const ScoutChatbot = () => {
   const location = useLocation();
+  const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
+  const [queriesRemaining, setQueriesRemaining] = useState<number | null>(null);
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
@@ -23,6 +27,49 @@ const ScoutChatbot = () => {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchQueryLimit();
+    }
+  }, [isOpen, user]);
+
+  const fetchQueryLimit = async () => {
+    let queryLimit = 3;
+    
+    if (user) {
+      const { data: stats } = await supabase
+        .from('user_stats')
+        .select('points')
+        .eq('user_id', user.id)
+        .single();
+      
+      if (stats) {
+        const points = stats.points || 0;
+        if (points >= 1000) {
+          setQueriesRemaining(null); // Unlimited
+          return;
+        } else if (points >= 500) {
+          queryLimit = 50;
+        } else if (points >= 100) {
+          queryLimit = 25;
+        } else {
+          queryLimit = 10;
+        }
+      }
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+    const { data: queryData } = await supabase
+      .from('scout_queries')
+      .select('query_count')
+      .eq('query_date', today)
+      .eq('user_id', user?.id || null)
+      .maybeSingle();
+
+    const currentCount = queryData?.query_count || 0;
+    setQueriesRemaining(queryLimit - currentCount);
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -42,13 +89,15 @@ const ScoutChatbot = () => {
     setIsLoading(true);
 
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/scout-chat`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            Authorization: `Bearer ${session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
           body: JSON.stringify({ messages: newMessages }),
         }
@@ -108,6 +157,7 @@ const ScoutChatbot = () => {
       }
 
       setIsLoading(false);
+      fetchQueryLimit(); // Refresh query count after successful message
     } catch (error) {
       console.error("Chat error:", error);
       toast({
@@ -185,10 +235,22 @@ const ScoutChatbot = () => {
 
       {/* Input */}
       <div className="p-4 border-t border-border">
+        {queriesRemaining !== null && queriesRemaining <= 5 && (
+          <p className="text-xs text-muted-foreground mb-2">
+            {queriesRemaining} {queriesRemaining === 1 ? 'query' : 'queries'} remaining today
+            {!user && ' · Sign in for more'}
+          </p>
+        )}
+        {queriesRemaining === null && user && (
+          <p className="text-xs text-primary mb-2">
+            ⚡ Unlimited queries (Thought Leader)
+          </p>
+        )}
         <form
           onSubmit={(e) => {
             e.preventDefault();
             sendMessage();
+            fetchQueryLimit();
           }}
           className="flex gap-2"
         >

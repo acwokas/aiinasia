@@ -42,8 +42,33 @@ const Article = () => {
   useEffect(() => {
     if (user && article?.id) {
       checkBookmark();
+      trackReadingHistory();
     }
   }, [user, article?.id]);
+
+  const trackReadingHistory = async () => {
+    if (!user || !article?.id) return;
+
+    // Check if already tracked today
+    const today = new Date().toISOString().split('T')[0];
+    const { data: existing } = await supabase
+      .from('reading_history')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('article_id', article.id)
+      .gte('read_at', `${today}T00:00:00`)
+      .maybeSingle();
+
+    if (!existing) {
+      await supabase
+        .from('reading_history')
+        .insert({
+          user_id: user.id,
+          article_id: article.id,
+          completed: true
+        });
+    }
+  };
 
   const checkBookmark = async () => {
     const { data } = await supabase
@@ -94,6 +119,27 @@ const Article = () => {
     try {
       if (navigator.share) {
         await navigator.share(shareData);
+        
+        // Track share if user is logged in
+        if (user) {
+          const { data: stats } = await supabase
+            .from('user_stats')
+            .select('shares_made')
+            .eq('user_id', user.id)
+            .single();
+          
+          if (stats) {
+            await supabase
+              .from('user_stats')
+              .update({ shares_made: (stats.shares_made || 0) + 1 })
+              .eq('user_id', user.id);
+            
+            await supabase.rpc('award_points', { 
+              _user_id: user.id, 
+              _points: 5 
+            });
+          }
+        }
       } else {
         await navigator.clipboard.writeText(window.location.href);
         toast({

@@ -784,12 +784,20 @@ export type Database = {
         Args: { _points: number; _user_id: string }
         Returns: undefined
       }
+      check_and_award_achievements: {
+        Args: { _user_id: string }
+        Returns: undefined
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
+      }
+      update_streak: {
+        Args: { _user_id: string }
+        Returns: undefined
       }
     }
     Enums: {
