@@ -9,7 +9,7 @@ import StockTicker from "@/components/StockTicker";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { TrendingUp, Users, Calendar, Loader2 } from "lucide-react";
+import { TrendingUp, Users, Calendar, Loader2, ExternalLink } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { PromptAndGoBanner } from "@/components/PromptAndGoBanner";
 import { BusinessInAByteAd } from "@/components/BusinessInAByteAd";
@@ -337,20 +337,18 @@ const Index = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
-              { name: "PromptCraft AI", desc: "Advanced prompt engineering platform", category: "Productivity" },
-              { name: "DataViz Pro", desc: "AI-powered data visualization suite", category: "Analytics" },
-              { name: "CodeAssist", desc: "Intelligent code completion for developers", category: "Development" },
+              { name: "prompt.withthepowerof.ai", desc: "Advanced prompt engineering platform", url: "https://www.promptandgo.ai" },
+              { name: "startup.withthepowerof.ai", desc: "AI prompts and templates to supercharge your business", url: "https://www.businessinabyte.com" },
+              { name: "shop.withthepowerof.ai", desc: "AI-curated deals from around the web", url: "https://www.myofferclub.com" },
             ].map((tool, i) => (
               <div key={i} className="article-card p-6">
-                <div className="flex items-start justify-between mb-3">
-                  <h3 className="font-semibold text-lg">{tool.name}</h3>
-                  <span className="category-badge bg-secondary text-secondary-foreground">
-                    {tool.category}
-                  </span>
-                </div>
+                <h3 className="font-semibold text-lg mb-3">{tool.name}</h3>
                 <p className="text-sm text-muted-foreground mb-4">{tool.desc}</p>
-                <Button variant="outline" size="sm" className="w-full">
-                  Learn More
+                <Button variant="outline" size="sm" className="w-full" asChild>
+                  <a href={tool.url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2">
+                    Learn More
+                    <ExternalLink className="w-4 h-4" />
+                  </a>
                 </Button>
               </div>
             ))}
