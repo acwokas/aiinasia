@@ -213,7 +213,7 @@ const Index = () => {
                   Trending
                 </div>
               </div>
-              {trendingArticles?.slice(0, 3).filter((article: any) => article.slug).map((article: any, index: number) => (
+              {trendingArticles?.slice(0, 4).filter((article: any) => article.slug).map((article: any, index: number) => (
                 <Link 
                   key={article.id}
                   to={`/article/${article.slug}`}
