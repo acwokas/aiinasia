@@ -175,7 +175,7 @@ const Index = () => {
       <main className="flex-1">
         {/* Hero Grid Section */}
         <section className="container mx-auto px-4 py-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             {/* Trending Section - Left */}
             <div className="lg:col-span-3 space-y-6">
               <div className="flex items-center gap-2 mb-4">
@@ -279,10 +279,10 @@ const Index = () => {
             </div>
 
             {/* Latest Articles - Right */}
-            <div className="lg:col-span-3 space-y-6">
+            <div className="lg:col-span-3 space-y-4">
               {/* Advertisement Slot */}
-              <div className="bg-muted/30 rounded-lg p-4 flex flex-col items-center">
-                <p className="text-xs text-muted-foreground mb-3">Advertisement</p>
+              <div className="mb-6">
+                <p className="text-xs text-muted-foreground text-center mb-2">Advertisement</p>
                 <BusinessInAByteAd />
               </div>
 
