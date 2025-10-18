@@ -42,6 +42,7 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
   const [featuredOnHomepage, setFeaturedOnHomepage] = useState(initialData?.featured_on_homepage || false);
   const [sticky, setSticky] = useState(initialData?.sticky || false);
   const [authorId, setAuthorId] = useState(initialData?.author_id || "");
+  const [primaryCategoryId, setPrimaryCategoryId] = useState(initialData?.primary_category_id || "");
   const [scheduledFor, setScheduledFor] = useState<Date | undefined>(
     initialData?.scheduled_for ? new Date(initialData.scheduled_for) : undefined
   );
@@ -80,6 +81,20 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('authors')
+        .select('*')
+        .order('name');
+      
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  // Fetch categories
+  const { data: categories } = useQuery({
+    queryKey: ['categories'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('categories')
         .select('*')
         .order('name');
       
@@ -351,6 +366,7 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
       featured_on_homepage: featuredOnHomepage,
       sticky,
       author_id: authorId || null,
+      primary_category_id: primaryCategoryId || null,
       scheduled_for: scheduledDateTime,
     };
     onSave?.(data);
@@ -691,6 +707,25 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
                     )}
                   </div>
                 </div>
+              </div>
+
+              <div>
+                <Label htmlFor="primary-category">Primary Category</Label>
+                <Select value={primaryCategoryId} onValueChange={setPrimaryCategoryId}>
+                  <SelectTrigger id="primary-category">
+                    <SelectValue placeholder="Select category..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories?.map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Main category for this article (used for related articles)
+                </p>
               </div>
 
               <div>
