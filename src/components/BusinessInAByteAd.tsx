@@ -8,7 +8,7 @@ export const BusinessInAByteAd = () => {
         href="https://www.businessinabyte.com"
         target="_blank"
         rel="noopener noreferrer sponsored"
-        className="block relative group overflow-hidden rounded-lg shadow-md hover:shadow-lg transition-all duration-300 h-full bg-gradient-to-br from-teal-500 via-cyan-500 to-blue-500"
+        className="block relative group overflow-hidden rounded-lg shadow-md hover:shadow-lg transition-all duration-300 h-full bg-gradient-to-br from-teal-500 via-cyan-500 to-blue-500 border-0"
         aria-label="Visit Business in a Byte - Launch Your Startup in 7 Days"
       >
         <div className="absolute inset-0 flex flex-col items-center justify-between p-5 text-center">
@@ -37,7 +37,7 @@ export const BusinessInAByteAd = () => {
           </div>
 
           {/* CTA */}
-          <div className="w-full bg-black text-white rounded-md px-4 py-2 font-bold text-xs flex items-center justify-center gap-2 group-hover:bg-gray-900 transition-colors mt-3">
+          <div className="w-full bg-black/90 text-white rounded-lg px-4 py-2 font-bold text-xs flex items-center justify-center gap-2 group-hover:bg-black transition-colors mt-3">
             Get Started Free
             <ExternalLink className="w-3 h-3" />
           </div>
