@@ -176,8 +176,16 @@ const Admin = () => {
       
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="headline text-4xl mb-2">Admin Dashboard</h1>
-          <p className="text-muted-foreground">Welcome back, {user?.email}</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="headline text-4xl mb-2">Admin Dashboard</h1>
+              <p className="text-muted-foreground">Welcome back, {user?.email}</p>
+            </div>
+            <Button onClick={() => navigate("/editor")} size="lg">
+              <FileText className="h-4 w-4 mr-2" />
+              Create New Article
+            </Button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
@@ -265,7 +273,13 @@ const Admin = () => {
                           by {article.authors?.name || "Unknown"} • {article.status}
                         </p>
                       </div>
-                      <Button variant="outline" size="sm">Edit</Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => navigate(`/editor?id=${article.id}`)}
+                      >
+                        Edit
+                      </Button>
                     </div>
                   ))}
                 </div>
