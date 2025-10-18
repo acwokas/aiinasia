@@ -87,7 +87,14 @@ const Article = () => {
     
     // If content is a string (markdown), convert it to HTML with proper parsing
     if (typeof content === 'string') {
-      const html = content
+      // First, normalize the content by adding line breaks before markdown elements if missing
+      let normalized = content
+        // Add line breaks before headings if they appear mid-line
+        .replace(/([^\n])(\n?)(#{1,3} )/g, '$1\n\n$3')
+        // Add line breaks before blockquotes if they appear mid-line
+        .replace(/([^\n])(\n?)(> )/g, '$1\n\n$3');
+      
+      const html = normalized
         // Process headings - MUST check longest patterns first
         .replace(/^### (.+)$/gm, '<h3 class="text-2xl font-semibold mt-8 mb-4">$1</h3>')
         .replace(/^## (.+)$/gm, '<h2 class="text-3xl font-bold mt-8 mb-4">$1</h2>')
