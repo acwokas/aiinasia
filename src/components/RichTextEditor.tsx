@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
@@ -21,6 +21,7 @@ const RichTextEditor = ({
 }: RichTextEditorProps) => {
   const editorRef = useRef<HTMLDivElement>(null);
   const isUpdatingFromProps = useRef(false);
+  const [isEmpty, setIsEmpty] = useState(!value);
 
   const formatContent = (text: string) => {
     if (!text) return '';
@@ -39,6 +40,46 @@ const RichTextEditor = ({
       .replace(/\n/g, '<br/>');
     
     return `<p class="mb-4">${formatted}</p>`.replace(/<p class="mb-4"><\/p>/g, '');
+  };
+
+  const saveCursorPosition = () => {
+    const selection = window.getSelection();
+    if (!selection || !editorRef.current) return null;
+    
+    const range = selection.getRangeAt(0);
+    const preCaretRange = range.cloneRange();
+    preCaretRange.selectNodeContents(editorRef.current);
+    preCaretRange.setEnd(range.endContainer, range.endOffset);
+    return preCaretRange.toString().length;
+  };
+
+  const restoreCursorPosition = (position: number) => {
+    if (!editorRef.current) return;
+
+    const selection = window.getSelection();
+    const range = document.createRange();
+    
+    let currentPos = 0;
+    const walk = (node: Node): boolean => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        const textLength = node.textContent?.length || 0;
+        if (currentPos + textLength >= position) {
+          range.setStart(node, position - currentPos);
+          range.collapse(true);
+          selection?.removeAllRanges();
+          selection?.addRange(range);
+          return true;
+        }
+        currentPos += textLength;
+      } else {
+        for (let i = 0; i < node.childNodes.length; i++) {
+          if (walk(node.childNodes[i])) return true;
+        }
+      }
+      return false;
+    };
+
+    walk(editorRef.current);
   };
 
   const stripHtmlToMarkdown = (html: string): string => {
@@ -82,7 +123,20 @@ const RichTextEditor = ({
   const handleInput = () => {
     if (!editorRef.current || isUpdatingFromProps.current) return;
     
+    const text = editorRef.current.innerText || '';
+    setIsEmpty(text.trim().length === 0);
+    
+    const cursorPos = saveCursorPosition();
     const markdown = stripHtmlToMarkdown(editorRef.current.innerHTML);
+    
+    isUpdatingFromProps.current = true;
+    editorRef.current.innerHTML = formatContent(markdown);
+    isUpdatingFromProps.current = false;
+    
+    if (cursorPos !== null) {
+      restoreCursorPosition(cursorPos);
+    }
+    
     onChange(markdown);
   };
 
@@ -104,22 +158,26 @@ const RichTextEditor = ({
   return (
     <div className={cn("space-y-2", className)}>
       {label && <Label>{label}</Label>}
-      <div
-        ref={editorRef}
-        contentEditable
-        onInput={handleInput}
-        onSelect={handleSelection}
-        onPaste={handlePaste}
-        className={cn(
-          "min-h-[400px] w-full rounded-md border border-input bg-background px-4 py-3",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-          "prose prose-slate max-w-none",
-          !value && "before:content-[attr(data-placeholder)] before:text-muted-foreground before:absolute"
+      <div className="relative">
+        {isEmpty && (
+          <div className="absolute top-3 left-4 text-muted-foreground pointer-events-none">
+            {placeholder}
+          </div>
         )}
-        data-placeholder={placeholder}
-        suppressContentEditableWarning
-      >
-        {formatContent(value)}
+        <div
+          ref={editorRef}
+          contentEditable
+          onInput={handleInput}
+          onSelect={handleSelection}
+          onPaste={handlePaste}
+          className={cn(
+            "min-h-[400px] w-full rounded-md border border-input bg-background px-4 py-3",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+            "prose prose-slate max-w-none"
+          )}
+          suppressContentEditableWarning
+          dangerouslySetInnerHTML={{ __html: formatContent(value) }}
+        />
       </div>
     </div>
   );
