@@ -87,9 +87,14 @@ const Article = () => {
     
     // If content is a string (markdown), convert it to HTML with proper parsing
     if (typeof content === 'string') {
-      // First, consolidate bullet points that are separated by blank lines
-      // Convert "- item\n\n- item" into "- item\n- item"
-      let consolidated = content.replace(/^(- .+?)(\n\n)(- )/gm, '$1\n$3');
+      // First, consolidate ALL bullet points that are separated by blank lines
+      // This regex will repeatedly replace "- item\n\n- item" with "- item\n- item"
+      let consolidated = content;
+      let prevConsolidated = '';
+      while (consolidated !== prevConsolidated) {
+        prevConsolidated = consolidated;
+        consolidated = consolidated.replace(/^(- .+)\n\n(- )/gm, '$1\n$2');
+      }
       
       // Process inline formatting FIRST (before splitting into blocks)
       let processed = consolidated
@@ -127,8 +132,8 @@ const Article = () => {
         if (block.includes('\n- ') || block.startsWith('- ')) {
           const items = block.split('\n')
             .filter(line => line.trim().startsWith('- '))
-            .map(line => `<li class="ml-6 leading-relaxed">${line.trim().substring(2)}</li>`)
-            .join('\n');
+            .map(line => `<li class="leading-relaxed">${line.trim().substring(2)}</li>`)
+            .join('');
           return `<ul class="list-disc ml-6 my-6">${items}</ul>`;
         }
         
