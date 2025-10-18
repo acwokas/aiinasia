@@ -58,29 +58,51 @@ const RichTextEditor = ({
   };
 
   const convertHtmlToMarkdown = (html: string): string => {
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = html;
+    if (!html) return '';
     
-    let markdown = html
+    // First, normalize block elements to ensure they're properly separated
+    let normalized = html
+      // Ensure block elements have line breaks before them if they don't already
+      .replace(/([^\n>])(<h[123])/g, '$1\n\n$2')
+      .replace(/([^\n>])(<blockquote)/g, '$1\n\n$2')
+      .replace(/([^\n>])(<p[^>]*>)/g, '$1\n\n$2')
+      .replace(/([^\n>])(<ul)/g, '$1\n\n$2')
+      // Ensure block closing tags have line breaks after them
+      .replace(/(<\/h[123]>)([^\n])/g, '$1\n\n$2')
+      .replace(/(<\/blockquote>)([^\n])/g, '$1\n\n$2')
+      .replace(/(<\/p>)([^\n])/g, '$1\n\n$2')
+      .replace(/(<\/ul>)([^\n])/g, '$1\n\n$2');
+    
+    let markdown = normalized
+      // Convert inline formatting first
       .replace(/<strong>(.*?)<\/strong>/g, '**$1**')
       .replace(/<b>(.*?)<\/b>/g, '**$1**')
       .replace(/<em>(.*?)<\/em>/g, '*$1*')
       .replace(/<i>(.*?)<\/i>/g, '*$1*')
-      .replace(/<h1[^>]*>(.*?)<\/h1>/g, '# $1\n\n')
-      .replace(/<h2[^>]*>(.*?)<\/h2>/g, '## $1\n\n')
-      .replace(/<h3[^>]*>(.*?)<\/h3>/g, '### $1\n\n')
+      // Convert headings (must be done before paragraphs)
+      .replace(/<h3[^>]*>(.*?)<\/h3>/gi, '### $1')
+      .replace(/<h2[^>]*>(.*?)<\/h2>/gi, '## $1')
+      .replace(/<h1[^>]*>(.*?)<\/h1>/gi, '# $1')
+      // Convert links
       .replace(/<a[^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/g, '[$2]($1)')
-      .replace(/<li[^>]*>(.*?)<\/li>/g, '- $1\n')
-      .replace(/<ul[^>]*>(.*?)<\/ul>/gs, '$1\n')
-      .replace(/<blockquote[^>]*>(.*?)<\/blockquote>/g, '> $1\n\n')
-      .replace(/<p[^>]*>(.*?)<\/p>/g, '$1\n\n')
-      .replace(/<br\s*\/?>/g, '\n')
+      // Convert lists
+      .replace(/<li[^>]*>(.*?)<\/li>/gs, '- $1\n')
+      .replace(/<ul[^>]*>(.*?)<\/ul>/gs, '$1')
+      // Convert blockquotes
+      .replace(/<blockquote[^>]*>(.*?)<\/blockquote>/gs, '> $1')
+      // Convert paragraphs
+      .replace(/<p[^>]*>(.*?)<\/p>/gs, '$1')
+      // Convert breaks
+      .replace(/<br\s*\/?>/gi, '\n')
       .replace(/<div[^>]*>(.*?)<\/div>/gs, '$1\n')
+      // Remove remaining HTML tags
       .replace(/<[^>]+>/g, '')
+      // Decode HTML entities
       .replace(/&nbsp;/g, ' ')
       .replace(/&amp;/g, '&')
       .replace(/&lt;/g, '<')
       .replace(/&gt;/g, '>')
+      // Clean up excessive line breaks
       .replace(/\n{3,}/g, '\n\n')
       .trim();
     
