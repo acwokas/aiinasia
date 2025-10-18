@@ -67,7 +67,15 @@ const AuthorProfile = () => {
         <section className="bg-muted/30 py-16">
           <div className="container mx-auto px-4">
             <div className="flex flex-col md:flex-row gap-8 items-start">
-              <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary to-secondary flex-shrink-0" />
+              {author?.avatar_url ? (
+                <img 
+                  src={author.avatar_url} 
+                  alt={author.name}
+                  className="w-32 h-32 rounded-full object-cover flex-shrink-0"
+                />
+              ) : (
+                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary to-secondary flex-shrink-0" />
+              )}
               
               <div className="flex-1">
                 <h1 className="headline text-4xl md:text-5xl mb-3">
@@ -79,7 +87,7 @@ const AuthorProfile = () => {
                   </p>
                 )}
                 <p className="text-sm text-muted-foreground mb-4">
-                  {author?.article_count || 0} articles published
+                  {articles?.length || 0} articles published
                 </p>
                 
                 <div className="flex gap-3">
