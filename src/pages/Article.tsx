@@ -12,9 +12,11 @@ import { Helmet } from "react-helmet";
 
 const Article = () => {
   const { slug } = useParams();
+  // Remove trailing slashes from slug for consistent lookups
+  const cleanSlug = slug?.replace(/\/+$/g, '');
 
   const { data: article, isLoading } = useQuery({
-    queryKey: ["article", slug],
+    queryKey: ["article", cleanSlug],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("articles")
@@ -23,9 +25,9 @@ const Article = () => {
           authors (name, slug, bio, avatar_url),
           categories:primary_category_id (name, slug)
         `)
-        .eq("slug", slug)
+        .eq("slug", cleanSlug)
         .eq("status", "published")
-        .single();
+        .maybeSingle();
       
       if (error) throw error;
       return data;

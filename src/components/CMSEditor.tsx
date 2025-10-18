@@ -46,7 +46,8 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
     return text
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-|-$/g, "");
+      .replace(/^-|-$/g, "")
+      .replace(/\/+$/g, ""); // Remove trailing slashes
   };
 
   const handleTitleChange = (value: string) => {
