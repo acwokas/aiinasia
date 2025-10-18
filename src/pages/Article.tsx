@@ -123,9 +123,9 @@ const Article = () => {
         if (block.includes('\n- ') || block.startsWith('- ')) {
           const items = block.split('\n')
             .filter(line => line.trim().startsWith('- '))
-            .map(line => `<li class="ml-6">${line.trim().substring(2)}</li>`)
+            .map(line => `<li class="ml-6 leading-relaxed">${line.trim().substring(2)}</li>`)
             .join('\n');
-          return `<ul class="list-disc ml-6 my-6 space-y-1">${items}</ul>`;
+          return `<ul class="list-disc ml-6 my-6">${items}</ul>`;
         }
         
         // Default to paragraph
