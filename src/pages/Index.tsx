@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Link } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ArticleCard from "@/components/ArticleCard";
@@ -30,6 +31,21 @@ const Index = () => {
       
       if (error) throw error;
       return data || [];
+    },
+  });
+
+  const { data: featuredAuthor } = useQuery({
+    queryKey: ["featured-author"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("authors")
+        .select("*")
+        .order("article_count", { ascending: false })
+        .limit(1)
+        .single();
+      
+      if (error) throw error;
+      return data;
     },
   });
 
@@ -149,8 +165,23 @@ const Index = () => {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              {featuredAuthor && (
+                <Link to={`/author/${featuredAuthor.slug}`} className="bg-card border border-border rounded-lg p-6 text-center hover:shadow-lg transition-shadow">
+                  {featuredAuthor.avatar_url ? (
+                    <img 
+                      src={featuredAuthor.avatar_url} 
+                      alt={featuredAuthor.name}
+                      className="w-20 h-20 rounded-full object-cover mx-auto mb-4 ring-2 ring-primary"
+                    />
+                  ) : (
+                    <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-secondary mx-auto mb-4" />
+                  )}
+                  <h3 className="font-semibold mb-1">{featuredAuthor.name}</h3>
+                  <p className="text-sm text-muted-foreground mb-2">{featuredAuthor.job_title}</p>
+                  <p className="text-xs text-muted-foreground">{featuredAuthor.article_count} articles</p>
+                </Link>
+              )}
               {[
-                { name: "Dr. Li Wei", title: "AI Ethics Researcher", articles: 24 },
                 { name: "Aisha Rahman", title: "ML Engineer", articles: 18 },
                 { name: "Kenji Sato", title: "Robotics Expert", articles: 31 },
                 { name: "Maya Patel", title: "Tech Journalist", articles: 42 },
