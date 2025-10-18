@@ -228,29 +228,6 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
                 />
               </div>
 
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label>Article Content (Live Preview)</Label>
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <Info className="h-3 w-3" />
-                      <span>Use markdown: **bold** *italic* # heading</span>
-                    </div>
-                    <ScoutWritingAssistant
-                      selectedText={selectedText}
-                      onReplace={replaceSelectedText}
-                      context={{ title, fullContent: content }}
-                    />
-                  </div>
-                </div>
-                <RichTextEditor
-                  value={content}
-                  onChange={setContent}
-                  onSelect={setSelectedText}
-                  placeholder="Start writing your article... Use markdown for formatting."
-                />
-              </div>
-
               <div className="space-y-4">
                 <div>
                   <Label htmlFor="featured-image">Featured Image</Label>
@@ -306,6 +283,29 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
                     placeholder="Descriptive alt text for accessibility"
                   />
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label>Article Content (Live Preview)</Label>
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <Info className="h-3 w-3" />
+                      <span>Use markdown: **bold** *italic* # heading</span>
+                    </div>
+                    <ScoutWritingAssistant
+                      selectedText={selectedText}
+                      onReplace={replaceSelectedText}
+                      context={{ title, fullContent: content }}
+                    />
+                  </div>
+                </div>
+                <RichTextEditor
+                  value={content}
+                  onChange={setContent}
+                  onSelect={setSelectedText}
+                  placeholder="Start writing your article... Use markdown for formatting."
+                />
               </div>
             </CardContent>
           </Card>
