@@ -32,7 +32,9 @@ const RichTextEditor = ({
   const [showImageDialog, setShowImageDialog] = useState(false);
   const [showLinkDialog, setShowLinkDialog] = useState(false);
   const [imageData, setImageData] = useState({ url: '', caption: '', alt: '', description: '' });
-  const [linkData, setLinkData] = useState({ url: '', openInNewTab: false });
+  const [linkData, setLinkData] = useState({ url: '', text: '', openInNewTab: false });
+  const [isEditingLink, setIsEditingLink] = useState(false);
+  const [selectedLinkElement, setSelectedLinkElement] = useState<HTMLAnchorElement | null>(null);
 
   useEffect(() => {
     if (editorRef.current && !editorRef.current.innerHTML && value) {
@@ -162,6 +164,39 @@ const RichTextEditor = ({
         const selection = window.getSelection();
         if (selection && selection.rangeCount > 0) {
           savedSelectionRef.current = selection.getRangeAt(0);
+          
+          // Check if the selection is inside an existing link
+          let linkElement: HTMLAnchorElement | null = null;
+          let node = selection.anchorNode;
+          
+          if (node) {
+            if (node.nodeType === Node.TEXT_NODE) {
+              node = node.parentElement;
+            }
+            
+            while (node && node !== editorRef.current) {
+              if ((node as HTMLElement).tagName === 'A') {
+                linkElement = node as HTMLAnchorElement;
+                break;
+              }
+              node = (node as HTMLElement).parentElement;
+            }
+          }
+          
+          // If we found a link, pre-populate the dialog for editing
+          if (linkElement) {
+            setSelectedLinkElement(linkElement);
+            setIsEditingLink(true);
+            setLinkData({
+              url: linkElement.href,
+              text: linkElement.textContent || '',
+              openInNewTab: linkElement.target === '_blank'
+            });
+          } else {
+            setIsEditingLink(false);
+            setSelectedLinkElement(null);
+            setLinkData({ url: '', text: selection.toString(), openInNewTab: false });
+          }
         }
         setShowLinkDialog(true);
         break;
@@ -236,37 +271,71 @@ const RichTextEditor = ({
   const handleInsertLink = () => {
     if (!linkData.url) return;
     
-    // Restore the saved selection
-    if (savedSelectionRef.current) {
-      const selection = window.getSelection();
-      if (selection) {
-        selection.removeAllRanges();
-        selection.addRange(savedSelectionRef.current);
+    // If editing existing link
+    if (isEditingLink && selectedLinkElement) {
+      selectedLinkElement.href = linkData.url;
+      selectedLinkElement.textContent = linkData.text;
+      
+      if (linkData.openInNewTab) {
+        selectedLinkElement.setAttribute('target', '_blank');
+        selectedLinkElement.setAttribute('rel', 'noopener noreferrer');
+      } else {
+        selectedLinkElement.removeAttribute('target');
+        selectedLinkElement.removeAttribute('rel');
       }
-    }
-    
-    execCommand('createLink', linkData.url);
-    
-    // Add target="_blank" if user wants to open in new tab
-    setTimeout(() => {
-      const links = editorRef.current?.querySelectorAll('a');
-      if (links && links.length > 0) {
-        // Get the last inserted link
-        const linkElement = links[links.length - 1] as HTMLAnchorElement;
-        
-        if (linkData.openInNewTab) {
-          linkElement.setAttribute('target', '_blank');
-          linkElement.setAttribute('rel', 'noopener noreferrer');
+      
+      handleInput();
+    } else {
+      // Inserting new link
+      // Restore the saved selection
+      if (savedSelectionRef.current) {
+        const selection = window.getSelection();
+        if (selection) {
+          selection.removeAllRanges();
+          selection.addRange(savedSelectionRef.current);
         }
       }
       
-      // Trigger input event to update the markdown
-      handleInput();
-    }, 100);
+      execCommand('createLink', linkData.url);
+      
+      // Add target="_blank" if user wants to open in new tab
+      setTimeout(() => {
+        const links = editorRef.current?.querySelectorAll('a');
+        if (links && links.length > 0) {
+          // Get the last inserted link
+          const linkElement = links[links.length - 1] as HTMLAnchorElement;
+          
+          if (linkData.openInNewTab) {
+            linkElement.setAttribute('target', '_blank');
+            linkElement.setAttribute('rel', 'noopener noreferrer');
+          }
+        }
+        
+        // Trigger input event to update the markdown
+        handleInput();
+      }, 100);
+    }
     
     setShowLinkDialog(false);
-    setLinkData({ url: '', openInNewTab: false });
+    setLinkData({ url: '', text: '', openInNewTab: false });
+    setIsEditingLink(false);
+    setSelectedLinkElement(null);
     savedSelectionRef.current = null;
+    editorRef.current?.focus();
+  };
+
+  const handleRemoveLink = () => {
+    if (selectedLinkElement) {
+      // Replace the link with just its text content
+      const textNode = document.createTextNode(selectedLinkElement.textContent || '');
+      selectedLinkElement.parentNode?.replaceChild(textNode, selectedLinkElement);
+      handleInput();
+    }
+    
+    setShowLinkDialog(false);
+    setLinkData({ url: '', text: '', openInNewTab: false });
+    setIsEditingLink(false);
+    setSelectedLinkElement(null);
     editorRef.current?.focus();
   };
 
@@ -565,12 +634,21 @@ const RichTextEditor = ({
       <Dialog open={showLinkDialog} onOpenChange={setShowLinkDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Insert Link</DialogTitle>
+            <DialogTitle>{isEditingLink ? 'Edit Link' : 'Insert Link'}</DialogTitle>
             <DialogDescription>
-              Add a link to your content
+              {isEditingLink ? 'Update or remove your link' : 'Add a link to your content'}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
+            <div>
+              <Label htmlFor="link-text">Link Text</Label>
+              <Input
+                id="link-text"
+                placeholder="Click here"
+                value={linkData.text}
+                onChange={(e) => setLinkData({ ...linkData, text: e.target.value })}
+              />
+            </div>
             <div>
               <Label htmlFor="link-url">URL</Label>
               <Input
@@ -600,10 +678,17 @@ const RichTextEditor = ({
             </div>
           </div>
           <DialogFooter>
+            {isEditingLink && (
+              <Button variant="destructive" onClick={handleRemoveLink}>
+                Remove Link
+              </Button>
+            )}
             <Button variant="outline" onClick={() => setShowLinkDialog(false)}>
               Cancel
             </Button>
-            <Button onClick={handleInsertLink}>Insert Link</Button>
+            <Button onClick={handleInsertLink}>
+              {isEditingLink ? 'Update Link' : 'Insert Link'}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
