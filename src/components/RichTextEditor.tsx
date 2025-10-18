@@ -242,22 +242,21 @@ const RichTextEditor = ({
     execCommand('createLink', linkData.url);
     
     // Add target="_blank" if user wants to open in new tab
-    if (linkData.openInNewTab) {
-      setTimeout(() => {
-        const selection = window.getSelection();
-        if (selection && selection.anchorNode) {
-          let node = selection.anchorNode.parentElement;
-          while (node && node !== editorRef.current) {
-            if (node.tagName === 'A') {
-              node.setAttribute('target', '_blank');
-              node.setAttribute('rel', 'noopener noreferrer');
-              break;
-            }
-            node = node.parentElement;
-          }
+    setTimeout(() => {
+      const links = editorRef.current?.querySelectorAll('a');
+      if (links && links.length > 0) {
+        // Get the last inserted link
+        const linkElement = links[links.length - 1] as HTMLAnchorElement;
+        
+        if (linkData.openInNewTab) {
+          linkElement.setAttribute('target', '_blank');
+          linkElement.setAttribute('rel', 'noopener noreferrer');
         }
-      }, 0);
-    }
+      }
+      
+      // Trigger input event to update the markdown
+      handleInput();
+    }, 100);
     
     setShowLinkDialog(false);
     setLinkData({ url: '', openInNewTab: false });
