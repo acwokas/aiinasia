@@ -93,12 +93,12 @@ const Article = () => {
       
       // Process inline formatting FIRST (before splitting into blocks)
       let processed = consolidated
-        // Remove empty bold markers (** ** or ** with only spaces)
-        .replace(/\*\*\s*\*\*/g, '')
-        // Convert actual bold text
+        // Convert actual bold text (must come before removing empty markers)
         .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
         // Convert italic text
         .replace(/\*(.+?)\*/g, '<em>$1</em>')
+        // Remove any remaining standalone ** markers (cleanup)
+        .replace(/\*\*/g, '')
         // Convert links with new tab marker (^) - add external link icon (must come before regular links)
         .replace(/\[([^\]]+)\]\(([^)]+)\)\^/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-primary underline hover:no-underline inline-flex items-center gap-1">$1<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline ml-0.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" x2="21" y1="14" y2="3"></line></svg></a>')
         // Convert regular links
