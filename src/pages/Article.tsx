@@ -87,14 +87,9 @@ const Article = () => {
     
     // If content is a string (markdown), convert it to HTML with proper parsing
     if (typeof content === 'string') {
-      // First, consolidate ALL bullet points that are separated by blank lines
-      // This regex will repeatedly replace "- item\n\n- item" with "- item\n- item"
-      let consolidated = content;
-      let prevConsolidated = '';
-      while (consolidated !== prevConsolidated) {
-        prevConsolidated = consolidated;
-        consolidated = consolidated.replace(/^(- .+)\n\n(- )/gm, '$1\n$2');
-      }
+      // Consolidate ALL consecutive bullet points into single lists
+      // Replace all double line breaks between bullets with single line breaks
+      let consolidated = content.replace(/(- [^\n]+)\n\n(?=- )/g, '$1\n');
       
       // Process inline formatting FIRST (before splitting into blocks)
       let processed = consolidated
