@@ -6,7 +6,11 @@ import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, FileText, Users, Tag, Folder, MessageSquare, Mail, BarChart, Home } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Loader2, FileText, Users, Tag, Folder, MessageSquare, Mail, BarChart, Home, Pencil, Trash2, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const Admin = () => {
@@ -15,6 +19,19 @@ const Admin = () => {
   const queryClient = useQueryClient();
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [user, setUser] = useState<any>(null);
+  const [authorsDialogOpen, setAuthorsDialogOpen] = useState(false);
+  const [editingAuthor, setEditingAuthor] = useState<any>(null);
+  const [authorForm, setAuthorForm] = useState({
+    name: "",
+    slug: "",
+    bio: "",
+    email: "",
+    job_title: "",
+    avatar_url: "",
+    twitter_handle: "",
+    linkedin_url: "",
+    website_url: "",
+  });
 
   useEffect(() => {
     checkAdminStatus();
@@ -112,6 +129,18 @@ const Admin = () => {
     },
   });
 
+  const { data: authors, refetch: refetchAuthors } = useQuery({
+    queryKey: ["all-authors"],
+    enabled: isAdmin === true && authorsDialogOpen,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("authors")
+        .select("*")
+        .order("name", { ascending: true });
+      return data;
+    },
+  });
+
   const approveComment = async (commentId: string) => {
     try {
       const { error } = await supabase
@@ -168,6 +197,109 @@ const Admin = () => {
     return username.charAt(0).toUpperCase() + username.slice(1);
   };
 
+  const handleOpenAuthorsDialog = () => {
+    setAuthorsDialogOpen(true);
+    resetAuthorForm();
+  };
+
+  const resetAuthorForm = () => {
+    setEditingAuthor(null);
+    setAuthorForm({
+      name: "",
+      slug: "",
+      bio: "",
+      email: "",
+      job_title: "",
+      avatar_url: "",
+      twitter_handle: "",
+      linkedin_url: "",
+      website_url: "",
+    });
+  };
+
+  const handleEditAuthor = (author: any) => {
+    setEditingAuthor(author);
+    setAuthorForm({
+      name: author.name || "",
+      slug: author.slug || "",
+      bio: author.bio || "",
+      email: author.email || "",
+      job_title: author.job_title || "",
+      avatar_url: author.avatar_url || "",
+      twitter_handle: author.twitter_handle || "",
+      linkedin_url: author.linkedin_url || "",
+      website_url: author.website_url || "",
+    });
+  };
+
+  const handleSaveAuthor = async () => {
+    try {
+      if (editingAuthor) {
+        const { error } = await supabase
+          .from("authors")
+          .update(authorForm)
+          .eq("id", editingAuthor.id);
+
+        if (error) throw error;
+
+        toast({
+          title: "Author updated",
+          description: "The author has been updated successfully",
+        });
+      } else {
+        const { error } = await supabase
+          .from("authors")
+          .insert([authorForm]);
+
+        if (error) throw error;
+
+        toast({
+          title: "Author created",
+          description: "The author has been created successfully",
+        });
+      }
+
+      refetchAuthors();
+      queryClient.invalidateQueries({ queryKey: ["admin-stats"] });
+      resetAuthorForm();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to save author",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteAuthor = async (authorId: string) => {
+    if (!confirm("Are you sure you want to delete this author? This cannot be undone.")) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from("authors")
+        .delete()
+        .eq("id", authorId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Author deleted",
+        description: "The author has been removed",
+      });
+
+      refetchAuthors();
+      queryClient.invalidateQueries({ queryKey: ["admin-stats"] });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete author",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (isAdmin === null) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -219,13 +351,17 @@ const Admin = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card 
+            className="cursor-pointer hover:bg-accent/50 transition-colors"
+            onClick={handleOpenAuthorsDialog}
+          >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Authors</CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stats?.authors || 0}</div>
+              <p className="text-xs text-muted-foreground mt-1">Click to manage all</p>
             </CardContent>
           </Card>
 
@@ -398,6 +534,168 @@ const Admin = () => {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Authors Management Dialog */}
+        <Dialog open={authorsDialogOpen} onOpenChange={setAuthorsDialogOpen}>
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Manage Authors</DialogTitle>
+              <DialogDescription>Add, edit, or delete authors</DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-6">
+              {/* Author Form */}
+              <div className="border border-border rounded-lg p-4 space-y-4">
+                <h3 className="font-semibold text-lg">
+                  {editingAuthor ? "Edit Author" : "Add New Author"}
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Name *</Label>
+                    <Input
+                      id="name"
+                      value={authorForm.name}
+                      onChange={(e) => setAuthorForm({ ...authorForm, name: e.target.value })}
+                      placeholder="John Doe"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="slug">Slug *</Label>
+                    <Input
+                      id="slug"
+                      value={authorForm.slug}
+                      onChange={(e) => setAuthorForm({ ...authorForm, slug: e.target.value })}
+                      placeholder="john-doe"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={authorForm.email}
+                      onChange={(e) => setAuthorForm({ ...authorForm, email: e.target.value })}
+                      placeholder="john@example.com"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="job_title">Job Title</Label>
+                    <Input
+                      id="job_title"
+                      value={authorForm.job_title}
+                      onChange={(e) => setAuthorForm({ ...authorForm, job_title: e.target.value })}
+                      placeholder="Senior Writer"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2 md:col-span-2">
+                    <Label htmlFor="bio">Bio</Label>
+                    <Textarea
+                      id="bio"
+                      value={authorForm.bio}
+                      onChange={(e) => setAuthorForm({ ...authorForm, bio: e.target.value })}
+                      placeholder="Author biography..."
+                      rows={3}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="avatar_url">Avatar URL</Label>
+                    <Input
+                      id="avatar_url"
+                      value={authorForm.avatar_url}
+                      onChange={(e) => setAuthorForm({ ...authorForm, avatar_url: e.target.value })}
+                      placeholder="https://..."
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="twitter_handle">Twitter Handle</Label>
+                    <Input
+                      id="twitter_handle"
+                      value={authorForm.twitter_handle}
+                      onChange={(e) => setAuthorForm({ ...authorForm, twitter_handle: e.target.value })}
+                      placeholder="@johndoe"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="linkedin_url">LinkedIn URL</Label>
+                    <Input
+                      id="linkedin_url"
+                      value={authorForm.linkedin_url}
+                      onChange={(e) => setAuthorForm({ ...authorForm, linkedin_url: e.target.value })}
+                      placeholder="https://linkedin.com/in/..."
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="website_url">Website URL</Label>
+                    <Input
+                      id="website_url"
+                      value={authorForm.website_url}
+                      onChange={(e) => setAuthorForm({ ...authorForm, website_url: e.target.value })}
+                      placeholder="https://..."
+                    />
+                  </div>
+                </div>
+                
+                <div className="flex gap-2">
+                  <Button onClick={handleSaveAuthor}>
+                    {editingAuthor ? "Update Author" : "Create Author"}
+                  </Button>
+                  {editingAuthor && (
+                    <Button variant="outline" onClick={resetAuthorForm}>
+                      Cancel Edit
+                    </Button>
+                  )}
+                </div>
+              </div>
+              
+              {/* Authors List */}
+              <div className="space-y-4">
+                <h3 className="font-semibold text-lg">Existing Authors</h3>
+                <div className="space-y-2">
+                  {authors?.map((author: any) => (
+                    <div key={author.id} className="flex items-center justify-between p-4 border border-border rounded-lg">
+                      <div className="flex-1">
+                        <h4 className="font-semibold">{author.name}</h4>
+                        <p className="text-sm text-muted-foreground">
+                          {author.job_title || "No job title"} • {author.email || "No email"}
+                        </p>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEditAuthor(author)}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDeleteAuthor(author.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                  {(!authors || authors.length === 0) && (
+                    <p className="text-muted-foreground text-center py-4">
+                      No authors yet. Create your first author above.
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </main>
     </div>
   );
