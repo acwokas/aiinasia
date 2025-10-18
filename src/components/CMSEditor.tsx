@@ -7,12 +7,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Save, Upload, Loader2, Info } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Save, Upload, Loader2, Info, Plus, Pencil } from "lucide-react";
 import ScoutWritingAssistant from "@/components/ScoutWritingAssistant";
 import RichTextEditor from "@/components/RichTextEditor";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { compressImage } from "@/lib/imageCompression";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 interface CMSEditorProps {
   initialData?: any;
@@ -35,12 +37,41 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
   const [keyphraseSynonyms, setKeyphraseSynonyms] = useState(initialData?.keyphrase_synonyms || "");
   const [featuredOnHomepage, setFeaturedOnHomepage] = useState(initialData?.featured_on_homepage || false);
   const [sticky, setSticky] = useState(initialData?.sticky || false);
+  const [authorId, setAuthorId] = useState(initialData?.author_id || "");
   const [selectedText, setSelectedText] = useState("");
   const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [showAuthorDialog, setShowAuthorDialog] = useState(false);
+  const [isEditingAuthor, setIsEditingAuthor] = useState(false);
+  const [authorForm, setAuthorForm] = useState({
+    id: "",
+    name: "",
+    slug: "",
+    bio: "",
+    email: "",
+    avatar_url: "",
+    twitter_handle: "",
+    linkedin_url: "",
+    website_url: ""
+  });
   const contentRef = useRef<HTMLTextAreaElement>(null);
   const excerptRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // Fetch authors
+  const { data: authors } = useQuery({
+    queryKey: ['authors'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('authors')
+        .select('*')
+        .order('name');
+      
+      if (error) throw error;
+      return data;
+    }
+  });
 
   const generateSlug = (text: string) => {
     return text
@@ -151,6 +182,90 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
     }
   };
 
+  const handleOpenAuthorDialog = (author?: any) => {
+    if (author) {
+      setIsEditingAuthor(true);
+      setAuthorForm({
+        id: author.id,
+        name: author.name,
+        slug: author.slug,
+        bio: author.bio || "",
+        email: author.email || "",
+        avatar_url: author.avatar_url || "",
+        twitter_handle: author.twitter_handle || "",
+        linkedin_url: author.linkedin_url || "",
+        website_url: author.website_url || ""
+      });
+    } else {
+      setIsEditingAuthor(false);
+      setAuthorForm({
+        id: "",
+        name: "",
+        slug: "",
+        bio: "",
+        email: "",
+        avatar_url: "",
+        twitter_handle: "",
+        linkedin_url: "",
+        website_url: ""
+      });
+    }
+    setShowAuthorDialog(true);
+  };
+
+  const handleSaveAuthor = async () => {
+    try {
+      const authorData = {
+        name: authorForm.name,
+        slug: authorForm.slug || generateSlug(authorForm.name),
+        bio: authorForm.bio || null,
+        email: authorForm.email || null,
+        avatar_url: authorForm.avatar_url || null,
+        twitter_handle: authorForm.twitter_handle || null,
+        linkedin_url: authorForm.linkedin_url || null,
+        website_url: authorForm.website_url || null
+      };
+
+      if (isEditingAuthor && authorForm.id) {
+        const { error } = await supabase
+          .from('authors')
+          .update(authorData)
+          .eq('id', authorForm.id);
+        
+        if (error) throw error;
+        
+        toast({
+          title: "Author updated",
+          description: "Author information has been updated successfully"
+        });
+      } else {
+        const { data, error } = await supabase
+          .from('authors')
+          .insert(authorData)
+          .select()
+          .single();
+        
+        if (error) throw error;
+        
+        setAuthorId(data.id);
+        toast({
+          title: "Author created",
+          description: "New author has been created successfully"
+        });
+      }
+
+      queryClient.invalidateQueries({ queryKey: ['authors'] });
+      setShowAuthorDialog(false);
+    } catch (error) {
+      console.error('Error saving author:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to save author",
+        variant: "destructive"
+      });
+    }
+  };
+
   const handleSave = () => {
     const data = {
       title,
@@ -168,6 +283,7 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
       keyphrase_synonyms: keyphraseSynonyms,
       featured_on_homepage: featuredOnHomepage,
       sticky,
+      author_id: authorId || null,
     };
     onSave?.(data);
   };
@@ -452,10 +568,147 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
                   onCheckedChange={setSticky}
                 />
               </div>
+
+              <div>
+                <Label htmlFor="author">Author</Label>
+                <div className="flex gap-2">
+                  <Select value={authorId} onValueChange={setAuthorId}>
+                    <SelectTrigger id="author" className="flex-1">
+                      <SelectValue placeholder="Select author..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {authors?.map((author) => (
+                        <SelectItem key={author.id} value={author.id}>
+                          {author.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleOpenAuthorDialog()}
+                    title="Create new author"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                  {authorId && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      onClick={() => {
+                        const author = authors?.find(a => a.id === authorId);
+                        if (author) handleOpenAuthorDialog(author);
+                      }}
+                      title="Edit selected author"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Author Dialog */}
+      <Dialog open={showAuthorDialog} onOpenChange={setShowAuthorDialog}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{isEditingAuthor ? 'Edit Author' : 'Create New Author'}</DialogTitle>
+            <DialogDescription>
+              {isEditingAuthor ? 'Update author information' : 'Add a new author to the system'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="author-name">Name *</Label>
+              <Input
+                id="author-name"
+                value={authorForm.name}
+                onChange={(e) => setAuthorForm({ ...authorForm, name: e.target.value })}
+                placeholder="Author name"
+              />
+            </div>
+            <div>
+              <Label htmlFor="author-slug">Slug</Label>
+              <Input
+                id="author-slug"
+                value={authorForm.slug}
+                onChange={(e) => setAuthorForm({ ...authorForm, slug: e.target.value })}
+                placeholder="author-slug (auto-generated if empty)"
+              />
+            </div>
+            <div>
+              <Label htmlFor="author-email">Email</Label>
+              <Input
+                id="author-email"
+                type="email"
+                value={authorForm.email}
+                onChange={(e) => setAuthorForm({ ...authorForm, email: e.target.value })}
+                placeholder="author@example.com"
+              />
+            </div>
+            <div>
+              <Label htmlFor="author-bio">Bio</Label>
+              <Textarea
+                id="author-bio"
+                value={authorForm.bio}
+                onChange={(e) => setAuthorForm({ ...authorForm, bio: e.target.value })}
+                placeholder="Brief biography..."
+                rows={3}
+              />
+            </div>
+            <div>
+              <Label htmlFor="author-avatar">Avatar URL</Label>
+              <Input
+                id="author-avatar"
+                value={authorForm.avatar_url}
+                onChange={(e) => setAuthorForm({ ...authorForm, avatar_url: e.target.value })}
+                placeholder="https://example.com/avatar.jpg"
+              />
+            </div>
+            <div>
+              <Label htmlFor="author-twitter">Twitter Handle</Label>
+              <Input
+                id="author-twitter"
+                value={authorForm.twitter_handle}
+                onChange={(e) => setAuthorForm({ ...authorForm, twitter_handle: e.target.value })}
+                placeholder="@username"
+              />
+            </div>
+            <div>
+              <Label htmlFor="author-linkedin">LinkedIn URL</Label>
+              <Input
+                id="author-linkedin"
+                value={authorForm.linkedin_url}
+                onChange={(e) => setAuthorForm({ ...authorForm, linkedin_url: e.target.value })}
+                placeholder="https://linkedin.com/in/username"
+              />
+            </div>
+            <div>
+              <Label htmlFor="author-website">Website URL</Label>
+              <Input
+                id="author-website"
+                value={authorForm.website_url}
+                onChange={(e) => setAuthorForm({ ...authorForm, website_url: e.target.value })}
+                placeholder="https://example.com"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAuthorDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveAuthor} disabled={!authorForm.name.trim()}>
+              {isEditingAuthor ? 'Update Author' : 'Create Author'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <div className="flex justify-end gap-4 mt-6">
         <Button onClick={handleSave}>
