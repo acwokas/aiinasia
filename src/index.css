@@ -106,14 +106,14 @@ All colors MUST be HSL.
   }
   
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Playfair Display', Georgia, serif;
+    font-family: 'Orbitron', sans-serif;
     font-weight: 700;
   }
 }
 
 @layer components {
   .headline {
-    @apply font-serif font-bold leading-tight;
+    @apply font-display font-bold leading-tight;
   }
   
   .article-card {
@@ -136,4 +136,4 @@ All colors MUST be HSL.
   }
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
