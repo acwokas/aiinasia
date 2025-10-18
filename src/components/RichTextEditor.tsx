@@ -49,6 +49,9 @@ const RichTextEditor = ({
       .replace(/^### (.+)$/gm, '<h3>$1</h3>')
       .replace(/^## (.+)$/gm, '<h2>$1</h2>')
       .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+      // Handle links with new tab marker (^)
+      .replace(/\[(.+?)\]\((.+?)\)\^/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
+      // Handle regular links
       .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2">$1</a>')
       .replace(/^- (.+)$/gm, '<li>$1</li>')
       .replace(/(<li>.*?<\/li>\s*)+/gs, '<ul>$&</ul>')
@@ -83,7 +86,10 @@ const RichTextEditor = ({
       .replace(/<h3[^>]*>(.*?)<\/h3>/gi, '### $1')
       .replace(/<h2[^>]*>(.*?)<\/h2>/gi, '## $1')
       .replace(/<h1[^>]*>(.*?)<\/h1>/gi, '# $1')
-      // Convert links
+      // Convert links - preserve target="_blank" with ^ marker
+      .replace(/<a[^>]*href="([^"]*)"[^>]*target="_blank"[^>]*>(.*?)<\/a>/g, '[$2]($1)^')
+      .replace(/<a[^>]*target="_blank"[^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/g, '[$2]($1)^')
+      // Convert regular links
       .replace(/<a[^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/g, '[$2]($1)')
       // Convert lists
       .replace(/<li[^>]*>(.*?)<\/li>/gs, '- $1\n')
