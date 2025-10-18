@@ -337,12 +337,15 @@ const Index = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
-              { name: "prompt.withthepowerof.ai", desc: "Advanced prompt engineering platform", url: "https://www.promptandgo.ai" },
-              { name: "startup.withthepowerof.ai", desc: "AI prompts and templates to supercharge your business", url: "https://www.businessinabyte.com" },
-              { name: "shop.withthepowerof.ai", desc: "AI-curated deals from around the web", url: "https://www.myofferclub.com" },
+              { name: "Prompt with the power of AI.", desc: "Advanced prompt engineering platform", url: "https://www.promptandgo.ai", category: "Productivity" },
+              { name: "Startup with the power of AI.", desc: "AI prompts and templates to supercharge your business", url: "https://www.businessinabyte.com", category: "Business" },
+              { name: "Shop with the power of AI.", desc: "AI-curated deals from around the web", url: "https://www.myofferclub.com", category: "Retail" },
             ].map((tool, i) => (
-              <div key={i} className="article-card p-6">
-                <h3 className="font-semibold text-lg mb-3">{tool.name}</h3>
+              <div key={i} className="article-card p-6 relative">
+                <Badge className="absolute top-3 right-3 bg-yellow-500 text-black hover:bg-yellow-600">
+                  {tool.category}
+                </Badge>
+                <h3 className="font-semibold text-lg mb-3 pr-20">{tool.name}</h3>
                 <p className="text-sm text-muted-foreground mb-4">{tool.desc}</p>
                 <Button variant="outline" size="sm" className="w-full" asChild>
                   <a href={tool.url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2">
