@@ -274,6 +274,42 @@ const RichTextEditor = ({
     const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
     const modKey = isMac ? e.metaKey : e.ctrlKey;
 
+    // Handle Enter key after image/figure
+    if (e.key === 'Enter' && !modKey) {
+      const selection = window.getSelection();
+      if (selection && selection.anchorNode) {
+        let node = selection.anchorNode;
+        if (node.nodeType === Node.TEXT_NODE) {
+          node = node.parentElement;
+        }
+        
+        // Check if we're inside a figure or figcaption
+        let currentElement = node as HTMLElement;
+        while (currentElement && currentElement !== editorRef.current) {
+          if (currentElement.tagName === 'FIGURE' || currentElement.tagName === 'FIGCAPTION') {
+            e.preventDefault();
+            
+            // Create a new paragraph after the figure
+            const figure = currentElement.tagName === 'FIGURE' ? currentElement : currentElement.closest('figure');
+            if (figure) {
+              const newParagraph = document.createElement('p');
+              newParagraph.innerHTML = '<br>'; // Empty paragraph with line break
+              figure.parentNode?.insertBefore(newParagraph, figure.nextSibling);
+              
+              // Move cursor to the new paragraph
+              const range = document.createRange();
+              range.setStart(newParagraph, 0);
+              range.collapse(true);
+              selection.removeAllRanges();
+              selection.addRange(range);
+            }
+            return;
+          }
+          currentElement = currentElement.parentElement as HTMLElement;
+        }
+      }
+    }
+
     if (modKey) {
       switch (e.key.toLowerCase()) {
         case 'b':
