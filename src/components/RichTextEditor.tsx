@@ -346,7 +346,7 @@ const RichTextEditor = ({
       />
       
       <div className="border border-input rounded-md overflow-hidden">
-        <div className="max-h-[600px] overflow-y-auto">
+        <div className="max-h-[700px] overflow-y-auto">
           <div className="sticky top-0 z-10 flex items-center gap-1 p-2 border-b border-input bg-background/95 backdrop-blur flex-wrap shadow-sm">
         <Button
           type="button"
@@ -466,7 +466,7 @@ const RichTextEditor = ({
             onPaste={handlePaste}
             onKeyDown={handleKeyDown}
             className={cn(
-              "min-h-[400px] w-full bg-background px-4 py-3",
+              "min-h-[500px] w-full bg-background px-4 py-3",
               "focus-visible:outline-none",
               "prose prose-slate max-w-none",
               "[&_h1]:text-3xl [&_h1]:font-bold [&_h1]:mt-6 [&_h1]:mb-4",
