@@ -76,8 +76,17 @@ const Events = () => {
     };
   }, []);
 
-  const featuredEvents = events?.filter(event => event.is_featured);
-  const upcomingEvents = events?.filter(event => !event.is_featured);
+  // Ensure at least 2 featured events (unless there aren't 2 published events total)
+  let featuredEvents = events?.filter(event => event.is_featured) || [];
+  let upcomingEvents = events?.filter(event => !event.is_featured) || [];
+  
+  // If we have fewer than 2 featured events and there are more events available
+  if (featuredEvents.length < 2 && events && events.length >= 2) {
+    const needed = 2 - featuredEvents.length;
+    const additionalFeatured = upcomingEvents.slice(0, needed);
+    featuredEvents = [...featuredEvents, ...additionalFeatured];
+    upcomingEvents = upcomingEvents.slice(needed);
+  }
 
   const formatEventDate = (startDate: string, endDate: string | null) => {
     const start = new Date(startDate);
