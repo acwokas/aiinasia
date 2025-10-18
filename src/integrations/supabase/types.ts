@@ -97,6 +97,7 @@ export type Database = {
           featured_on_homepage: boolean | null
           focus_keyphrase: string | null
           id: string
+          keyphrase_synonyms: string | null
           like_count: number | null
           meta_description: string | null
           meta_title: string | null
@@ -104,6 +105,7 @@ export type Database = {
           published_at: string | null
           reading_time_minutes: number | null
           scheduled_for: string | null
+          seo_title: string | null
           slug: string
           status: Database["public"]["Enums"]["article_status"]
           sticky: boolean | null
@@ -135,6 +137,7 @@ export type Database = {
           featured_on_homepage?: boolean | null
           focus_keyphrase?: string | null
           id?: string
+          keyphrase_synonyms?: string | null
           like_count?: number | null
           meta_description?: string | null
           meta_title?: string | null
@@ -142,6 +145,7 @@ export type Database = {
           published_at?: string | null
           reading_time_minutes?: number | null
           scheduled_for?: string | null
+          seo_title?: string | null
           slug: string
           status?: Database["public"]["Enums"]["article_status"]
           sticky?: boolean | null
@@ -173,6 +177,7 @@ export type Database = {
           featured_on_homepage?: boolean | null
           focus_keyphrase?: string | null
           id?: string
+          keyphrase_synonyms?: string | null
           like_count?: number | null
           meta_description?: string | null
           meta_title?: string | null
@@ -180,6 +185,7 @@ export type Database = {
           published_at?: string | null
           reading_time_minutes?: number | null
           scheduled_for?: string | null
+          seo_title?: string | null
           slug?: string
           status?: Database["public"]["Enums"]["article_status"]
           sticky?: boolean | null

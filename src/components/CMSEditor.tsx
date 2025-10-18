@@ -28,9 +28,11 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
   const [status, setStatus] = useState(initialData?.status || "draft");
   const [featuredImage, setFeaturedImage] = useState(initialData?.featured_image_url || "");
   const [featuredImageAlt, setFeaturedImageAlt] = useState(initialData?.featured_image_alt || "");
+  const [seoTitle, setSeoTitle] = useState(initialData?.seo_title || "");
   const [metaTitle, setMetaTitle] = useState(initialData?.meta_title || "");
   const [metaDescription, setMetaDescription] = useState(initialData?.meta_description || "");
   const [focusKeyphrase, setFocusKeyphrase] = useState(initialData?.focus_keyphrase || "");
+  const [keyphraseSynonyms, setKeyphraseSynonyms] = useState(initialData?.keyphrase_synonyms || "");
   const [featuredOnHomepage, setFeaturedOnHomepage] = useState(initialData?.featured_on_homepage || false);
   const [sticky, setSticky] = useState(initialData?.sticky || false);
   const [selectedText, setSelectedText] = useState("");
@@ -158,9 +160,11 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
       status,
       featured_image_url: featuredImage,
       featured_image_alt: featuredImageAlt,
+      seo_title: seoTitle,
       meta_title: metaTitle,
       meta_description: metaDescription,
       focus_keyphrase: focusKeyphrase,
+      keyphrase_synonyms: keyphraseSynonyms,
       featured_on_homepage: featuredOnHomepage,
       sticky,
     };
@@ -314,6 +318,20 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
+                <Label htmlFor="seo-title">SEO Title</Label>
+                <Input
+                  id="seo-title"
+                  value={seoTitle}
+                  onChange={(e) => setSeoTitle(e.target.value)}
+                  placeholder="SEO title (max 60 characters)"
+                  maxLength={60}
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  {seoTitle.length}/60 characters
+                </p>
+              </div>
+
+              <div>
                 <Label htmlFor="meta-title">Meta Title</Label>
                 <Input
                   id="meta-title"
@@ -350,6 +368,19 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
                   onChange={(e) => setFocusKeyphrase(e.target.value)}
                   placeholder="Primary keyword for this article"
                 />
+              </div>
+
+              <div>
+                <Label htmlFor="keyphrase-synonyms">Keyphrase Synonyms</Label>
+                <Input
+                  id="keyphrase-synonyms"
+                  value={keyphraseSynonyms}
+                  onChange={(e) => setKeyphraseSynonyms(e.target.value)}
+                  placeholder="Comma separated list of synonyms"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  e.g., artificial intelligence, machine learning, AI technology
+                </p>
               </div>
             </CardContent>
           </Card>
