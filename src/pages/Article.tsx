@@ -8,7 +8,7 @@ import Comments from "@/components/Comments";
 import ArticleCard from "@/components/ArticleCard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Clock, User, Share2, Bookmark, Twitter, Linkedin, Facebook, Loader2, ExternalLink } from "lucide-react";
+import { Clock, User, Share2, Bookmark, Twitter, Linkedin, Facebook, Loader2, ExternalLink, ChevronDown, ChevronUp } from "lucide-react";
 import { Helmet } from "react-helmet";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
@@ -18,6 +18,7 @@ const Article = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const [isBookmarked, setIsBookmarked] = useState(false);
+  const [isAuthorBioExpanded, setIsAuthorBioExpanded] = useState(false);
   const cleanSlug = slug?.replace(/\/+$/g, '');
 
   const { data: article, isLoading } = useQuery({
@@ -385,51 +386,84 @@ const Article = () => {
               )}
 
               <div className="flex items-center justify-between flex-wrap gap-4 pb-6 border-b border-border">
-                <div className="flex items-center gap-4">
-                  {article.authors?.slug ? (
-                    <Link to={`/author/${article.authors.slug}`}>
-                      {article.authors.avatar_url ? (
+                <div className="flex-1">
+                  <div className="flex items-center gap-4 mb-3">
+                    {article.authors?.slug ? (
+                      <Link to={`/author/${article.authors.slug}`}>
+                        {article.authors.avatar_url ? (
+                          <img 
+                            src={article.authors.avatar_url} 
+                            alt={article.authors.name}
+                            className="w-12 h-12 rounded-full object-cover hover:opacity-80 transition-opacity flex-shrink-0"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-secondary hover:opacity-80 transition-opacity flex-shrink-0" />
+                        )}
+                      </Link>
+                    ) : (
+                      article.authors?.avatar_url ? (
                         <img 
                           src={article.authors.avatar_url} 
-                          alt={article.authors.name}
-                          className="w-12 h-12 rounded-full object-cover hover:opacity-80 transition-opacity"
+                          alt={article.authors?.name || 'Anonymous'}
+                          className="w-12 h-12 rounded-full object-cover flex-shrink-0"
                         />
                       ) : (
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-secondary hover:opacity-80 transition-opacity" />
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-secondary flex-shrink-0" />
+                      )
+                    )}
+                    <div>
+                      <div className="flex items-center gap-2 font-semibold">
+                        <User className="h-4 w-4" />
+                        {article.authors?.slug ? (
+                          <Link to={`/author/${article.authors.slug}`} className="hover:text-primary transition-colors">
+                            {article.authors.name}
+                          </Link>
+                        ) : (
+                          article.authors?.name || 'Anonymous'
+                        )}
+                      </div>
+                      {article.authors?.job_title && (
+                        <div className="text-sm text-muted-foreground">
+                          {article.authors.job_title}
+                        </div>
                       )}
-                    </Link>
-                  ) : (
-                    article.authors?.avatar_url ? (
-                      <img 
-                        src={article.authors.avatar_url} 
-                        alt={article.authors?.name || 'Anonymous'}
-                        className="w-12 h-12 rounded-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-secondary" />
-                    )
-                  )}
-                  <div>
-                    <div className="flex items-center gap-2 font-semibold">
-                      <User className="h-4 w-4" />
-                      {article.authors?.slug ? (
-                        <Link to={`/author/${article.authors.slug}`} className="hover:text-primary transition-colors">
-                          {article.authors.name}
-                        </Link>
-                      ) : (
-                        article.authors?.name || 'Anonymous'
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Clock className="h-3 w-3" />
-                      {article.reading_time_minutes || 5} min read • 
-                      {article.published_at && new Date(article.published_at).toLocaleDateString("en-GB", {
-                        day: "numeric",
-                        month: "long",
-                        year: "numeric",
-                      })}
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Clock className="h-3 w-3" />
+                        {article.reading_time_minutes || 5} min read • 
+                        {article.published_at && new Date(article.published_at).toLocaleDateString("en-GB", {
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric",
+                        })}
+                      </div>
                     </div>
                   </div>
+
+                  {article.authors?.bio && (
+                    <div className="ml-16">
+                      <div className={`text-sm text-muted-foreground ${!isAuthorBioExpanded && 'line-clamp-2'}`}>
+                        {article.authors.bio}
+                      </div>
+                      {article.authors.bio.length > 100 && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setIsAuthorBioExpanded(!isAuthorBioExpanded)}
+                          className="mt-1 text-primary hover:text-primary/80 h-auto p-0"
+                        >
+                          {isAuthorBioExpanded ? (
+                            <>
+                              Show less <ChevronUp className="ml-1 h-3 w-3" />
+                            </>
+                          ) : (
+                            <>
+                              Read bio <ChevronDown className="ml-1 h-3 w-3" />
+                            </>
+                          )}
+                        </Button>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex gap-2">
