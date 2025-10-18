@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import logo from "@/assets/aiinasia-logo.png";
 
 const Header = () => {
   const [isDark, setIsDark] = useState(false);
@@ -27,12 +28,8 @@ const Header = () => {
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center gap-8">
-            <a href="/" className="flex items-center space-x-2">
-              <span className="font-serif text-2xl font-bold">
-                <span className="text-primary">AI</span>
-                <span className="text-foreground">in</span>
-                <span className="text-secondary">ASIA</span>
-              </span>
+            <a href="/" className="flex items-center">
+              <img src={logo} alt="AI in Asia" className="h-8" />
             </a>
             
             <nav className="hidden md:flex items-center space-x-6">
