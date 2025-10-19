@@ -6,6 +6,7 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { Upload, Image as ImageIcon, FileText, CheckCircle2, XCircle, Clock } from "lucide-react";
@@ -109,28 +110,73 @@ export default function MigrationDashboard() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <div className="mb-6">
+            <Alert>
+              <CheckCircle2 className="h-4 w-4" />
+              <AlertDescription>
+                <strong>Migration Workflow:</strong>
+                <ol className="list-decimal list-inside mt-2 space-y-1">
+                  <li>Import articles using Bulk Import</li>
+                  <li>Migrate images using Image Migration</li>
+                  <li>Create redirects using Bulk Redirects</li>
+                  <li>Update internal links using Content Processor</li>
+                </ol>
+              </AlertDescription>
+            </Alert>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium">Quick Actions</CardTitle>
+                <CardTitle className="text-sm font-medium">Step 1: Articles</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2">
+              <CardContent>
                 <Link to="/admin/bulk-import">
                   <Button className="w-full" variant="outline">
                     <Upload className="mr-2 h-4 w-4" />
                     Bulk Import
                   </Button>
                 </Link>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium">Step 2: Images</CardTitle>
+              </CardHeader>
+              <CardContent>
                 <Link to="/admin/image-migration">
                   <Button className="w-full" variant="outline">
                     <ImageIcon className="mr-2 h-4 w-4" />
                     Image Migration
                   </Button>
                 </Link>
-                <Link to="/redirects">
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium">Step 3: Redirects</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Link to="/admin/bulk-redirects">
                   <Button className="w-full" variant="outline">
                     <FileText className="mr-2 h-4 w-4" />
-                    Manage Redirects
+                    Bulk Redirects
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium">Step 4: Links</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Link to="/admin/content-processor">
+                  <Button className="w-full" variant="outline">
+                    <FileText className="mr-2 h-4 w-4" />
+                    Process Content
                   </Button>
                 </Link>
               </CardContent>

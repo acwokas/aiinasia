@@ -24,6 +24,8 @@ import Redirects from "./pages/Redirects";
 import BulkImport from "./pages/BulkImport";
 import ImageMigration from "./pages/ImageMigration";
 import MigrationDashboard from "./pages/MigrationDashboard";
+import BulkRedirects from "./pages/BulkRedirects";
+import ContentProcessor from "./pages/ContentProcessor";
 import NotFound from "./pages/NotFound";
 import Events from "./pages/Events";
 import NewsletterPopup from "./components/NewsletterPopup";
@@ -71,6 +73,8 @@ const App = () => (
             <Route path="/admin/bulk-import" element={<BulkImport />} />
             <Route path="/admin/image-migration" element={<ImageMigration />} />
             <Route path="/admin/migration-dashboard" element={<MigrationDashboard />} />
+            <Route path="/admin/bulk-redirects" element={<BulkRedirects />} />
+            <Route path="/admin/content-processor" element={<ContentProcessor />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <CollectiveFooter />
