@@ -58,10 +58,8 @@ export default {
         turquoise: {
           DEFAULT: "hsl(var(--turquoise))",
           light: "hsl(var(--turquoise-light))",
-        },
-        saffron: {
-          DEFAULT: "hsl(var(--saffron))",
-          light: "hsl(var(--saffron-light))",
+          accent: "hsl(var(--turquoise-accent))",
+          bright: "hsl(var(--turquoise-bright))",
         },
       },
       borderRadius: {

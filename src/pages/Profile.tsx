@@ -170,7 +170,7 @@ const Profile = () => {
 
             <Card className="p-6">
               <div className="flex items-center gap-3">
-                <Award className="h-8 w-8 text-yellow-500" />
+                <Award className="h-8 w-8 text-accent" />
                 <div>
                   <p className="text-sm text-muted-foreground">Achievements</p>
                   <p className="text-2xl font-bold">

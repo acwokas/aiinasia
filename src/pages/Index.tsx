@@ -401,7 +401,7 @@ const Index = () => {
               { name: "Shop with the power of AI.", desc: "AI-curated deals from around the web", url: "https://www.myofferclub.com", category: "Retail" },
             ].map((tool, i) => (
               <div key={i} className="article-card p-6 relative">
-                <Badge className="absolute top-3 right-3 bg-yellow-500 text-black hover:bg-yellow-600">
+                <Badge className="absolute top-3 right-3 bg-accent text-accent-foreground hover:bg-accent/90">
                   {tool.category}
                 </Badge>
                 <h3 className="font-semibold text-lg mb-3 pr-20">{tool.name}</h3>

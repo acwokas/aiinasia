@@ -20,13 +20,13 @@ All colors MUST be HSL.
     --primary: 188 85% 40%;
     --primary-foreground: 0 0% 100%;
     
-    --secondary: 38 95% 55%;
-    --secondary-foreground: 220 15% 15%;
+    --secondary: 188 60% 30%;
+    --secondary-foreground: 0 0% 100%;
     
     --muted: 220 13% 96%;
     --muted-foreground: 220 10% 45%;
     
-    --accent: 188 85% 40%;
+    --accent: 188 70% 55%;
     --accent-foreground: 0 0% 100%;
     
     --destructive: 0 72% 51%;
@@ -43,9 +43,8 @@ All colors MUST be HSL.
     
     --turquoise: 188 85% 40%;
     --turquoise-light: 188 70% 55%;
-    
-    --saffron: 38 95% 55%;
-    --saffron-light: 38 95% 70%;
+    --turquoise-accent: 188 60% 30%;
+    --turquoise-bright: 188 70% 60%;
     
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.08);
@@ -65,13 +64,13 @@ All colors MUST be HSL.
     --primary: 188 80% 50%;
     --primary-foreground: 220 15% 10%;
     
-    --secondary: 38 90% 60%;
-    --secondary-foreground: 220 15% 10%;
+    --secondary: 188 60% 35%;
+    --secondary-foreground: 0 0% 100%;
     
     --muted: 220 15% 18%;
     --muted-foreground: 220 10% 60%;
     
-    --accent: 188 80% 50%;
+    --accent: 188 70% 60%;
     --accent-foreground: 220 15% 10%;
     
     --destructive: 0 72% 51%;
@@ -86,9 +85,8 @@ All colors MUST be HSL.
     
     --turquoise: 188 80% 50%;
     --turquoise-light: 188 70% 60%;
-    
-    --saffron: 38 90% 60%;
-    --saffron-light: 38 90% 75%;
+    --turquoise-accent: 188 60% 35%;
+    --turquoise-bright: 188 70% 65%;
     
     --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.3);
     --shadow-card-hover: 0 8px 24px rgba(0, 0, 0, 0.4);
