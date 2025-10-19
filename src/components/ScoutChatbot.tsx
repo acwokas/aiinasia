@@ -194,7 +194,7 @@ const ScoutChatbot = () => {
   }
 
   return (
-    <div className="fixed bottom-6 right-6 w-96 h-[600px] z-50 animate-scale-in">
+    <div className="fixed bottom-4 right-4 left-4 md:left-auto md:right-6 md:w-96 h-[600px] max-h-[85vh] z-50 animate-scale-in">
       {/* Outer glow effect */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 rounded-2xl blur-xl" />
       
