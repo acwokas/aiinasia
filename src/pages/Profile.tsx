@@ -331,17 +331,19 @@ const Profile = () => {
   const handleAchievementClick = (achievement: Achievement) => {
     if (achievement.earned_at) return; // Already earned, do nothing
     
-    // Route to appropriate section based on achievement
+    // Show helpful toast based on achievement type without navigating
     switch (achievement.name) {
       // Reading achievements
       case 'First Steps':
       case 'Knowledge Seeker':
       case 'Dedicated Reader':
       case 'AI Scholar':
-        navigate('/');
+      case 'AI Pioneer':
+      case 'News Hound':
+      case 'Tool Explorer':
         toast({
           title: "Start Reading! 📚",
-          description: "Browse our latest AI articles to earn this achievement",
+          description: "Browse our latest AI articles on the homepage to earn this achievement",
         });
         break;
       
@@ -349,37 +351,34 @@ const Profile = () => {
       case 'Week Warrior':
       case 'Month Master':
       case 'Early Adopter':
-        navigate('/');
         toast({
           title: "Build Your Streak! 🔥",
-          description: "Read articles daily to maintain your reading streak",
+          description: "Read articles daily to maintain your reading streak and unlock this badge",
         });
         break;
       
       // Comment achievements
       case 'Conversationalist':
       case 'Comment Champion':
-      case 'Thought Leader':
-        navigate('/');
+      case 'Conversation Master':
         toast({
           title: "Join the Discussion! 💬",
-          description: "Comment on articles to earn this achievement",
+          description: "Comment on articles to earn this achievement and engage with the community",
         });
         break;
       
       // Bookmark achievements
-      case 'Bookworm':
-        navigate('/');
+      case 'First Bookmark':
+      case 'Bookmark Collector':
         toast({
           title: "Start Bookmarking! 🔖",
-          description: "Save articles you love to earn this achievement",
+          description: "Save articles you love to your bookmarks to earn this achievement",
         });
         break;
       
       // Sharing achievements
       case 'Social Sharer':
       case 'Social Butterfly':
-        navigate('/');
         toast({
           title: "Share the Knowledge! 📢",
           description: "Share articles on social media to earn this achievement",
@@ -389,12 +388,9 @@ const Profile = () => {
       // Profile completion achievements
       case 'Digital Pioneer':
       case 'Profile Master':
-        // Switch to account settings tab
-        const accountTab = document.querySelector('[value="account"]') as HTMLElement;
-        accountTab?.click();
         toast({
           title: "Complete Your Profile! ✨",
-          description: "Fill in your profile information to earn this achievement",
+          description: "Fill in all profile information in Account Settings to earn this badge",
         });
         break;
       
@@ -402,36 +398,30 @@ const Profile = () => {
       case 'Explorer':
       case 'Enthusiast':
       case 'Expert':
-        // Switch to stats tab to show progress
-        const statsTab = document.querySelector('[value="stats"]') as HTMLElement;
-        statsTab?.click();
+      case 'Thought Leader':
         toast({
           title: "Keep Earning Points! ⚡",
-          description: "Read articles and engage with content to level up",
+          description: "Read articles and engage with content to level up and unlock this badge",
         });
         break;
       
       // Newsletter achievement
       case 'Newsletter Insider':
-        const accountTab2 = document.querySelector('[value="account"]') as HTMLElement;
-        accountTab2?.click();
         toast({
           title: "Subscribe to Newsletter! 📧",
-          description: "Enable newsletter subscription in account settings",
+          description: "Enable newsletter subscription in Account Settings to earn this badge",
         });
         break;
       
       // Regional achievements
       case 'Asia Expert':
-        navigate('/');
         toast({
           title: "Explore All Regions! 🌏",
-          description: "Read articles from different Asian countries",
+          description: "Read articles from different Asian countries to earn this achievement",
         });
         break;
       
       default:
-        navigate('/');
         toast({
           title: "Keep Exploring! 🚀",
           description: "Continue using the platform to unlock this achievement",
