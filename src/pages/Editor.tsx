@@ -1,5 +1,5 @@
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
 import Header from "@/components/Header";
@@ -13,6 +13,7 @@ const Editor = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [user, setUser] = useState<any>(null);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     checkAuth();
@@ -72,26 +73,35 @@ const Editor = () => {
 
         if (error) throw error;
 
+        // Refetch article data to get updated preview_code
+        await queryClient.invalidateQueries({ queryKey: ["article-edit", articleId] });
+
         toast({
           title: "Success!",
           description: "Article updated successfully.",
         });
       } else {
-        const { error } = await supabase
+        const { data: newArticle, error } = await supabase
           .from("articles")
           .insert({
             ...data,
             created_by: user.id,
             updated_by: user.id,
-          });
+          })
+          .select()
+          .single();
 
         if (error) throw error;
 
         toast({
           title: "Success!",
-          description: "Article created successfully.",
+          description: "Article created successfully. Redirecting to editor...",
         });
-        navigate("/admin");
+        
+        // Navigate to edit the newly created article so preview code is available
+        setTimeout(() => {
+          navigate(`/editor?id=${newArticle.id}`);
+        }, 1000);
       }
     } catch (error: any) {
       toast({
