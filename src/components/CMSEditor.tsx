@@ -399,6 +399,16 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
               </div>
 
               <div>
+                <Label htmlFor="slug">Slug</Label>
+                <Input
+                  id="slug"
+                  value={slug}
+                  onChange={(e) => setSlug(e.target.value)}
+                  placeholder="article-url-slug"
+                />
+              </div>
+
+              <div>
                 <Label htmlFor="article-type">Article Type</Label>
                 <Select value={articleType} onValueChange={setArticleType}>
                   <SelectTrigger id="article-type">
@@ -437,16 +447,6 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
                 <p className="text-xs text-muted-foreground mt-1">
                   Main category for this article (used for related articles)
                 </p>
-              </div>
-
-              <div>
-                <Label htmlFor="slug">Slug</Label>
-                <Input
-                  id="slug"
-                  value={slug}
-                  onChange={(e) => setSlug(e.target.value)}
-                  placeholder="article-url-slug"
-                />
               </div>
 
               <div>
