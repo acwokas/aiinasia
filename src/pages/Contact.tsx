@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Mail, MapPin, Phone } from "lucide-react";
+import { z } from "zod";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -16,6 +17,25 @@ import {
   BreadcrumbSeparator,
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
+
+const contactSchema = z.object({
+  name: z.string()
+    .trim()
+    .min(1, { message: "Name is required" })
+    .max(100, { message: "Name must be less than 100 characters" }),
+  email: z.string()
+    .trim()
+    .email({ message: "Invalid email address" })
+    .max(255, { message: "Email must be less than 255 characters" }),
+  subject: z.string()
+    .trim()
+    .min(1, { message: "Subject is required" })
+    .max(200, { message: "Subject must be less than 200 characters" }),
+  message: z.string()
+    .trim()
+    .min(10, { message: "Message must be at least 10 characters" })
+    .max(2000, { message: "Message must be less than 2000 characters" })
+});
 
 const Contact = () => {
   const { toast } = useToast();
@@ -26,15 +46,25 @@ const Contact = () => {
     setIsSubmitting(true);
     
     const formData = new FormData(e.currentTarget);
-    const name = formData.get('name') as string;
-    const email = formData.get('email') as string;
-    const subject = formData.get('subject') as string;
-    const message = formData.get('message') as string;
+    const rawData = {
+      name: formData.get('name') as string,
+      email: formData.get('email') as string,
+      subject: formData.get('subject') as string,
+      message: formData.get('message') as string,
+    };
 
     try {
+      // Validate input
+      const validatedData = contactSchema.parse(rawData);
+
       const { error } = await supabase
         .from('contact_messages')
-        .insert([{ name, email, subject, message }]);
+        .insert({
+          name: validatedData.name,
+          email: validatedData.email,
+          subject: validatedData.subject,
+          message: validatedData.message
+        });
 
       if (error) throw error;
 
@@ -45,12 +75,20 @@ const Contact = () => {
       
       (e.target as HTMLFormElement).reset();
     } catch (error) {
-      console.error('Error sending message:', error);
-      toast({
-        title: "Error",
-        description: "Failed to send message. Please try again.",
-        variant: "destructive",
-      });
+      if (error instanceof z.ZodError) {
+        toast({
+          title: "Validation Error",
+          description: error.errors[0].message,
+          variant: "destructive",
+        });
+      } else {
+        console.error('Error sending message:', error);
+        toast({
+          title: "Error",
+          description: "Failed to send message. Please try again.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -122,21 +160,40 @@ const Contact = () => {
                 <label htmlFor="name" className="block text-sm font-medium mb-2">
                   Name *
                 </label>
-                <Input id="name" name="name" required placeholder="Your full name" />
+                <Input 
+                  id="name" 
+                  name="name" 
+                  required 
+                  maxLength={100}
+                  placeholder="Your full name" 
+                />
               </div>
               
               <div>
                 <label htmlFor="email" className="block text-sm font-medium mb-2">
                   Email *
                 </label>
-                <Input id="email" name="email" type="email" required placeholder="your@email.com" />
+                <Input 
+                  id="email" 
+                  name="email" 
+                  type="email" 
+                  required 
+                  maxLength={255}
+                  placeholder="your@email.com" 
+                />
               </div>
               
               <div>
                 <label htmlFor="subject" className="block text-sm font-medium mb-2">
                   Subject *
                 </label>
-                <Input id="subject" name="subject" required placeholder="What's this about?" />
+                <Input 
+                  id="subject" 
+                  name="subject" 
+                  required 
+                  maxLength={200}
+                  placeholder="What's this about?" 
+                />
               </div>
               
               <div>
@@ -146,7 +203,9 @@ const Contact = () => {
                 <Textarea 
                   id="message"
                   name="message"
-                  required 
+                  required
+                  minLength={10}
+                  maxLength={2000}
                   placeholder="Tell us more..."
                   className="min-h-[150px]"
                 />

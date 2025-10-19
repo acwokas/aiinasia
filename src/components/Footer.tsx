@@ -5,6 +5,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import logo from "@/assets/aiinasia-logo.png";
+import { z } from "zod";
+
+const emailSchema = z.string()
+  .trim()
+  .email({ message: "Invalid email address" })
+  .max(255, { message: "Email must be less than 255 characters" });
 
 const Footer = () => {
   const [email, setEmail] = useState("");
@@ -17,9 +23,12 @@ const Footer = () => {
     setIsSubmitting(true);
 
     try {
+      // Validate email
+      const validatedEmail = emailSchema.parse(email);
+
       const { error } = await supabase
         .from("newsletter_subscribers")
-        .insert([{ email }]);
+        .insert([{ email: validatedEmail }]);
 
       if (error) {
         if (error.code === "23505") {
@@ -77,11 +86,19 @@ const Footer = () => {
         setEmail("");
       }
     } catch (error) {
-      toast({
-        title: "Subscription failed",
-        description: "Please try again later.",
-        variant: "destructive",
-      });
+      if (error instanceof z.ZodError) {
+        toast({
+          title: "Validation Error",
+          description: error.errors[0].message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Subscription failed",
+          description: "Please try again later.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -143,6 +160,7 @@ const Footer = () => {
                 className="flex-1"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                maxLength={255}
                 required
               />
               <Button variant="default" disabled={isSubmitting}>

@@ -5,6 +5,12 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { z } from "zod";
+
+const emailSchema = z.string()
+  .trim()
+  .email({ message: "Invalid email address" })
+  .max(255, { message: "Email must be less than 255 characters" });
 
 const NewsletterPopup = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -35,9 +41,12 @@ const NewsletterPopup = () => {
     setIsSubmitting(true);
 
     try {
+      // Validate email
+      const validatedEmail = emailSchema.parse(email);
+
       const { error } = await supabase
         .from("newsletter_subscribers")
-        .insert([{ email }]);
+        .insert([{ email: validatedEmail }]);
 
       if (error) {
         if (error.code === "23505") {
@@ -95,11 +104,19 @@ const NewsletterPopup = () => {
         handleClose();
       }
     } catch (error) {
-      toast({
-        title: "Subscription failed",
-        description: "Please try again later.",
-        variant: "destructive",
-      });
+      if (error instanceof z.ZodError) {
+        toast({
+          title: "Validation Error",
+          description: error.errors[0].message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Subscription failed",
+          description: "Please try again later.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -135,6 +152,7 @@ const NewsletterPopup = () => {
             className="w-full"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            maxLength={255}
             required
           />
           <Button className="w-full" size="lg" disabled={isSubmitting}>
