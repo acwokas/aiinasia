@@ -32,7 +32,7 @@ const Index = () => {
         `)
         .eq("status", "published")
         .eq("featured_on_homepage", true)
-        .order("published_at", { ascending: false })
+        .order("published_at", { ascending: false, nullsFirst: false })
         .limit(1)
         .maybeSingle();
       
@@ -54,6 +54,7 @@ const Index = () => {
         `)
         .eq("status", "published")
         .order("view_count", { ascending: false })
+        .order("published_at", { ascending: false, nullsFirst: false })
         .limit(10);
       
       if (topError) throw topError;
@@ -72,7 +73,7 @@ const Index = () => {
           categories:primary_category_id (name)
         `)
         .eq("status", "published")
-        .order("published_at", { ascending: false })
+        .order("published_at", { ascending: false, nullsFirst: false })
         .limit(4);
       
       if (latestError) throw latestError;
@@ -102,7 +103,7 @@ const Index = () => {
           categories:primary_category_id (name)
         `)
         .eq("status", "published")
-        .order("published_at", { ascending: false })
+        .order("published_at", { ascending: false, nullsFirst: false })
         .limit(8);
       
       if (error) throw error;
