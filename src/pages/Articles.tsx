@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Home, Search, Filter, Edit, Trash2, Eye, Plus } from "lucide-react";
+import { Loader2, Home, Search, Filter, Edit, Trash2, Eye, Plus, Pin, Globe } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import {
   AlertDialog,
@@ -83,6 +84,8 @@ const Articles = () => {
           article_type,
           author_id,
           primary_category_id,
+          sticky,
+          featured_on_homepage,
           authors (name, slug),
           categories:primary_category_id (name, slug)
         `);
@@ -392,6 +395,18 @@ const Articles = () => {
                   >
                     Views {sortBy === "view_count" && (sortOrder === "asc" ? "↑" : "↓")}
                   </TableHead>
+                  <TableHead className="text-center">
+                    <div className="flex items-center justify-center gap-1">
+                      <Pin className="h-3 w-3" />
+                      Sticky
+                    </div>
+                  </TableHead>
+                  <TableHead className="text-center">
+                    <div className="flex items-center justify-center gap-1">
+                      <Globe className="h-3 w-3" />
+                      Homepage
+                    </div>
+                  </TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -471,6 +486,18 @@ const Articles = () => {
                     </TableCell>
                     <TableCell>
                       {article.view_count || 0}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Switch
+                        checked={article.sticky || false}
+                        onCheckedChange={(checked) => handleUpdate(article.id, "sticky", checked)}
+                      />
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Switch
+                        checked={article.featured_on_homepage || false}
+                        onCheckedChange={(checked) => handleUpdate(article.id, "featured_on_homepage", checked)}
+                      />
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-2">
