@@ -38,9 +38,11 @@ const Header = () => {
             </a>
             
             <nav className="hidden md:flex items-center space-x-6">
-              <a href="/category/features" className="text-sm font-medium hover:text-primary transition-colors">Features</a>
               <a href="/category/news" className="text-sm font-medium hover:text-primary transition-colors">News</a>
-              <a href="/category/tools" className="text-sm font-medium hover:text-primary transition-colors">Tools</a>
+              <a href="/category/business" className="text-sm font-medium hover:text-primary transition-colors">Business</a>
+              <a href="/category/learn" className="text-sm font-medium hover:text-primary transition-colors">Learn</a>
+              <a href="/category/live" className="text-sm font-medium hover:text-primary transition-colors">Live</a>
+              <a href="/category/create" className="text-sm font-medium hover:text-primary transition-colors">Create</a>
               <a href="/category/voices" className="text-sm font-medium hover:text-primary transition-colors">Voices</a>
               <a href="/about" className="text-sm font-medium hover:text-primary transition-colors">About</a>
             </nav>
@@ -96,9 +98,11 @@ const Header = () => {
         {isMenuOpen && (
           <nav className="md:hidden py-4 border-t border-border">
             <div className="flex flex-col space-y-3">
-              <a href="/category/features" className="text-sm font-medium hover:text-primary transition-colors">Features</a>
               <a href="/category/news" className="text-sm font-medium hover:text-primary transition-colors">News</a>
-              <a href="/category/tools" className="text-sm font-medium hover:text-primary transition-colors">Tools</a>
+              <a href="/category/business" className="text-sm font-medium hover:text-primary transition-colors">Business</a>
+              <a href="/category/learn" className="text-sm font-medium hover:text-primary transition-colors">Learn</a>
+              <a href="/category/live" className="text-sm font-medium hover:text-primary transition-colors">Live</a>
+              <a href="/category/create" className="text-sm font-medium hover:text-primary transition-colors">Create</a>
               <a href="/category/voices" className="text-sm font-medium hover:text-primary transition-colors">Voices</a>
               <a href="/about" className="text-sm font-medium hover:text-primary transition-colors">About</a>
               <a href="/contact" className="text-sm font-medium hover:text-primary transition-colors">Contact</a>
