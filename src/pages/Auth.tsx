@@ -121,7 +121,10 @@ const Auth = () => {
         return;
       }
 
-      if (data.user) {
+      if (data.user && data.session) {
+        // Wait a moment for the session to be fully established
+        await new Promise(resolve => setTimeout(resolve, 500));
+
         // Prepare profile data
         const profileData: any = {
           id: data.user.id,
@@ -136,6 +139,7 @@ const Auth = () => {
         };
 
         // Upload avatar if provided
+        let avatarUrl = null;
         if (avatarFile) {
           try {
             const fileExt = 'jpg';
@@ -154,17 +158,30 @@ const Auth = () => {
               const { data: { publicUrl } } = supabase.storage
                 .from('article-images')
                 .getPublicUrl(fileName);
-              profileData.avatar_url = publicUrl;
+              avatarUrl = publicUrl;
+              profileData.avatar_url = avatarUrl;
             }
           } catch (err) {
             console.error('Avatar processing error:', err);
           }
         }
 
-        // Upsert profile (insert or update)
-        const { error: profileError } = await supabase
+        // Update profile - using update instead of upsert since the trigger creates it
+        const { error: profileError, data: profileResult } = await supabase
           .from('profiles')
-          .upsert(profileData, { onConflict: 'id' });
+          .update({
+            first_name: firstName,
+            last_name: lastName || null,
+            username: firstName || email.split('@')[0],
+            company: company || null,
+            job_title: jobTitle || null,
+            country: country || null,
+            interests: interests.length > 0 ? interests : null,
+            newsletter_subscribed: newsletterOptIn,
+            ...(avatarUrl && { avatar_url: avatarUrl })
+          })
+          .eq('id', data.user.id)
+          .select();
 
         if (profileError) {
           console.error('Profile update error:', profileError);
@@ -173,6 +190,8 @@ const Auth = () => {
             description: "Account created but profile update failed. Please update your profile later.",
             variant: "destructive",
           });
+        } else {
+          console.log('Profile updated successfully:', profileResult);
         }
 
         // Add to newsletter if opted in
@@ -182,7 +201,7 @@ const Auth = () => {
             .insert({ email, confirmed: true })
             .select();
           
-          if (newsletterError) {
+          if (newsletterError && !newsletterError.message?.includes('duplicate')) {
             console.error('Newsletter subscription error:', newsletterError);
           }
         }
