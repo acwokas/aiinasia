@@ -32,7 +32,7 @@ const Header = () => {
           <div className="flex items-end gap-8">
             <a href="/" className="flex flex-col items-start -ml-8 mb-4">
               <img src={logo} alt="AI in Asia" className="h-32 md:h-24 w-auto" />
-              <span className="text-xs md:text-sm text-muted-foreground font-medium leading-tight -mt-10 ml-8" style={{ width: '180px', maxWidth: '180px' }}>
+              <span className="text-xs text-muted-foreground font-medium leading-tight -mt-10 ml-8 md:hidden" style={{ width: '180px', maxWidth: '180px' }}>
                 AI news, insights and innovation
               </span>
             </a>
