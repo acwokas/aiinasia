@@ -344,11 +344,10 @@ const Index = () => {
                 <BusinessInAByteAd />
               </div>
 
-              <div className="flex items-center gap-2 bg-secondary text-secondary-foreground px-3 py-1.5 mb-6">
+              <div className="bg-secondary text-secondary-foreground px-3 py-1.5 mb-6">
                 <div className="text-xs font-bold uppercase">
                   Latest
                 </div>
-                <span className="text-xs opacity-80">Videos</span>
               </div>
               <div className="space-y-4">
               {latestArticles?.filter((article: any) => article.slug).map((article: any) => (
