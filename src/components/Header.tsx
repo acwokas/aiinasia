@@ -31,7 +31,7 @@ const Header = () => {
         <div className="flex h-24 items-center justify-between">
           <div className="flex items-center gap-8">
             <a href="/" className="flex flex-col items-start -mb-2">
-              <img src={logo} alt="AI in Asia" className="h-20 md:h-24 w-auto" />
+              <img src={logo} alt="AI in Asia" className="h-24 md:h-24 w-auto" />
               <span className="text-xs md:text-sm text-muted-foreground font-medium leading-tight -mt-5 pl-1" style={{ width: '180px', maxWidth: '180px' }}>
                 AI news, insights and innovation
               </span>
