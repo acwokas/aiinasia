@@ -29,10 +29,10 @@ const Header = () => {
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4">
         <div className="flex h-24 items-center justify-between">
-          <div className="flex items-end md:items-center gap-8">
-            <a href="/" className="flex flex-col items-start">
-              <img src={logo} alt="AI in Asia" className="h-24 md:h-28 w-auto" />
-              <span className="text-sm md:text-base text-muted-foreground font-medium leading-tight -mt-3 md:-mt-4" style={{ width: '200px' }}>
+          <div className="flex items-center gap-8">
+            <a href="/" className="flex flex-col items-start -mb-2">
+              <img src={logo} alt="AI in Asia" className="h-20 md:h-24 w-auto" />
+              <span className="text-xs md:text-sm text-muted-foreground font-medium leading-tight -mt-2" style={{ width: '180px', maxWidth: '180px' }}>
                 AI news, insights and innovation
               </span>
             </a>
