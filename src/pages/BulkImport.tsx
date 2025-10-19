@@ -250,15 +250,38 @@ export default function BulkImport() {
   };
 
   const downloadTemplate = () => {
-    const template = `title,slug,old_slug,content,excerpt,author,meta_title,meta_description,featured_image_url,featured_image_alt,published_at
-"Sample Article Title","sample-article-slug","old-sample-slug","This is the article content","Brief excerpt","Author Name","Meta Title","Meta description for SEO","https://example.com/image.jpg","Image alt text","2024-01-01T00:00:00Z"`;
+    const template = `title,slug,old_slug,content,excerpt,author,meta_title,meta_description,featured_image_url,featured_image_alt,published_at,article_type
+"Sample Article Title","sample-article-slug","old-sample-slug","This is the article content. You can use multiple paragraphs.
+
+Just press Enter to create new paragraphs within the quoted content field.
+
+You can include links: https://example.com","Brief excerpt of the article for preview","Author Name","Meta Title for SEO","Meta description for SEO (max 160 characters)","https://example.com/image.jpg","Image alt text for accessibility","2024-01-15T10:30:00Z","article"
+"How to Write Article Content","content-writing-guide","old-guide-slug","When writing content for the CSV:
+
+1. Wrap the entire content in quotes
+2. Use actual line breaks for paragraphs
+3. Escape quotes by doubling them: ""quoted text""
+4. Keep formatting simple - plain text works best
+
+Special characters are fine as long as the file is UTF-8 encoded.","Guide to formatting article content for CSV import","Your Name","Content Writing Guide | AI in ASIA","Learn how to properly format article content for bulk CSV import into the migration system.","https://example.com/guide.jpg","Content writing guide illustration","2024-02-01T14:00:00Z","article"`;
     
-    const blob = new Blob([template], { type: 'text/csv' });
+    const blob = new Blob([template], { type: 'text/csv;charset=utf-8;' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
     a.download = 'article-import-template.csv';
     a.click();
+    
+    // Also trigger download of detailed example
+    const link = document.createElement('a');
+    link.href = '/article-import-template-detailed.csv';
+    link.download = 'article-import-template-detailed.csv';
+    link.click();
+    
+    toast({
+      title: "Templates Downloaded",
+      description: "Check your downloads folder for both template files and MIGRATION_CSV_GUIDE.md",
+    });
   };
 
   if (loading) {
@@ -281,16 +304,31 @@ export default function BulkImport() {
 
           <Card className="mb-6">
             <CardHeader>
-              <CardTitle>CSV Template</CardTitle>
+              <CardTitle>📋 CSV Template & Guide</CardTitle>
               <CardDescription>
-                Download and fill out the CSV template with your article data
+                Download templates and comprehensive guide for preparing your article data
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <Button onClick={downloadTemplate} variant="outline">
+            <CardContent className="space-y-4">
+              <Button onClick={downloadTemplate} variant="outline" className="mr-2">
                 <Download className="mr-2 h-4 w-4" />
-                Download Template
+                Download CSV Templates
               </Button>
+              <Alert>
+                <FileText className="h-4 w-4" />
+                <AlertDescription>
+                  <strong>CSV Structure:</strong> title, slug, old_slug, content, excerpt, author, categories, tags, meta_title, meta_description, featured_image_url, featured_image_alt, published_at, article_type
+                  <br /><br />
+                  <strong>Tips:</strong>
+                  <ul className="list-disc list-inside mt-2 space-y-1">
+                    <li>Wrap fields containing commas in quotes</li>
+                    <li>Escape quotes by doubling them: ""quoted text""</li>
+                    <li>Use UTF-8 encoding for special characters</li>
+                    <li>Date format: YYYY-MM-DDTHH:MM:SSZ</li>
+                    <li>Test with 10-20 articles first!</li>
+                  </ul>
+                </AlertDescription>
+              </Alert>
             </CardContent>
           </Card>
 
