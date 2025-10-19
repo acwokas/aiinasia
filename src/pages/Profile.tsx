@@ -8,7 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2, TrendingUp, BookMarked, Award, Zap } from 'lucide-react';
+import { Loader2, TrendingUp, BookMarked, Award, Zap, User as UserIcon } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface UserStats {
   points: number;
@@ -27,12 +28,18 @@ interface Achievement {
   earned_at?: string;
 }
 
+interface Profile {
+  username: string;
+  avatar_url: string;
+}
+
 const Profile = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const [stats, setStats] = useState<UserStats | null>(null);
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [bookmarks, setBookmarks] = useState<any[]>([]);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -46,6 +53,15 @@ const Profile = () => {
 
   const fetchUserData = async () => {
     try {
+      // Fetch profile
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('username, avatar_url')
+        .eq('id', user!.id)
+        .single();
+      
+      setProfile(profileData);
+
       // Fetch stats
       const { data: statsData } = await supabase
         .from('user_stats')
@@ -126,11 +142,19 @@ const Profile = () => {
         {/* Stats Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-4xl font-bold mb-2">{user?.email}</h1>
-              <Badge className={`${levelInfo.color} text-white`}>
-                {levelInfo.name}
-              </Badge>
+            <div className="flex items-center gap-4">
+              <Avatar className="h-16 w-16">
+                <AvatarImage src={profile?.avatar_url || ''} alt={profile?.username || 'User'} />
+                <AvatarFallback>
+                  <UserIcon className="h-8 w-8" />
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <h1 className="text-4xl font-bold mb-2">{profile?.username || 'User'}</h1>
+                <Badge className={`${levelInfo.color} text-white`}>
+                  {levelInfo.name}
+                </Badge>
+              </div>
             </div>
             <Button onClick={handleSignOut} variant="outline">
               Sign Out
