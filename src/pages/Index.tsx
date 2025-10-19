@@ -149,14 +149,47 @@ const Index = () => {
   const { data: featuredAuthors } = useQuery({
     queryKey: ["featured-authors"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // Fetch Intelligence Desk author
+      const { data: intelligenceDesk, error: idError } = await supabase
+        .from("authors")
+        .select("*")
+        .eq("slug", "intelligence-desk")
+        .single();
+      
+      if (idError && idError.code !== 'PGRST116') throw idError;
+      
+      // Fetch other top authors
+      const query = supabase
         .from("authors")
         .select("*")
         .order("article_count", { ascending: false })
-        .limit(4);
+        .limit(intelligenceDesk ? 5 : 4);
+      
+      // Exclude Intelligence Desk from main query if found
+      if (intelligenceDesk) {
+        query.neq("slug", "intelligence-desk");
+      }
+      
+      const { data: otherAuthors, error } = await query;
       
       if (error) throw error;
-      return data || [];
+      
+      // Arrange authors: first 3 from top authors, Intelligence Desk as 4th
+      const result = [];
+      const authors = otherAuthors || [];
+      
+      // Add first 3 top authors
+      result.push(...authors.slice(0, 3));
+      
+      // Add Intelligence Desk as 4th if available
+      if (intelligenceDesk) {
+        result.push(intelligenceDesk);
+      } else {
+        // If Intelligence Desk not found, just use the 4th author
+        if (authors[3]) result.push(authors[3]);
+      }
+      
+      return result;
     },
   });
 
