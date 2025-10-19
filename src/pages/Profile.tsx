@@ -87,7 +87,158 @@ const Profile = () => {
     }
 
     fetchUserData();
+    completePendingProfile();
   }, [user, navigate]);
+
+  const completePendingProfile = async () => {
+    const pendingData = sessionStorage.getItem('pendingProfileData');
+    if (!pendingData || !user) return;
+
+    try {
+      const data = JSON.parse(pendingData);
+      
+      // Clear the pending data first
+      sessionStorage.removeItem('pendingProfileData');
+
+      // Wait a moment to ensure session is ready
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Upload avatar if provided
+      let avatarUrl = null;
+      if (data.avatarData) {
+        try {
+          // Convert base64 to blob
+          const response = await fetch(data.avatarData);
+          const blob = await response.blob();
+          
+          const compressed = await compressImage(blob as File, {
+            maxWidth: 400,
+            maxHeight: 400,
+            quality: 0.8,
+            maxSizeMB: 0.5,
+          });
+
+          const fileExt = 'jpg';
+          const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+          
+          const { error: uploadError } = await supabase.storage
+            .from('article-images')
+            .upload(fileName, compressed, {
+              cacheControl: '3600',
+              upsert: false
+            });
+
+          if (!uploadError) {
+            const { data: { publicUrl } } = supabase.storage
+              .from('article-images')
+              .getPublicUrl(fileName);
+            avatarUrl = publicUrl;
+          } else {
+            console.error('Avatar upload error:', uploadError);
+          }
+        } catch (err) {
+          console.error('Avatar processing error:', err);
+        }
+      }
+
+      // Update profile
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({
+          first_name: data.firstName,
+          last_name: data.lastName || null,
+          username: data.firstName || data.email?.split('@')[0],
+          company: data.company || null,
+          job_title: data.jobTitle || null,
+          country: data.country || null,
+          interests: data.interests?.length > 0 ? data.interests : null,
+          newsletter_subscribed: data.newsletterOptIn,
+          ...(avatarUrl && { avatar_url: avatarUrl })
+        })
+        .eq('id', user.id);
+
+      if (profileError) {
+        console.error('Profile completion error:', profileError);
+        toast({
+          title: "Warning",
+          description: "Failed to complete profile setup. You can update it manually.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Add to newsletter if opted in
+      if (data.newsletterOptIn) {
+        await supabase
+          .from('newsletter_subscribers')
+          .insert({ email: data.email, confirmed: true })
+          .select();
+      }
+
+      // Calculate and award points
+      let points = 20; // Base signup points
+      if (data.newsletterOptIn) points += 5;
+      if (avatarUrl) points += 5;
+      if (data.lastName) points += 3;
+      if (data.company) points += 5;
+      if (data.jobTitle) points += 5;
+      if (data.country) points += 3;
+      points += (data.interests?.length || 0) * 2;
+
+      await supabase.rpc('award_points', {
+        _user_id: user.id,
+        _points: points
+      });
+
+      // Award achievements
+      const { data: digitalPioneer } = await supabase
+        .from('achievements')
+        .select('id')
+        .eq('name', 'Digital Pioneer')
+        .single();
+
+      if (digitalPioneer?.id) {
+        await supabase
+          .from('user_achievements')
+          .insert({
+            user_id: user.id,
+            achievement_id: digitalPioneer.id
+          });
+      }
+
+      if (points >= 45) {
+        const { data: profileMaster } = await supabase
+          .from('achievements')
+          .select('id')
+          .eq('name', 'Profile Master')
+          .single();
+
+        if (profileMaster?.id) {
+          await supabase
+            .from('user_achievements')
+            .insert({
+              user_id: user.id,
+              achievement_id: profileMaster.id
+            });
+        }
+      }
+
+      await supabase.rpc('check_and_award_achievements', {
+        _user_id: user.id
+      });
+
+      toast({
+        title: "Profile Complete! 🎉",
+        description: `You earned ${points} points!`,
+      });
+
+      // Refresh data
+      fetchUserData();
+    } catch (error) {
+      console.error('Profile completion error:', error);
+      sessionStorage.removeItem('pendingProfileData');
+    }
+  };
 
   const fetchUserData = async () => {
     try {
