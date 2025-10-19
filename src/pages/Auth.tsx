@@ -111,6 +111,7 @@ const Auth = () => {
       const { error, data } = await signUp(email, password);
 
       if (error) {
+        console.error('Sign up error:', error);
         toast({
           title: "Error",
           description: error.message,
@@ -123,6 +124,7 @@ const Auth = () => {
       if (data.user) {
         // Prepare profile data
         const profileData: any = {
+          id: data.user.id,
           first_name: firstName,
           last_name: lastName || null,
           username: firstName || email.split('@')[0],
@@ -135,75 +137,112 @@ const Auth = () => {
 
         // Upload avatar if provided
         if (avatarFile) {
-          const fileExt = 'jpg';
-          const fileName = `${data.user.id}-${Date.now()}.${fileExt}`;
-          
-          const { error: uploadError } = await supabase.storage
-            .from('article-images')
-            .upload(fileName, avatarFile, {
-              cacheControl: '3600',
-              upsert: false
-            });
-
-          if (!uploadError) {
-            const { data: { publicUrl } } = supabase.storage
+          try {
+            const fileExt = 'jpg';
+            const fileName = `${data.user.id}-${Date.now()}.${fileExt}`;
+            
+            const { error: uploadError } = await supabase.storage
               .from('article-images')
-              .getPublicUrl(fileName);
-            profileData.avatar_url = publicUrl;
+              .upload(fileName, avatarFile, {
+                cacheControl: '3600',
+                upsert: false
+              });
+
+            if (uploadError) {
+              console.error('Avatar upload error:', uploadError);
+            } else {
+              const { data: { publicUrl } } = supabase.storage
+                .from('article-images')
+                .getPublicUrl(fileName);
+              profileData.avatar_url = publicUrl;
+            }
+          } catch (err) {
+            console.error('Avatar processing error:', err);
           }
         }
 
-        // Update profile
-        await supabase
+        // Upsert profile (insert or update)
+        const { error: profileError } = await supabase
           .from('profiles')
-          .update(profileData)
-          .eq('id', data.user.id);
+          .upsert(profileData, { onConflict: 'id' });
+
+        if (profileError) {
+          console.error('Profile update error:', profileError);
+          toast({
+            title: "Warning",
+            description: "Account created but profile update failed. Please update your profile later.",
+            variant: "destructive",
+          });
+        }
 
         // Add to newsletter if opted in
         if (newsletterOptIn) {
-          await supabase
+          const { error: newsletterError } = await supabase
             .from('newsletter_subscribers')
-            .insert({ email, confirmed: true });
+            .insert({ email, confirmed: true })
+            .select();
+          
+          if (newsletterError) {
+            console.error('Newsletter subscription error:', newsletterError);
+          }
         }
 
         // Award signup points based on information provided
         const signupPoints = calculateSignupPoints();
-        await supabase.rpc('award_points', {
+        const { error: pointsError } = await supabase.rpc('award_points', {
           _user_id: data.user.id,
           _points: signupPoints
         });
 
-        // Award signup achievements
-        // Digital Pioneer - for basic signup (always awarded)
-        await supabase
-          .from('user_achievements')
-          .insert({
-            user_id: data.user.id,
-            achievement_id: (await supabase
-              .from('achievements')
-              .select('id')
-              .eq('name', 'Digital Pioneer')
-              .single()).data?.id
-          });
-
-        // Profile Master - for completing optional info (45+ points)
-        if (signupPoints >= 45) {
-          await supabase
-            .from('user_achievements')
-            .insert({
-              user_id: data.user.id,
-              achievement_id: (await supabase
-                .from('achievements')
-                .select('id')
-                .eq('name', 'Profile Master')
-                .single()).data?.id
-            });
+        if (pointsError) {
+          console.error('Points award error:', pointsError);
         }
 
-        // Check for other achievements after signup
-        await supabase.rpc('check_and_award_achievements', {
-          _user_id: data.user.id
-        });
+        // Award signup achievements
+        try {
+          // Digital Pioneer - for basic signup (always awarded)
+          const { data: digitalPioneer } = await supabase
+            .from('achievements')
+            .select('id')
+            .eq('name', 'Digital Pioneer')
+            .single();
+
+          if (digitalPioneer?.id) {
+            await supabase
+              .from('user_achievements')
+              .insert({
+                user_id: data.user.id,
+                achievement_id: digitalPioneer.id
+              })
+              .select();
+          }
+
+          // Profile Master - for completing optional info (45+ points)
+          if (signupPoints >= 45) {
+            const { data: profileMaster } = await supabase
+              .from('achievements')
+              .select('id')
+              .eq('name', 'Profile Master')
+              .single();
+
+            if (profileMaster?.id) {
+              await supabase
+                .from('user_achievements')
+                .insert({
+                  user_id: data.user.id,
+                  achievement_id: profileMaster.id
+                })
+                .select();
+            }
+          }
+
+          // Check for other achievements after signup
+          await supabase.rpc('check_and_award_achievements', {
+            _user_id: data.user.id
+          });
+        } catch (achievementError) {
+          console.error('Achievement award error:', achievementError);
+        }
       }
 
       const earnedPoints = calculateSignupPoints();
@@ -216,9 +255,10 @@ const Auth = () => {
         description: `Account created successfully! You earned ${earnedPoints} points!${achievementText}`,
       });
     } catch (error) {
+      console.error('Sign up process error:', error);
       toast({
         title: "Error",
-        description: "Something went wrong",
+        description: error instanceof Error ? error.message : "Something went wrong during sign up",
         variant: "destructive",
       });
     }
