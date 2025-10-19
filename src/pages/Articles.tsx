@@ -398,6 +398,7 @@ const Articles = () => {
                   >
                     Views {sortBy === "view_count" && (sortOrder === "asc" ? "↑" : "↓")}
                   </TableHead>
+                  <TableHead className="text-center">View</TableHead>
                   <TableHead className="text-center">
                     <div className="flex items-center justify-center gap-1">
                       <Pin className="h-3 w-3" />
@@ -463,35 +464,23 @@ const Articles = () => {
                     <TableCell className="capitalize">
                       {article.article_type}
                     </TableCell>
-                     <TableCell>
-                       <div className="flex items-center gap-2">
-                         <Select
-                           value={article.status}
-                           onValueChange={(value) => handleUpdate(article.id, "status", value)}
-                         >
-                           <SelectTrigger className="w-[120px]">
-                             <SelectValue />
-                           </SelectTrigger>
-                           <SelectContent>
-                             <SelectItem value="draft">Draft</SelectItem>
-                             <SelectItem value="scheduled">Scheduled</SelectItem>
-                             <SelectItem value="review">Review</SelectItem>
-                             <SelectItem value="published">Published</SelectItem>
-                             <SelectItem value="archived">Archived</SelectItem>
-                           </SelectContent>
-                         </Select>
-                         <Button
-                           variant="ghost"
-                           size="icon"
-                           title="View on site"
-                           asChild
-                         >
-                           <Link to={`/article/${article.slug}`} target="_blank">
-                             <ExternalLink className="h-4 w-4" />
-                           </Link>
-                         </Button>
-                       </div>
-                     </TableCell>
+                    <TableCell>
+                      <Select
+                        value={article.status}
+                        onValueChange={(value) => handleUpdate(article.id, "status", value)}
+                      >
+                        <SelectTrigger className="w-[120px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="draft">Draft</SelectItem>
+                          <SelectItem value="scheduled">Scheduled</SelectItem>
+                          <SelectItem value="review">Review</SelectItem>
+                          <SelectItem value="published">Published</SelectItem>
+                          <SelectItem value="archived">Archived</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </TableCell>
                     <TableCell>
                       <Input
                         type="date"
@@ -502,6 +491,33 @@ const Articles = () => {
                     </TableCell>
                     <TableCell>
                       {article.view_count || 0}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {article.status === "published" ? (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          title="View published article"
+                          asChild
+                        >
+                          <Link to={`/article/${article.slug}`} target="_blank">
+                            <ExternalLink className="h-4 w-4" />
+                          </Link>
+                        </Button>
+                      ) : article.preview_code ? (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          title="Preview draft/scheduled article"
+                          asChild
+                        >
+                          <Link to={`/article/${article.slug}?preview=${article.preview_code}`} target="_blank">
+                            <Eye className="h-4 w-4 text-muted-foreground" />
+                          </Link>
+                        </Button>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">Save first</span>
+                      )}
                     </TableCell>
                     <TableCell className="text-center">
                       <Switch
@@ -517,29 +533,6 @@ const Articles = () => {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-2">
-                        {article.status === "published" ? (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            title="View published article"
-                            asChild
-                          >
-                            <Link to={`/article/${article.slug}`} target="_blank">
-                              <Eye className="h-4 w-4" />
-                            </Link>
-                          </Button>
-                        ) : article.preview_code ? (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            title="Preview draft"
-                            asChild
-                          >
-                            <Link to={`/article/${article.slug}?preview=${article.preview_code}`} target="_blank">
-                              <Eye className="h-4 w-4 text-muted-foreground" />
-                            </Link>
-                          </Button>
-                        ) : null}
                         <Button
                           variant="ghost"
                           size="icon"
