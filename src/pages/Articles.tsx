@@ -80,12 +80,14 @@ const Articles = () => {
           created_at,
           updated_at,
           published_at,
+          scheduled_for,
           view_count,
           article_type,
           author_id,
           primary_category_id,
           sticky,
           featured_on_homepage,
+          preview_code,
           authors (name, slug),
           categories:primary_category_id (name, slug)
         `);
@@ -515,18 +517,29 @@ const Articles = () => {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-2">
-                        {article.status === "published" && (
+                        {article.status === "published" ? (
                           <Button
                             variant="ghost"
                             size="icon"
-                            title="View"
+                            title="View published article"
                             asChild
                           >
                             <Link to={`/article/${article.slug}`} target="_blank">
                               <Eye className="h-4 w-4" />
                             </Link>
                           </Button>
-                        )}
+                        ) : article.preview_code ? (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            title="Preview draft"
+                            asChild
+                          >
+                            <Link to={`/article/${article.slug}?preview=${article.preview_code}`} target="_blank">
+                              <Eye className="h-4 w-4 text-muted-foreground" />
+                            </Link>
+                          </Button>
+                        ) : null}
                         <Button
                           variant="ghost"
                           size="icon"

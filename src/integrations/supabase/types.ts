@@ -137,6 +137,7 @@ export type Database = {
           meta_title: string | null
           podcast_audio_url: string | null
           podcast_duration_minutes: number | null
+          preview_code: string | null
           primary_category_id: string | null
           published_at: string | null
           reading_time_minutes: number | null
@@ -185,6 +186,7 @@ export type Database = {
           meta_title?: string | null
           podcast_audio_url?: string | null
           podcast_duration_minutes?: number | null
+          preview_code?: string | null
           primary_category_id?: string | null
           published_at?: string | null
           reading_time_minutes?: number | null
@@ -233,6 +235,7 @@ export type Database = {
           meta_title?: string | null
           podcast_audio_url?: string | null
           podcast_duration_minutes?: number | null
+          preview_code?: string | null
           primary_category_id?: string | null
           published_at?: string | null
           reading_time_minutes?: number | null

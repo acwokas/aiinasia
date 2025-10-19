@@ -358,6 +358,15 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
       }
     }
 
+    // Generate preview code if article is not published and doesn't have one
+    let previewCode = initialData?.preview_code;
+    if (finalStatus !== 'published' && !previewCode) {
+      previewCode = crypto.randomUUID().substring(0, 8);
+    } else if (finalStatus === 'published') {
+      // Clear preview code when publishing
+      previewCode = null;
+    }
+
     const data = {
       title,
       slug: slug.replace(/\//g, ''),
@@ -377,6 +386,7 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
       author_id: authorId || null,
       primary_category_id: primaryCategoryId || null,
       scheduled_for: scheduledDateTime,
+      preview_code: previewCode,
     };
     onSave?.(data);
   };
@@ -648,16 +658,31 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
                 <div className="flex items-center justify-between mb-2">
                   <Label htmlFor="status">Status</Label>
                   {slug && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      asChild
-                    >
-                      <a href={`/article/${slug}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1">
-                        <ExternalLink className="h-3 w-3" />
-                        View on site
-                      </a>
-                    </Button>
+                    <div className="flex gap-2">
+                      {status === 'published' ? (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          asChild
+                        >
+                          <a href={`/article/${slug}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1">
+                            <ExternalLink className="h-3 w-3" />
+                            View on site
+                          </a>
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          asChild
+                        >
+                          <a href={`/article/${slug}?preview=${initialData?.preview_code || 'pending'}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1">
+                            <ExternalLink className="h-3 w-3" />
+                            Preview draft
+                          </a>
+                        </Button>
+                      )}
+                    </div>
                   )}
                 </div>
                 <Select value={status} onValueChange={setStatus}>
@@ -672,6 +697,11 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
                     <SelectItem value="archived">Archived</SelectItem>
                   </SelectContent>
                 </Select>
+                {status !== 'published' && initialData?.preview_code && (
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Preview code: {initialData.preview_code}
+                  </p>
+                )}
               </div>
 
               <div className="flex items-center justify-between">

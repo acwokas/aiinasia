@@ -20,20 +20,33 @@ const Article = () => {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [isAuthorBioExpanded, setIsAuthorBioExpanded] = useState(false);
   const cleanSlug = slug?.replace(/\/+$/g, '');
+  
+  // Check for preview code in URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const previewCode = urlParams.get('preview');
+  const isPreview = !!previewCode;
 
   const { data: article, isLoading } = useQuery({
-    queryKey: ["article", cleanSlug],
+    queryKey: ["article", cleanSlug, previewCode],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("articles")
         .select(`
           *,
           authors (name, slug, bio, avatar_url, job_title),
           categories:primary_category_id (name, slug)
         `)
-        .eq("slug", cleanSlug)
-        .eq("status", "published")
-        .maybeSingle();
+        .eq("slug", cleanSlug);
+      
+      // If preview code provided, check for draft/scheduled articles with matching code
+      if (previewCode) {
+        query = query.eq("preview_code", previewCode);
+      } else {
+        // Otherwise only show published articles
+        query = query.eq("status", "published");
+      }
+      
+      const { data, error } = await query.maybeSingle();
       
       if (error) throw error;
       return data;
@@ -346,7 +359,11 @@ const Article = () => {
       <Helmet>
         <title>{article.meta_title || article.title} | AIinASIA</title>
         <meta name="description" content={article.meta_description || article.excerpt || ''} />
-        <link rel="canonical" href={article.canonical_url || window.location.href} />
+        {isPreview ? (
+          <meta name="robots" content="noindex, nofollow" />
+        ) : (
+          <link rel="canonical" href={article.canonical_url || window.location.href} />
+        )}
       </Helmet>
 
       <div className="min-h-screen flex flex-col">
@@ -371,6 +388,13 @@ const Article = () => {
 
             {/* Article Header */}
             <header className="mb-8">
+              {isPreview && (
+                <div className="mb-4 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+                  <p className="text-sm font-medium text-yellow-600 dark:text-yellow-400">
+                    🔒 Preview Mode - This article is not publicly visible
+                  </p>
+                </div>
+              )}
               <Badge className="mb-4 bg-primary text-primary-foreground">
                 {article.categories?.name || 'Article'}
               </Badge>
