@@ -207,7 +207,7 @@ const Index = () => {
         <section className="container mx-auto px-4 py-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             {/* Trending Section - Left */}
-            <div className="lg:col-span-3 space-y-6">
+            <div className="lg:col-span-3 space-y-6 order-2 lg:order-1">
               <div className="flex items-center gap-2 mb-4">
                 <div className="bg-primary text-primary-foreground px-3 py-1 text-xs font-bold uppercase">
                   Trending
@@ -252,7 +252,7 @@ const Index = () => {
             </div>
 
             {/* Featured Article - Center */}
-            <div className="lg:col-span-6 space-y-6">
+            <div className="lg:col-span-6 space-y-6 order-1 lg:order-2">
               {/* Large Featured Article */}
               {featuredArticle && featuredArticle.slug ? (
                 <Link to={`/article/${featuredArticle.slug}`} className="block group">
@@ -337,7 +337,7 @@ const Index = () => {
             </div>
 
             {/* Latest Articles - Right */}
-            <div className="lg:col-span-3 space-y-4">
+            <div className="lg:col-span-3 space-y-4 order-3">
               {/* Advertisement Slot */}
               <div className="mb-6">
                 <p className="text-xs text-muted-foreground text-center mb-2">Advertisement</p>
