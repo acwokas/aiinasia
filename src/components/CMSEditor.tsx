@@ -670,16 +670,26 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
                             View on site
                           </a>
                         </Button>
-                      ) : (
+                      ) : initialData?.preview_code ? (
                         <Button
                           variant="ghost"
                           size="sm"
                           asChild
                         >
-                          <a href={`/article/${slug}?preview=${initialData?.preview_code || 'pending'}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1">
+                          <a href={`/article/${slug}?preview=${initialData.preview_code}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1">
                             <ExternalLink className="h-3 w-3" />
                             Preview draft
                           </a>
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          disabled
+                          title="Save article first to generate preview link"
+                        >
+                          <ExternalLink className="h-3 w-3" />
+                          Preview draft
                         </Button>
                       )}
                     </div>
@@ -697,6 +707,11 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
                     <SelectItem value="archived">Archived</SelectItem>
                   </SelectContent>
                 </Select>
+                {status !== 'published' && !initialData?.preview_code && (
+                  <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-2">
+                    💡 Save this article first to generate a preview link
+                  </p>
+                )}
                 {status !== 'published' && initialData?.preview_code && (
                   <p className="text-xs text-muted-foreground mt-2">
                     Preview code: {initialData.preview_code}
