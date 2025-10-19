@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -70,6 +70,7 @@ const Profile = () => {
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState("bookmarks");
+  const tabsRef = useRef<HTMLDivElement>(null);
   
   // Edit state
   const [editFirstName, setEditFirstName] = useState("");
@@ -651,13 +652,21 @@ const Profile = () => {
 
             <Card 
               className="p-6 cursor-pointer hover:shadow-lg transition-shadow" 
-              onClick={() => setActiveTab("achievements")}
+              onClick={() => {
+                setActiveTab("achievements");
+                setTimeout(() => {
+                  tabsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
+              }}
               role="button"
               tabIndex={0}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                   e.preventDefault();
                   setActiveTab("achievements");
+                  setTimeout(() => {
+                    tabsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }, 100);
                 }
               }}
             >
@@ -675,13 +684,14 @@ const Profile = () => {
         </div>
 
         {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="bookmarks">Bookmarks</TabsTrigger>
-            <TabsTrigger value="achievements">Achievements</TabsTrigger>
-            <TabsTrigger value="stats">Reading Stats</TabsTrigger>
-            <TabsTrigger value="account">Account Settings</TabsTrigger>
-          </TabsList>
+        <div ref={tabsRef}>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+            <TabsList>
+              <TabsTrigger value="bookmarks">Bookmarks</TabsTrigger>
+              <TabsTrigger value="achievements">Achievements</TabsTrigger>
+              <TabsTrigger value="stats">Reading Stats</TabsTrigger>
+              <TabsTrigger value="account">Account Settings</TabsTrigger>
+            </TabsList>
 
           <TabsContent value="bookmarks" className="space-y-4">
             {bookmarks.length === 0 ? (
@@ -930,6 +940,7 @@ const Profile = () => {
             </div>
           </TabsContent>
         </Tabs>
+        </div>
       </main>
 
       <Footer />
