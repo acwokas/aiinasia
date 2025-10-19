@@ -41,7 +41,7 @@ const CookiePolicy = () => {
           
           <h2 className="headline text-3xl mt-8 mb-4">How We Use Cookies</h2>
           <p>
-            AI in Asia uses cookies for the following purposes:
+            AI in ASIA uses cookies for the following purposes:
           </p>
           
           <h3 className="text-xl font-semibold mt-6 mb-3">Essential Cookies</h3>

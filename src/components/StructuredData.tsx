@@ -83,7 +83,7 @@ export const OrganizationStructuredData = () => {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: "AI in Asia",
+    name: "AI in ASIA",
     url: "https://aiinasia.com",
     logo: "https://aiinasia.com/logo.png",
     description: "Leading platform for AI news, insights, and innovation across Asia",

@@ -252,7 +252,7 @@ const Auth = () => {
     <div className="min-h-screen flex items-center justify-center bg-muted/30 px-4 py-8">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <img src={logo} alt="AI in Asia" className="h-16 mx-auto mb-4" />
+          <img src={logo} alt="AI in ASIA" className="h-16 mx-auto mb-4" />
           <p className="text-muted-foreground">Unlock points, bookmarks & personalized AI news</p>
         </div>
 

@@ -30,11 +30,11 @@ const About = () => {
           </BreadcrumbList>
         </Breadcrumb>
         
-        <h1 className="headline text-4xl md:text-5xl mb-6">About AI in Asia</h1>
+        <h1 className="headline text-4xl md:text-5xl mb-6">About AI in ASIA</h1>
         
         <div className="prose prose-lg max-w-none space-y-6">
           <p className="text-xl text-muted-foreground">
-            AI in Asia is the leading platform for artificial intelligence news, insights, and education across Asia, powered by you.withthepowerof.ai.
+            AI in ASIA is the leading platform for artificial intelligence news, insights, and education across Asia, powered by you.withthepowerof.ai.
           </p>
           
           <h2 className="headline text-3xl mt-8 mb-4">The Power of AI for Everyone</h2>
@@ -45,9 +45,9 @@ const About = () => {
             Our mission is to make AI accessible, understandable, and actionable for everyone. We bridge the gap between cutting-edge AI innovation and practical implementation through education, tools, and trusted journalism.
           </p>
           
-          <h2 className="headline text-3xl mt-8 mb-4">AIinASIA's Mission</h2>
+          <h2 className="headline text-3xl mt-8 mb-4">AI in ASIA's Mission</h2>
           <p>
-            As the news and insights arm of you.withthepowerof.ai, AI in Asia empowers the region's builders, innovators, and decision-makers with timely, accurate, and actionable AI intelligence. From breakthrough research to practical applications, we cover the stories that matter most to Asia's rapidly evolving AI landscape.
+            As the news and insights arm of you.withthepowerof.ai, AI in ASIA empowers the region's builders, innovators, and decision-makers with timely, accurate, and actionable AI intelligence. From breakthrough research to practical applications, we cover the stories that matter most to Asia's rapidly evolving AI landscape.
           </p>
           
           <h2 className="headline text-3xl mt-8 mb-4">What We Cover</h2>
@@ -64,7 +64,7 @@ const About = () => {
           
           <h2 className="headline text-3xl mt-8 mb-4">Gamification & Rewards 🎯</h2>
           <p>
-            At AI in Asia, we believe learning about AI should be engaging and rewarding. That's why we've built a comprehensive points and achievement system that recognizes your engagement and unlocks exclusive benefits.
+            At AI in ASIA, we believe learning about AI should be engaging and rewarding. That's why we've built a comprehensive points and achievement system that recognizes your engagement and unlocks exclusive benefits.
           </p>
           
           <h3 className="font-semibold text-xl mt-6 mb-3">How to Earn Points</h3>
@@ -113,7 +113,7 @@ const About = () => {
           
           <h3 className="font-semibold text-xl mt-6 mb-3">Partner Benefits & Premium Access</h3>
           <p>
-            Your points don't just unlock features on AI in Asia—they open doors across the entire <strong>you.withthepowerof.ai</strong> ecosystem:
+            Your points don't just unlock features on AI in ASIA—they open doors across the entire <strong>you.withthepowerof.ai</strong> ecosystem:
           </p>
           <ul className="space-y-2 mt-3">
             <li><strong>PromptAndGo.ai</strong> – Discounted access to premium prompt templates and advanced tools</li>
@@ -125,10 +125,10 @@ const About = () => {
           
           <h2 className="headline text-3xl mt-8 mb-4">Our Ecosystem</h2>
           <p>
-            AI in Asia is part of the <strong>you.withthepowerof.ai</strong> integrated ecosystem, where your engagement and learning journey is recognized across all platforms:
+            AI in ASIA is part of the <strong>you.withthepowerof.ai</strong> integrated ecosystem, where your engagement and learning journey is recognized across all platforms:
           </p>
           <ul className="space-y-2">
-            <li><strong>AIinASIA.com</strong> – Trusted AI news, insights, and analysis with gamified learning</li>
+            <li><strong>AI in ASIA</strong> – Trusted AI news, insights, and analysis with gamified learning</li>
             <li><strong>PromptAndGo.ai</strong> – Prompt engineering tools and resources for practitioners</li>
             <li><strong>BusinessInAByte.com</strong> – AI strategies and implementation guides for business leaders</li>
             <li><strong>AIAcademy.asia</strong> – Structured learning paths and professional certification programs</li>

@@ -36,7 +36,7 @@ const Privacy = () => {
         <div className="prose prose-lg max-w-none space-y-6">
           <h2 className="headline text-3xl mt-8 mb-4">Introduction</h2>
           <p>
-            AI in Asia ("we", "our", or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website.
+            AI in ASIA ("we", "our", or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website.
           </p>
           
           <h2 className="headline text-3xl mt-8 mb-4">Information We Collect</h2>

@@ -92,7 +92,7 @@ const Footer = () => {
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
           <div>
-            <img src={logo} alt="AI in Asia" className="h-24 mb-0 -ml-6" />
+            <img src={logo} alt="AI in ASIA" className="h-24 mb-0 -ml-6" />
             <p className="text-sm text-muted-foreground mb-4 -mt-4">
               Your trusted source for AI news, insights and innovation across Asia.
             </p>
@@ -131,7 +131,7 @@ const Footer = () => {
           </div>
 
           <div>
-            <h4 className="font-semibold mb-4">AI in Asia Brief</h4>
+            <h4 className="font-semibold mb-4">AI in ASIA Brief</h4>
             <p className="text-sm text-muted-foreground mb-4">
               Get weekly insights delivered to your inbox.
             </p>
@@ -152,7 +152,7 @@ const Footer = () => {
         </div>
 
         <div className="pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
-          <p>© 2025 AIinASIA. All rights reserved.</p>
+          <p>© 2025 AI in ASIA. All rights reserved.</p>
           <div className="flex gap-6">
             <a href="/privacy" className="hover:text-primary transition-colors">Privacy Policy</a>
             <a href="/terms" className="hover:text-primary transition-colors">Terms of Service</a>

@@ -541,7 +541,7 @@ const Index = () => {
               Never Miss an AI Breakthrough
             </h2>
             <p className="text-lg mb-8 opacity-90">
-              Join 10,000+ professionals getting the AI in Asia Brief every week.
+              Join 10,000+ professionals getting the AI in ASIA Brief every week.
             </p>
             <form onSubmit={handleNewsletterSignup} className="flex gap-4 max-w-md mx-auto">
               <Input

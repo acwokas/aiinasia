@@ -362,7 +362,7 @@ const Article = () => {
   return (
     <>
       <Helmet>
-        <title>{article.meta_title || article.title} | AIinASIA</title>
+        <title>{article.meta_title || article.title} | AI in ASIA</title>
         <meta name="description" content={article.meta_description || article.excerpt || ''} />
         {isPreview ? (
           <meta name="robots" content="noindex, nofollow" />

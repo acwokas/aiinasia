@@ -36,12 +36,12 @@ const Terms = () => {
         <div className="prose prose-lg max-w-none space-y-6">
           <h2 className="headline text-3xl mt-8 mb-4">Agreement to Terms</h2>
           <p>
-            By accessing or using AI in Asia, you agree to be bound by these Terms of Service and all applicable laws and regulations. If you do not agree with any part of these terms, you may not use our services.
+            By accessing or using AI in ASIA, you agree to be bound by these Terms of Service and all applicable laws and regulations. If you do not agree with any part of these terms, you may not use our services.
           </p>
           
           <h2 className="headline text-3xl mt-8 mb-4">Intellectual Property</h2>
           <p>
-            All content on AI in Asia, including text, graphics, logos, images, and software, is the property of AI in Asia or its content suppliers and is protected by international copyright laws.
+            All content on AI in ASIA, including text, graphics, logos, images, and software, is the property of AI in ASIA or its content suppliers and is protected by international copyright laws.
           </p>
           
           <h3 className="text-xl font-semibold mt-6 mb-3">Permitted Use</h3>
@@ -63,17 +63,17 @@ const Terms = () => {
           
           <h2 className="headline text-3xl mt-8 mb-4">User Content</h2>
           <p>
-            When you submit comments, feedback, or other content to AI in Asia, you grant us a non-exclusive, worldwide, royalty-free licence to use, reproduce, and publish such content.
+            When you submit comments, feedback, or other content to AI in ASIA, you grant us a non-exclusive, worldwide, royalty-free licence to use, reproduce, and publish such content.
           </p>
           
           <h2 className="headline text-3xl mt-8 mb-4">Disclaimer of Warranties</h2>
           <p>
-            AI in Asia is provided "as is" without warranties of any kind, either express or implied. We do not warrant that the service will be uninterrupted, error-free, or free from viruses or other harmful components.
+            AI in ASIA is provided "as is" without warranties of any kind, either express or implied. We do not warrant that the service will be uninterrupted, error-free, or free from viruses or other harmful components.
           </p>
           
           <h2 className="headline text-3xl mt-8 mb-4">Limitation of Liability</h2>
           <p>
-            In no event shall AI in Asia be liable for any indirect, incidental, special, consequential, or punitive damages arising out of or relating to your use of the service.
+            In no event shall AI in ASIA be liable for any indirect, incidental, special, consequential, or punitive damages arising out of or relating to your use of the service.
           </p>
           
           <h2 className="headline text-3xl mt-8 mb-4">External Links</h2>

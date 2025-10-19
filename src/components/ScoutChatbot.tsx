@@ -20,7 +20,7 @@ const ScoutChatbot = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: "Hello! I'm Scout, your AI assistant for AIinASIA. Ask me anything about AI developments, trends, and news across Asia.",
+      content: "Hello! I'm Scout, your AI assistant for AI in ASIA. Ask me anything about AI developments, trends, and news across Asia.",
     },
   ]);
   const [input, setInput] = useState("");

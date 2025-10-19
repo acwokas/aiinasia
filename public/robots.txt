@@ -1,4 +1,4 @@
-# AI in Asia - robots.txt
+# AI in ASIA - robots.txt
 User-agent: *
 Allow: /
 
