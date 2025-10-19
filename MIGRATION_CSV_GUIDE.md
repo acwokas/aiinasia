@@ -100,23 +100,160 @@ Overall Rating: 4.5/5","Our in-depth review of ChatGPT Enterprise Edition after 
 
 ## Exporting from WordPress
 
-### Using WP All Export Plugin:
-1. Install "WP All Export" plugin
-2. Go to All Export > New Export
-3. Select "Specific Post Type" > Posts
-4. Customize Export File:
-   - Title: `{post_title}`
-   - Slug: `{post_name}`
-   - Old Slug: `{post_name}` (or use full URL)
-   - Content: `{post_content}`
-   - Excerpt: `{post_excerpt}`
-   - Author: `{author_display_name}`
-   - Categories: `{categories}`
-   - Tags: `{tags}`
-   - Meta Title: `{yoast_wpseo_title}` or `{rank_math_title}`
-   - Meta Description: `{yoast_wpseo_metadesc}` or `{rank_math_description}`
-   - Featured Image: `{featured_image_url}`
-   - Published Date: `{post_date}`
+### Using WP All Export Plugin (Recommended):
+
+#### Step 1: Install & Setup
+1. Install "WP All Export" plugin from WordPress admin
+2. Navigate to **All Export > New Export**
+3. Select **Specific Post Type** > **Posts**
+4. Click **Customize Export File**
+
+#### Step 2: Configure Export Columns (Drag fields in this order)
+
+**Column 1 - title** (Required)
+```
+{post_title}
+```
+
+**Column 2 - slug** (Required)
+```
+{post_name}
+```
+
+**Column 3 - old_slug** (Required - for redirects)
+```
+{guid}
+```
+*Alternative if you want just the slug: `{post_name}`*
+
+**Column 4 - content** (Required)
+```
+{post_content}
+```
+*Note: This exports raw HTML content*
+
+**Column 5 - excerpt** (Optional but recommended)
+```
+{post_excerpt[160]}
+```
+*The [160] limits to 160 characters*
+
+**Column 6 - author** (Optional)
+```
+{author_display_name}
+```
+*Alternative: `{author_first_name} {author_last_name}`*
+
+**Column 7 - categories** (Optional)
+```
+{categories, sep=,}
+```
+*The sep=, creates comma-separated list*
+
+**Column 8 - tags** (Optional)
+```
+{tags, sep=,}
+```
+
+**Column 9 - meta_title** (Optional - SEO)
+
+For Yoast SEO:
+```
+{yoast_wpseo_title}
+```
+
+For Rank Math:
+```
+{rank_math_title}
+```
+
+For All in One SEO:
+```
+{_aioseop_title}
+```
+
+**Column 10 - meta_description** (Optional - SEO)
+
+For Yoast SEO:
+```
+{yoast_wpseo_metadesc}
+```
+
+For Rank Math:
+```
+{rank_math_description}
+```
+
+For All in One SEO:
+```
+{_aioseop_description}
+```
+
+**Column 11 - featured_image_url** (Optional but recommended)
+```
+{featured_image_url}
+```
+
+**Column 12 - featured_image_alt** (Optional)
+```
+{featured_image_alt}
+```
+
+**Column 13 - published_at** (Optional but recommended)
+```
+{post_date_gmt}
+```
+*Use GMT version for consistent timezone handling*
+
+**Column 14 - article_type** (Optional)
+```
+article
+```
+*Or use: `{post_format}` if you use post formats*
+
+#### Step 3: Export Settings
+
+1. **File Type**: CSV
+2. **Delimiter**: Comma (,)
+3. **Encoding**: UTF-8
+4. **Include Field Names**: Yes (check this box)
+5. **Filter Posts** (if needed):
+   - Published posts only: Add rule `Post Status = publish`
+   - Date range: Add rule for `Post Date`
+   - Specific categories: Add rule for `Category`
+
+#### Step 4: Run Export
+
+1. Click **Continue**
+2. Click **Confirm & Run Export**
+3. Download the CSV file
+4. Open in text editor (NOT Excel) to verify format
+5. Check for proper quote escaping and line breaks
+
+#### Common WP All Export Issues & Solutions
+
+**Issue**: Categories/Tags showing as IDs
+- **Fix**: Use `{categories}` not `{categories_ids}`
+
+**Issue**: Content has broken line breaks
+- **Fix**: In Advanced Options, enable "Preserve line breaks"
+
+**Issue**: Special characters show as ���
+- **Fix**: Ensure UTF-8 encoding is selected
+
+**Issue**: Featured images showing as attachment IDs
+- **Fix**: Use `{featured_image_url}` not `{featured_image}`
+
+**Issue**: Empty excerpt fields
+- **Fix**: Use `{post_excerpt[160]}` or `{post_content[160]}` as fallback
+
+#### Pro Tips
+
+- **Test Export**: Start with 10 posts to verify format before full export
+- **Filter Drafts**: Add rule to export only published posts
+- **Backup First**: Always backup your WordPress database before exporting
+- **Large Sites**: If you have 1000+ posts, export in batches by date range
+- **Custom Fields**: Click "Add Field" > "Custom Field" to add any custom post meta
 
 ### Using MySQL Query (Advanced):
 ```sql
