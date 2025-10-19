@@ -6,12 +6,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Eye, EyeOff } from "lucide-react";
+import { Loader2, Eye, EyeOff, Upload } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { supabase } from "@/integrations/supabase/client";
+import { compressImage } from "@/lib/imageCompression";
 import logo from "@/assets/aiinasia-logo.png";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("");
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string>("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const { signIn, signUp, user } = useAuth();
@@ -24,22 +30,92 @@ const Auth = () => {
     }
   }, [user, navigate]);
 
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      // Compress avatar image
+      const compressed = await compressImage(file, {
+        maxWidth: 400,
+        maxHeight: 400,
+        quality: 0.8,
+        maxSizeMB: 0.5,
+      });
+      
+      setAvatarFile(compressed);
+      setAvatarPreview(URL.createObjectURL(compressed));
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to process image",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    const { error } = await signUp(email, password);
+    try {
+      const { error, data } = await signUp(email, password);
 
-    if (error) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    } else {
+      if (error) {
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Upload avatar if provided
+      if (avatarFile && data.user) {
+        const fileExt = 'jpg';
+        const fileName = `${data.user.id}-${Date.now()}.${fileExt}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from('article-images')
+          .upload(fileName, avatarFile, {
+            cacheControl: '3600',
+            upsert: false
+          });
+
+        if (uploadError) {
+          console.error('Avatar upload error:', uploadError);
+        } else {
+          const { data: { publicUrl } } = supabase.storage
+            .from('article-images')
+            .getPublicUrl(fileName);
+
+          // Update profile with avatar URL and username
+          await supabase
+            .from('profiles')
+            .update({ 
+              avatar_url: publicUrl,
+              username: username || email.split('@')[0]
+            })
+            .eq('id', data.user.id);
+        }
+      } else if (data.user && username) {
+        // Just update username if no avatar
+        await supabase
+          .from('profiles')
+          .update({ username: username || email.split('@')[0] })
+          .eq('id', data.user.id);
+      }
+
       toast({
         title: "Success!",
         description: "Account created successfully!",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Something went wrong",
+        variant: "destructive",
       });
     }
 
@@ -132,6 +208,36 @@ const Auth = () => {
 
             <TabsContent value="signup">
               <form onSubmit={handleSignUp} className="space-y-4">
+                <div className="flex flex-col items-center mb-4">
+                  <Avatar className="h-24 w-24 mb-3">
+                    <AvatarImage src={avatarPreview} alt="Avatar preview" />
+                    <AvatarFallback>
+                      <Upload className="h-8 w-8" />
+                    </AvatarFallback>
+                  </Avatar>
+                  <Label htmlFor="avatar-upload" className="cursor-pointer">
+                    <div className="text-sm text-primary hover:underline">
+                      Upload Avatar (optional)
+                    </div>
+                    <Input
+                      id="avatar-upload"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleAvatarChange}
+                      className="hidden"
+                    />
+                  </Label>
+                </div>
+                <div>
+                  <Label htmlFor="signup-username">Username</Label>
+                  <Input
+                    id="signup-username"
+                    type="text"
+                    placeholder="Your display name"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                  />
+                </div>
                 <div>
                   <Label htmlFor="signup-email">Email</Label>
                   <Input

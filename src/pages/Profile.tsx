@@ -7,9 +7,12 @@ import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2, TrendingUp, BookMarked, Award, Zap, User as UserIcon } from 'lucide-react';
+import { Loader2, TrendingUp, BookMarked, Award, Zap, User as UserIcon, Upload } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { compressImage } from '@/lib/imageCompression';
+import { useToast } from '@/hooks/use-toast';
 
 interface UserStats {
   points: number;
@@ -36,11 +39,13 @@ interface Profile {
 const Profile = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [stats, setStats] = useState<UserStats | null>(null);
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [bookmarks, setBookmarks] = useState<any[]>([]);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -124,6 +129,65 @@ const Profile = () => {
     navigate('/');
   };
 
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    setUploading(true);
+    try {
+      // Compress image
+      const compressed = await compressImage(file, {
+        maxWidth: 400,
+        maxHeight: 400,
+        quality: 0.8,
+        maxSizeMB: 0.5,
+      });
+
+      const fileExt = 'jpg';
+      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+      
+      // Upload to storage
+      const { error: uploadError } = await supabase.storage
+        .from('article-images')
+        .upload(fileName, compressed, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('article-images')
+        .getPublicUrl(fileName);
+
+      // Update profile
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ avatar_url: publicUrl })
+        .eq('id', user.id);
+
+      if (updateError) throw updateError;
+
+      // Update local state
+      setProfile(prev => prev ? { ...prev, avatar_url: publicUrl } : null);
+
+      toast({
+        title: "Success",
+        description: "Avatar updated successfully",
+      });
+    } catch (error) {
+      console.error('Avatar upload error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to upload avatar",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -143,12 +207,33 @@ const Profile = () => {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-4">
-              <Avatar className="h-16 w-16">
-                <AvatarImage src={profile?.avatar_url || ''} alt={profile?.username || 'User'} />
-                <AvatarFallback>
-                  <UserIcon className="h-8 w-8" />
-                </AvatarFallback>
-              </Avatar>
+              <div className="relative">
+                <Avatar className="h-16 w-16">
+                  <AvatarImage src={profile?.avatar_url || ''} alt={profile?.username || 'User'} />
+                  <AvatarFallback>
+                    <UserIcon className="h-8 w-8" />
+                  </AvatarFallback>
+                </Avatar>
+                <label 
+                  htmlFor="avatar-upload-profile" 
+                  className="absolute bottom-0 right-0 bg-primary text-primary-foreground rounded-full p-1 cursor-pointer hover:bg-primary/90 transition-colors"
+                  title="Change avatar"
+                >
+                  {uploading ? (
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                  ) : (
+                    <Upload className="h-3 w-3" />
+                  )}
+                  <Input
+                    id="avatar-upload-profile"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAvatarChange}
+                    className="hidden"
+                    disabled={uploading}
+                  />
+                </label>
+              </div>
               <div>
                 <h1 className="text-4xl font-bold mb-2">{profile?.username || 'User'}</h1>
                 <Badge className={`${levelInfo.color} text-white`}>
