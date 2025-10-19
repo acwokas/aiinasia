@@ -648,7 +648,10 @@ const Profile = () => {
               </div>
             </Card>
 
-            <Card className="p-6">
+            <Card className="p-6 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => {
+              const achievementsTab = document.querySelector('[value="achievements"]') as HTMLElement;
+              achievementsTab?.click();
+            }}>
               <div className="flex items-center gap-3">
                 <Award className="h-8 w-8 text-accent" />
                 <div>
