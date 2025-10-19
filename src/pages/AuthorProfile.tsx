@@ -94,10 +94,6 @@ const AuthorProfile = () => {
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
-                  <BreadcrumbLink>Authors</BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
                   <BreadcrumbPage>{author?.name}</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
