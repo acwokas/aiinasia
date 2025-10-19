@@ -30,8 +30,11 @@ const Header = () => {
       <div className="container mx-auto px-4">
         <div className="flex h-24 items-center justify-between">
           <div className="flex items-center gap-8">
-            <a href="/" className="flex items-center">
-              <img src={logo} alt="AI in Asia" className="h-24" />
+            <a href="/" className="flex flex-col">
+              <img src={logo} alt="AI in Asia" className="h-20 md:h-24" />
+              <span className="text-[10px] md:text-xs text-muted-foreground font-medium tracking-wide -mt-1 md:-mt-2">
+                AI news, insights and innovation
+              </span>
             </a>
             
             <nav className="hidden md:flex items-center space-x-6">
