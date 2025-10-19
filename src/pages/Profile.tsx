@@ -96,7 +96,7 @@ const Profile = () => {
         .from('profiles')
         .select('*')
         .eq('id', user!.id)
-        .single();
+        .maybeSingle();
       
       setProfile(profileData);
       
@@ -543,18 +543,29 @@ const Profile = () => {
           </TabsContent>
 
           <TabsContent value="achievements" className="space-y-4">
+            <p className="text-sm text-muted-foreground mb-4">
+              💡 Click on any locked badge to see how to earn it!
+            </p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {achievements.map((achievement) => {
                 const isEarned = !!achievement.earned_at;
                 return (
                   <Card 
                     key={achievement.id} 
+                    role={!isEarned ? "button" : undefined}
+                    tabIndex={!isEarned ? 0 : undefined}
                     className={`p-6 transition-all ${
                       isEarned 
                         ? 'border-primary/50 shadow-md' 
-                        : 'opacity-50 grayscale border-dashed cursor-pointer hover:opacity-70 hover:scale-105'
+                        : 'opacity-50 grayscale border-dashed cursor-pointer hover:opacity-70 hover:scale-105 hover:border-primary/30'
                     }`}
-                    onClick={() => handleAchievementClick(achievement)}
+                    onClick={() => !isEarned && handleAchievementClick(achievement)}
+                    onKeyDown={(e) => {
+                      if (!isEarned && (e.key === 'Enter' || e.key === ' ')) {
+                        e.preventDefault();
+                        handleAchievementClick(achievement);
+                      }
+                    }}
                   >
                     <div className={`text-4xl mb-3 ${!isEarned && 'opacity-40'}`}>
                       {achievement.badge_icon}
@@ -571,7 +582,7 @@ const Profile = () => {
                       </p>
                     ) : (
                       <p className="text-xs text-primary font-medium italic">
-                        🔒 Click to start earning this badge
+                        👆 Click to start earning
                       </p>
                     )}
                   </Card>
