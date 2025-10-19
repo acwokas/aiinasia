@@ -86,8 +86,12 @@ const Profile = () => {
       return;
     }
 
-    fetchUserData();
-    completePendingProfile();
+    const loadData = async () => {
+      await fetchUserData();
+      await completePendingProfile();
+    };
+    
+    loadData();
   }, [user, navigate]);
 
   const completePendingProfile = async () => {
@@ -241,12 +245,14 @@ const Profile = () => {
   };
 
   const fetchUserData = async () => {
+    if (!user) return;
+    
     try {
       // Fetch profile
       const { data: profileData } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', user!.id)
+        .eq('id', user.id)
         .maybeSingle();
       
       setProfile(profileData);
@@ -267,8 +273,8 @@ const Profile = () => {
       const { data: statsData } = await supabase
         .from('user_stats')
         .select('*')
-        .eq('user_id', user!.id)
-        .single();
+        .eq('user_id', user.id)
+        .maybeSingle();
       
       setStats(statsData);
 
@@ -282,7 +288,7 @@ const Profile = () => {
       const { data: earnedAchievementsData } = await supabase
         .from('user_achievements')
         .select('achievement_id, earned_at')
-        .eq('user_id', user!.id);
+        .eq('user_id', user.id);
 
       // Map all achievements with earned status
       const earnedMap = new Map(
@@ -298,7 +304,7 @@ const Profile = () => {
       const { data: bookmarksData } = await supabase
         .from('bookmarks')
         .select('*, articles(title, slug, excerpt, featured_image_url)')
-        .eq('user_id', user!.id)
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
       
       setBookmarks(bookmarksData || []);
