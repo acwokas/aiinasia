@@ -399,6 +399,47 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
               </div>
 
               <div>
+                <Label htmlFor="article-type">Article Type</Label>
+                <Select value={articleType} onValueChange={setArticleType}>
+                  <SelectTrigger id="article-type">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="article">Article</SelectItem>
+                    <SelectItem value="voice">Voice</SelectItem>
+                    <SelectItem value="guide">Guide</SelectItem>
+                    <SelectItem value="tool">Tool</SelectItem>
+                    <SelectItem value="video">Video</SelectItem>
+                    <SelectItem value="event">Event</SelectItem>
+                    <SelectItem value="interview">Interview</SelectItem>
+                    <SelectItem value="review">Review</SelectItem>
+                    <SelectItem value="explainer">Explainer</SelectItem>
+                    <SelectItem value="podcast">Podcast</SelectItem>
+                    <SelectItem value="site_furniture">Site Furniture</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="primary-category">Primary Category</Label>
+                <Select value={primaryCategoryId} onValueChange={setPrimaryCategoryId}>
+                  <SelectTrigger id="primary-category">
+                    <SelectValue placeholder="Select category..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories?.map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Main category for this article (used for related articles)
+                </p>
+              </div>
+
+              <div>
                 <Label htmlFor="slug">Slug</Label>
                 <Input
                   id="slug"
@@ -594,47 +635,6 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
               <CardDescription>Configure article type and visibility</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="article-type">Article Type</Label>
-                <Select value={articleType} onValueChange={setArticleType}>
-                  <SelectTrigger id="article-type">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="article">Article</SelectItem>
-                    <SelectItem value="voice">Voice</SelectItem>
-                    <SelectItem value="guide">Guide</SelectItem>
-                    <SelectItem value="tool">Tool</SelectItem>
-                    <SelectItem value="video">Video</SelectItem>
-                    <SelectItem value="event">Event</SelectItem>
-                    <SelectItem value="interview">Interview</SelectItem>
-                    <SelectItem value="review">Review</SelectItem>
-                    <SelectItem value="explainer">Explainer</SelectItem>
-                    <SelectItem value="podcast">Podcast</SelectItem>
-                    <SelectItem value="site_furniture">Site Furniture</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="primary-category">Primary Category</Label>
-                <Select value={primaryCategoryId} onValueChange={setPrimaryCategoryId}>
-                  <SelectTrigger id="primary-category">
-                    <SelectValue placeholder="Select category..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories?.map((category) => (
-                      <SelectItem key={category.id} value={category.id}>
-                        {category.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Main category for this article (used for related articles)
-                </p>
-              </div>
-
               <div>
                 <Label htmlFor="status">Status</Label>
                 <Select value={status} onValueChange={setStatus}>
