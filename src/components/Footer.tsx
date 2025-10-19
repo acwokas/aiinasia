@@ -113,11 +113,12 @@ const Footer = () => {
           <div>
             <h4 className="font-semibold mb-4">Content</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><a href="/features" className="hover:text-primary transition-colors">Features</a></li>
-              <li><a href="/news" className="hover:text-primary transition-colors">News</a></li>
-              <li><a href="/opinion" className="hover:text-primary transition-colors">Opinion</a></li>
-              <li><a href="/tools" className="hover:text-primary transition-colors">Tools</a></li>
-              <li><a href="/events" className="hover:text-primary transition-colors">Events</a></li>
+              <li><a href="/category/news" className="hover:text-primary transition-colors">News</a></li>
+              <li><a href="/category/business" className="hover:text-primary transition-colors">Business</a></li>
+              <li><a href="/category/learn" className="hover:text-primary transition-colors">Learn</a></li>
+              <li><a href="/category/live" className="hover:text-primary transition-colors">Live</a></li>
+              <li><a href="/category/create" className="hover:text-primary transition-colors">Create</a></li>
+              <li><a href="/category/voices" className="hover:text-primary transition-colors">Voices</a></li>
             </ul>
           </div>
 
