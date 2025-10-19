@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { MessageCircle, X, Send, Loader2 } from "lucide-react";
+import { MessageCircle, X, Send, Loader2, Sparkles, Bot } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -177,56 +177,114 @@ const ScoutChatbot = () => {
 
   if (!isOpen) {
     return (
-      <Button
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 rounded-full w-14 h-14 shadow-lg z-50"
-        size="icon"
-      >
-        <MessageCircle className="h-6 w-6" />
-      </Button>
+      <div className="fixed bottom-6 right-6 z-50">
+        {/* Pulsing glow ring */}
+        <div className="absolute inset-0 rounded-full bg-primary/20 animate-pulse" />
+        <div className="absolute inset-0 rounded-full bg-primary/30 blur-xl animate-pulse" style={{ animationDelay: '0.5s' }} />
+        
+        <Button
+          onClick={() => setIsOpen(true)}
+          className="relative rounded-full w-16 h-16 bg-gradient-to-br from-primary via-primary to-accent shadow-[0_0_30px_rgba(0,188,212,0.5)] hover:shadow-[0_0_40px_rgba(0,188,212,0.8)] transition-all duration-300 hover:scale-110 border border-primary/50"
+          size="icon"
+        >
+          <Bot className="h-7 w-7 animate-pulse" />
+        </Button>
+      </div>
     );
   }
 
   return (
-    <div className="fixed bottom-6 right-6 w-96 h-[600px] bg-card border border-border rounded-lg shadow-2xl flex flex-col z-50">
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-border bg-primary text-primary-foreground rounded-t-lg">
-        <div className="flex items-center gap-2">
-          <MessageCircle className="h-5 w-5" />
-          <h3 className="font-semibold">Ask Scout</h3>
+    <div className="fixed bottom-6 right-6 w-96 h-[600px] z-50 animate-scale-in">
+      {/* Outer glow effect */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 rounded-2xl blur-xl" />
+      
+      {/* Main container */}
+      <div className="relative bg-card/95 backdrop-blur-xl border border-primary/30 rounded-2xl shadow-[0_0_50px_rgba(0,188,212,0.3)] flex flex-col overflow-hidden">
+        {/* Animated background grid */}
+        <div className="absolute inset-0 opacity-[0.03]" style={{
+          backgroundImage: 'linear-gradient(hsl(var(--primary)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)',
+          backgroundSize: '20px 20px'
+        }} />
+        
+        {/* Header */}
+        <div className="relative flex items-center justify-between p-4 border-b border-primary/20 bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10">
+          {/* Animated scan line */}
+          <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-primary to-transparent animate-pulse" />
+          
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <div className="absolute inset-0 bg-primary/30 blur-lg rounded-full animate-pulse" />
+              <div className="relative bg-gradient-to-br from-primary to-accent p-2 rounded-full">
+                <Bot className="h-5 w-5 text-primary-foreground" />
+              </div>
+            </div>
+            <div>
+              <h3 className="font-bold text-lg flex items-center gap-2">
+                Ask Scout
+                <Sparkles className="h-4 w-4 text-accent animate-pulse" />
+              </h3>
+              <p className="text-xs text-muted-foreground">AI-Powered Assistant</p>
+            </div>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsOpen(false)}
+            className="hover:bg-primary/10 hover:text-primary transition-all rounded-full"
+          >
+            <X className="h-5 w-5" />
+          </Button>
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setIsOpen(false)}
-          className="text-primary-foreground hover:bg-primary-foreground/20"
-        >
-          <X className="h-4 w-4" />
-        </Button>
-      </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="relative flex-1 overflow-y-auto p-4 space-y-4">
         {messages.map((msg, i) => (
           <div
             key={i}
-            className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+            className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} animate-fade-in`}
+            style={{ animationDelay: `${i * 0.05}s` }}
           >
+            {msg.role === "assistant" && (
+              <div className="mr-2 mt-1">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-accent/30 blur-md rounded-full" />
+                  <div className="relative bg-gradient-to-br from-accent to-primary p-1.5 rounded-full">
+                    <Bot className="h-4 w-4 text-primary-foreground" />
+                  </div>
+                </div>
+              </div>
+            )}
             <div
-              className={`max-w-[80%] rounded-lg p-3 ${
+              className={`max-w-[80%] rounded-2xl p-3 relative group ${
                 msg.role === "user"
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted"
+                  ? "bg-gradient-to-br from-primary to-accent text-primary-foreground shadow-[0_0_20px_rgba(0,188,212,0.3)] border border-primary/20"
+                  : "bg-muted/50 backdrop-blur border border-border/50"
               }`}
             >
-              <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+              {msg.role === "user" && (
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition-opacity -z-10" />
+              )}
+              <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.content}</p>
             </div>
           </div>
         ))}
         {isLoading && (
-          <div className="flex justify-start">
-            <div className="bg-muted rounded-lg p-3">
-              <Loader2 className="h-4 w-4 animate-spin" />
+          <div className="flex justify-start animate-fade-in">
+            <div className="mr-2 mt-1">
+              <div className="relative">
+                <div className="absolute inset-0 bg-accent/30 blur-md rounded-full animate-pulse" />
+                <div className="relative bg-gradient-to-br from-accent to-primary p-1.5 rounded-full">
+                  <Bot className="h-4 w-4 text-primary-foreground" />
+                </div>
+              </div>
+            </div>
+            <div className="bg-muted/50 backdrop-blur border border-border/50 rounded-2xl p-3 flex items-center gap-2">
+              <Loader2 className="h-4 w-4 animate-spin text-primary" />
+              <div className="flex gap-1">
+                <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0s' }} />
+                <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
+                <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.4s' }} />
+              </div>
             </div>
           </div>
         )}
@@ -234,17 +292,22 @@ const ScoutChatbot = () => {
       </div>
 
       {/* Input */}
-      <div className="p-4 border-t border-border">
+      <div className="relative p-4 border-t border-primary/20 bg-gradient-to-r from-primary/5 via-accent/5 to-primary/5">
+        {/* Glow line on top */}
+        <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-primary to-transparent" />
+        
         {queriesRemaining !== null && queriesRemaining <= 5 && (
-          <p className="text-xs text-muted-foreground mb-2">
+          <div className="text-xs text-muted-foreground mb-3 flex items-center gap-2 bg-muted/30 rounded-lg px-3 py-1.5 border border-border/30">
+            <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
             {queriesRemaining} {queriesRemaining === 1 ? 'query' : 'queries'} remaining today
             {!user && ' · Sign in for more'}
-          </p>
+          </div>
         )}
         {queriesRemaining === null && user && (
-          <p className="text-xs text-primary mb-2">
-            ⚡ Unlimited queries (Thought Leader)
-          </p>
+          <div className="text-xs mb-3 flex items-center gap-2 bg-gradient-to-r from-primary/20 to-accent/20 rounded-lg px-3 py-1.5 border border-primary/30">
+            <Sparkles className="h-3 w-3 text-primary animate-pulse" />
+            <span className="text-primary font-semibold">Unlimited queries (Thought Leader)</span>
+          </div>
         )}
         <form
           onSubmit={(e) => {
@@ -254,16 +317,26 @@ const ScoutChatbot = () => {
           }}
           className="flex gap-2"
         >
-          <Input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask Scout..."
-            disabled={isLoading}
-          />
-          <Button type="submit" size="icon" disabled={isLoading || !input.trim()}>
+          <div className="relative flex-1 group">
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20 rounded-lg blur opacity-0 group-focus-within:opacity-100 transition-opacity" />
+            <Input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Ask Scout anything..."
+              disabled={isLoading}
+              className="relative border-primary/30 focus-visible:ring-primary/50 bg-background/50 backdrop-blur"
+            />
+          </div>
+          <Button 
+            type="submit" 
+            size="icon" 
+            disabled={isLoading || !input.trim()}
+            className="relative bg-gradient-to-br from-primary to-accent hover:from-primary/90 hover:to-accent/90 shadow-[0_0_20px_rgba(0,188,212,0.3)] hover:shadow-[0_0_30px_rgba(0,188,212,0.5)] transition-all disabled:opacity-50 disabled:shadow-none rounded-lg"
+          >
             <Send className="h-4 w-4" />
           </Button>
         </form>
+      </div>
       </div>
     </div>
   );
