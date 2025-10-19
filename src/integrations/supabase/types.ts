@@ -552,6 +552,45 @@ export type Database = {
         }
         Relationships: []
       }
+      migration_logs: {
+        Row: {
+          batch_id: string
+          created_at: string | null
+          created_by: string | null
+          error_details: Json | null
+          failed_records: number | null
+          id: string
+          operation_type: string
+          status: string
+          successful_records: number | null
+          total_records: number | null
+        }
+        Insert: {
+          batch_id: string
+          created_at?: string | null
+          created_by?: string | null
+          error_details?: Json | null
+          failed_records?: number | null
+          id?: string
+          operation_type: string
+          status?: string
+          successful_records?: number | null
+          total_records?: number | null
+        }
+        Update: {
+          batch_id?: string
+          created_at?: string | null
+          created_by?: string | null
+          error_details?: Json | null
+          failed_records?: number | null
+          id?: string
+          operation_type?: string
+          status?: string
+          successful_records?: number | null
+          total_records?: number | null
+        }
+        Relationships: []
+      }
       newsletter_subscribers: {
         Row: {
           confirmed: boolean | null
@@ -733,6 +772,47 @@ export type Database = {
           slug?: string
         }
         Relationships: []
+      }
+      url_mappings: {
+        Row: {
+          article_id: string | null
+          created_at: string | null
+          id: string
+          new_slug: string
+          new_url: string
+          old_slug: string
+          old_url: string
+          redirect_created: boolean | null
+        }
+        Insert: {
+          article_id?: string | null
+          created_at?: string | null
+          id?: string
+          new_slug: string
+          new_url: string
+          old_slug: string
+          old_url: string
+          redirect_created?: boolean | null
+        }
+        Update: {
+          article_id?: string | null
+          created_at?: string | null
+          id?: string
+          new_slug?: string
+          new_url?: string
+          old_slug?: string
+          old_url?: string
+          redirect_created?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "url_mappings_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_achievements: {
         Row: {

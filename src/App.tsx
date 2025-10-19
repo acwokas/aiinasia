@@ -21,6 +21,9 @@ import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import CookiePolicy from "./pages/CookiePolicy";
 import Redirects from "./pages/Redirects";
+import BulkImport from "./pages/BulkImport";
+import ImageMigration from "./pages/ImageMigration";
+import MigrationDashboard from "./pages/MigrationDashboard";
 import NotFound from "./pages/NotFound";
 import Events from "./pages/Events";
 import NewsletterPopup from "./components/NewsletterPopup";
@@ -65,6 +68,9 @@ const App = () => (
             <Route path="/terms" element={<Terms />} />
             <Route path="/cookie-policy" element={<CookiePolicy />} />
             <Route path="/redirects" element={<Redirects />} />
+            <Route path="/admin/bulk-import" element={<BulkImport />} />
+            <Route path="/admin/image-migration" element={<ImageMigration />} />
+            <Route path="/admin/migration-dashboard" element={<MigrationDashboard />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <CollectiveFooter />
