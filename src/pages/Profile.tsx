@@ -8,11 +8,26 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2, TrendingUp, BookMarked, Award, Zap, User as UserIcon, Upload } from 'lucide-react';
+import { Loader2, TrendingUp, BookMarked, Award, Zap, User as UserIcon, Upload, Save } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { compressImage } from '@/lib/imageCompression';
 import { useToast } from '@/hooks/use-toast';
+
+const INTEREST_OPTIONS = [
+  "Artificial Intelligence",
+  "Machine Learning",
+  "Deep Learning",
+  "Robotics",
+  "Computer Vision",
+  "Natural Language Processing",
+  "AI Ethics",
+  "AI Research",
+  "Business AI",
+  "Healthcare AI"
+];
 
 interface UserStats {
   points: number;
@@ -34,6 +49,13 @@ interface Achievement {
 interface Profile {
   username: string;
   avatar_url: string;
+  first_name: string;
+  last_name: string;
+  company: string;
+  job_title: string;
+  country: string;
+  interests: string[];
+  newsletter_subscribed: boolean;
 }
 
 const Profile = () => {
@@ -46,6 +68,17 @@ const Profile = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  
+  // Edit state
+  const [editFirstName, setEditFirstName] = useState("");
+  const [editLastName, setEditLastName] = useState("");
+  const [editUsername, setEditUsername] = useState("");
+  const [editCompany, setEditCompany] = useState("");
+  const [editJobTitle, setEditJobTitle] = useState("");
+  const [editCountry, setEditCountry] = useState("");
+  const [editInterests, setEditInterests] = useState<string[]>([]);
+  const [editNewsletter, setEditNewsletter] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -61,11 +94,23 @@ const Profile = () => {
       // Fetch profile
       const { data: profileData } = await supabase
         .from('profiles')
-        .select('username, avatar_url')
+        .select('*')
         .eq('id', user!.id)
         .single();
       
       setProfile(profileData);
+      
+      // Set edit state
+      if (profileData) {
+        setEditFirstName(profileData.first_name || '');
+        setEditLastName(profileData.last_name || '');
+        setEditUsername(profileData.username || '');
+        setEditCompany(profileData.company || '');
+        setEditJobTitle(profileData.job_title || '');
+        setEditCountry(profileData.country || '');
+        setEditInterests(profileData.interests || []);
+        setEditNewsletter(profileData.newsletter_subscribed || false);
+      }
 
       // Fetch stats
       const { data: statsData } = await supabase
@@ -188,6 +233,64 @@ const Profile = () => {
     }
   };
 
+  const toggleInterest = (interest: string) => {
+    setEditInterests(prev =>
+      prev.includes(interest)
+        ? prev.filter(i => i !== interest)
+        : [...prev, interest]
+    );
+  };
+
+  const handleSaveProfile = async () => {
+    if (!user) return;
+    
+    setSaving(true);
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          first_name: editFirstName,
+          last_name: editLastName,
+          username: editUsername,
+          company: editCompany,
+          job_title: editJobTitle,
+          country: editCountry,
+          interests: editInterests.length > 0 ? editInterests : null,
+          newsletter_subscribed: editNewsletter
+        })
+        .eq('id', user.id);
+
+      if (error) throw error;
+
+      // Update local state
+      setProfile(prev => prev ? {
+        ...prev,
+        first_name: editFirstName,
+        last_name: editLastName,
+        username: editUsername,
+        company: editCompany,
+        job_title: editJobTitle,
+        country: editCountry,
+        interests: editInterests,
+        newsletter_subscribed: editNewsletter
+      } : null);
+
+      toast({
+        title: "Success",
+        description: "Profile updated successfully",
+      });
+    } catch (error) {
+      console.error('Save error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update profile",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -235,7 +338,7 @@ const Profile = () => {
                 </label>
               </div>
               <div>
-                <h1 className="text-4xl font-bold mb-2">{profile?.username || 'User'}</h1>
+                <h1 className="text-4xl font-bold mb-2">{profile?.first_name || profile?.username || 'User'}</h1>
                 <Badge className={`${levelInfo.color} text-white`}>
                   {levelInfo.name}
                 </Badge>
@@ -297,6 +400,7 @@ const Profile = () => {
             <TabsTrigger value="bookmarks">Bookmarks</TabsTrigger>
             <TabsTrigger value="achievements">Achievements</TabsTrigger>
             <TabsTrigger value="stats">Reading Stats</TabsTrigger>
+            <TabsTrigger value="account">Account Settings</TabsTrigger>
           </TabsList>
 
           <TabsContent value="bookmarks" className="space-y-4">
@@ -398,6 +502,140 @@ const Profile = () => {
                 )}
               </div>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="account" className="space-y-4">
+            <Card className="p-6">
+              <h3 className="text-xl font-semibold mb-4">Personal Information</h3>
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="edit-firstname">First Name</Label>
+                    <Input
+                      id="edit-firstname"
+                      value={editFirstName}
+                      onChange={(e) => setEditFirstName(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="edit-lastname">Last Name</Label>
+                    <Input
+                      id="edit-lastname"
+                      value={editLastName}
+                      onChange={(e) => setEditLastName(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="edit-username">Username</Label>
+                  <Input
+                    id="edit-username"
+                    value={editUsername}
+                    onChange={(e) => setEditUsername(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="edit-email">Email (cannot be changed)</Label>
+                  <Input
+                    id="edit-email"
+                    value={user?.email || ''}
+                    disabled
+                    className="bg-muted"
+                  />
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-6">
+              <h3 className="text-xl font-semibold mb-4">Professional Information</h3>
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="edit-company">Company</Label>
+                    <Input
+                      id="edit-company"
+                      value={editCompany}
+                      onChange={(e) => setEditCompany(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="edit-jobtitle">Job Title</Label>
+                    <Input
+                      id="edit-jobtitle"
+                      value={editJobTitle}
+                      onChange={(e) => setEditJobTitle(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="edit-country">Country</Label>
+                  <Input
+                    id="edit-country"
+                    value={editCountry}
+                    onChange={(e) => setEditCountry(e.target.value)}
+                  />
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-6">
+              <h3 className="text-xl font-semibold mb-4">Content Preferences</h3>
+              <div className="space-y-4">
+                <div>
+                  <Label className="mb-3 block">Interests (Customize your feed)</Label>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3 p-4 border rounded-md max-h-64 overflow-y-auto">
+                    {INTEREST_OPTIONS.map((interest) => (
+                      <div key={interest} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`edit-${interest}`}
+                          checked={editInterests.includes(interest)}
+                          onCheckedChange={() => toggleInterest(interest)}
+                        />
+                        <label
+                          htmlFor={`edit-${interest}`}
+                          className="text-sm leading-none cursor-pointer"
+                        >
+                          {interest}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-2 pt-4 border-t">
+                  <Checkbox
+                    id="edit-newsletter"
+                    checked={editNewsletter}
+                    onCheckedChange={(checked) => setEditNewsletter(checked as boolean)}
+                  />
+                  <label
+                    htmlFor="edit-newsletter"
+                    className="text-sm cursor-pointer"
+                  >
+                    Subscribe to weekly newsletter
+                  </label>
+                </div>
+              </div>
+            </Card>
+
+            <div className="flex justify-end">
+              <Button onClick={handleSaveProfile} disabled={saving}>
+                {saving ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="mr-2 h-4 w-4" />
+                    Save Changes
+                  </>
+                )}
+              </Button>
+            </div>
           </TabsContent>
         </Tabs>
       </main>

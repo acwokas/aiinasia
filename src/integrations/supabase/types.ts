@@ -553,24 +553,45 @@ export type Database = {
         Row: {
           avatar_url: string | null
           bio: string | null
+          company: string | null
+          country: string | null
           created_at: string | null
+          first_name: string | null
           id: string
+          interests: string[] | null
+          job_title: string | null
+          last_name: string | null
+          newsletter_subscribed: boolean | null
           updated_at: string | null
           username: string | null
         }
         Insert: {
           avatar_url?: string | null
           bio?: string | null
+          company?: string | null
+          country?: string | null
           created_at?: string | null
+          first_name?: string | null
           id: string
+          interests?: string[] | null
+          job_title?: string | null
+          last_name?: string | null
+          newsletter_subscribed?: boolean | null
           updated_at?: string | null
           username?: string | null
         }
         Update: {
           avatar_url?: string | null
           bio?: string | null
+          company?: string | null
+          country?: string | null
           created_at?: string | null
+          first_name?: string | null
           id?: string
+          interests?: string[] | null
+          job_title?: string | null
+          last_name?: string | null
+          newsletter_subscribed?: boolean | null
           updated_at?: string | null
           username?: string | null
         }
