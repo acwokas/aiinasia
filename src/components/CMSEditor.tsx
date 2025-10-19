@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { Save, Upload, Loader2, Info, Plus, Pencil, CalendarIcon, Clock } from "lucide-react";
+import { Save, Upload, Loader2, Info, Plus, Pencil, CalendarIcon, Clock, ExternalLink } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import ScoutWritingAssistant from "@/components/ScoutWritingAssistant";
@@ -344,11 +344,18 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
 
   const handleSave = () => {
     let scheduledDateTime = null;
+    let finalStatus = status;
+    
     if (scheduledFor && scheduledTime) {
       const [hours, minutes] = scheduledTime.split(':').map(Number);
       const dateTime = new Date(scheduledFor);
       dateTime.setHours(hours, minutes, 0, 0);
       scheduledDateTime = dateTime.toISOString();
+      
+      // Auto-set status to scheduled when scheduled_for is set
+      if (finalStatus === 'draft') {
+        finalStatus = 'scheduled';
+      }
     }
 
     const data = {
@@ -357,7 +364,7 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
       excerpt,
       content,
       article_type: articleType,
-      status,
+      status: finalStatus,
       featured_image_url: featuredImage,
       featured_image_alt: featuredImageAlt,
       seo_title: seoTitle,
@@ -638,13 +645,28 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label htmlFor="status">Status</Label>
+                <div className="flex items-center justify-between mb-2">
+                  <Label htmlFor="status">Status</Label>
+                  {slug && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      asChild
+                    >
+                      <a href={`/article/${slug}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1">
+                        <ExternalLink className="h-3 w-3" />
+                        View on site
+                      </a>
+                    </Button>
+                  )}
+                </div>
                 <Select value={status} onValueChange={setStatus}>
                   <SelectTrigger id="status">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="draft">Draft</SelectItem>
+                    <SelectItem value="scheduled">Scheduled</SelectItem>
                     <SelectItem value="review">In Review</SelectItem>
                     <SelectItem value="published">Published</SelectItem>
                     <SelectItem value="archived">Archived</SelectItem>

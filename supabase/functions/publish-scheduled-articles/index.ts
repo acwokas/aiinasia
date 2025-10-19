@@ -27,7 +27,7 @@ Deno.serve(async (req) => {
     const { data: scheduledArticles, error: fetchError } = await supabase
       .from('articles')
       .select('id, title, scheduled_for, status')
-      .eq('status', 'draft')
+      .eq('status', 'scheduled')
       .not('scheduled_for', 'is', null)
       .lte('scheduled_for', now);
 

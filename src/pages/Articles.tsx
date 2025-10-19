@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Home, Search, Filter, Edit, Trash2, Eye, Plus, Pin, Globe } from "lucide-react";
+import { Loader2, Home, Search, Filter, Edit, Trash2, Eye, Plus, Pin, Globe, ExternalLink } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -284,13 +284,14 @@ const Articles = () => {
               <SelectTrigger>
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="published">Published</SelectItem>
-                <SelectItem value="draft">Draft</SelectItem>
-                <SelectItem value="review">In Review</SelectItem>
-                <SelectItem value="archived">Archived</SelectItem>
-              </SelectContent>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="published">Published</SelectItem>
+                  <SelectItem value="scheduled">Scheduled</SelectItem>
+                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="review">In Review</SelectItem>
+                  <SelectItem value="archived">Archived</SelectItem>
+                </SelectContent>
             </Select>
 
             <Select value={typeFilter} onValueChange={setTypeFilter}>
@@ -460,22 +461,35 @@ const Articles = () => {
                     <TableCell className="capitalize">
                       {article.article_type}
                     </TableCell>
-                    <TableCell>
-                      <Select
-                        value={article.status}
-                        onValueChange={(value) => handleUpdate(article.id, "status", value)}
-                      >
-                        <SelectTrigger className="w-[120px]">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="draft">Draft</SelectItem>
-                          <SelectItem value="review">Review</SelectItem>
-                          <SelectItem value="published">Published</SelectItem>
-                          <SelectItem value="archived">Archived</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </TableCell>
+                     <TableCell>
+                       <div className="flex items-center gap-2">
+                         <Select
+                           value={article.status}
+                           onValueChange={(value) => handleUpdate(article.id, "status", value)}
+                         >
+                           <SelectTrigger className="w-[120px]">
+                             <SelectValue />
+                           </SelectTrigger>
+                           <SelectContent>
+                             <SelectItem value="draft">Draft</SelectItem>
+                             <SelectItem value="scheduled">Scheduled</SelectItem>
+                             <SelectItem value="review">Review</SelectItem>
+                             <SelectItem value="published">Published</SelectItem>
+                             <SelectItem value="archived">Archived</SelectItem>
+                           </SelectContent>
+                         </Select>
+                         <Button
+                           variant="ghost"
+                           size="icon"
+                           title="View on site"
+                           asChild
+                         >
+                           <Link to={`/article/${article.slug}`} target="_blank">
+                             <ExternalLink className="h-4 w-4" />
+                           </Link>
+                         </Button>
+                       </div>
+                     </TableCell>
                     <TableCell>
                       <Input
                         type="date"
