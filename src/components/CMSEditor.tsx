@@ -617,6 +617,25 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
               </div>
 
               <div>
+                <Label htmlFor="primary-category">Primary Category</Label>
+                <Select value={primaryCategoryId} onValueChange={setPrimaryCategoryId}>
+                  <SelectTrigger id="primary-category">
+                    <SelectValue placeholder="Select category..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories?.map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Main category for this article (used for related articles)
+                </p>
+              </div>
+
+              <div>
                 <Label htmlFor="status">Status</Label>
                 <Select value={status} onValueChange={setStatus}>
                   <SelectTrigger id="status">
@@ -684,19 +703,16 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
                           mode="single"
                           selected={scheduledFor}
                           onSelect={setScheduledFor}
-                          disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
                           initialFocus
-                          className="pointer-events-auto"
                         />
                       </PopoverContent>
                     </Popover>
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-muted-foreground" />
+                    <div className="w-32">
                       <Input
                         type="time"
                         value={scheduledTime}
                         onChange={(e) => setScheduledTime(e.target.value)}
-                        className="w-32"
+                        disabled={!scheduledFor}
                       />
                     </div>
                     {scheduledFor && (
@@ -713,25 +729,6 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
                     )}
                   </div>
                 </div>
-              </div>
-
-              <div>
-                <Label htmlFor="primary-category">Primary Category</Label>
-                <Select value={primaryCategoryId} onValueChange={setPrimaryCategoryId}>
-                  <SelectTrigger id="primary-category">
-                    <SelectValue placeholder="Select category..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories?.map((category) => (
-                      <SelectItem key={category.id} value={category.id}>
-                        {category.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Main category for this article (used for related articles)
-                </p>
               </div>
 
               <div>
