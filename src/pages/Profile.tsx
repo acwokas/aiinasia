@@ -676,11 +676,11 @@ const Profile = () => {
         {/* Tabs */}
         <div ref={tabsRef}>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-            <TabsList>
-              <TabsTrigger value="bookmarks">Bookmarks</TabsTrigger>
-              <TabsTrigger value="achievements">Achievements</TabsTrigger>
-              <TabsTrigger value="stats">Reading Stats</TabsTrigger>
-              <TabsTrigger value="account">Account Settings</TabsTrigger>
+            <TabsList className="w-full h-auto flex-wrap md:flex-nowrap justify-start gap-1 overflow-x-auto">
+              <TabsTrigger value="bookmarks" className="flex-shrink-0">Bookmarks</TabsTrigger>
+              <TabsTrigger value="achievements" className="flex-shrink-0">Achievements</TabsTrigger>
+              <TabsTrigger value="stats" className="flex-shrink-0">Reading Stats</TabsTrigger>
+              <TabsTrigger value="account" className="flex-shrink-0">Account Settings</TabsTrigger>
             </TabsList>
 
           <TabsContent value="bookmarks" className="space-y-4">
