@@ -42,7 +42,7 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
   const [featuredOnHomepage, setFeaturedOnHomepage] = useState(
     initialData?.featured_on_homepage ?? true
   );
-  const [sticky, setSticky] = useState(initialData?.sticky ?? true);
+  const [sticky, setSticky] = useState(initialData?.sticky ?? false);
   const [authorId, setAuthorId] = useState(initialData?.author_id || "dc6a0958-a872-48ab-ae1a-76eb4e1ea4a4");
   const [primaryCategoryId, setPrimaryCategoryId] = useState(initialData?.primary_category_id || "");
   const [scheduledFor, setScheduledFor] = useState<Date | undefined>(
