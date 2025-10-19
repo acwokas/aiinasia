@@ -97,7 +97,7 @@ const Articles = () => {
       }
 
       if (typeFilter !== "all") {
-        query = query.eq("article_type", typeFilter as "feature" | "life" | "news" | "opinion" | "tools");
+        query = query.eq("article_type", typeFilter as "article" | "voice" | "guide" | "tool" | "video" | "site_furniture");
       }
 
       if (categoryFilter !== "all") {
@@ -296,11 +296,12 @@ const Articles = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="news">News</SelectItem>
-                <SelectItem value="feature">Feature</SelectItem>
-                <SelectItem value="opinion">Opinion</SelectItem>
-                <SelectItem value="life">Life</SelectItem>
-                <SelectItem value="tools">Tools</SelectItem>
+                <SelectItem value="article">Article</SelectItem>
+                <SelectItem value="voice">Voice</SelectItem>
+                <SelectItem value="guide">Guide</SelectItem>
+                <SelectItem value="tool">Tool</SelectItem>
+                <SelectItem value="video">Video</SelectItem>
+                <SelectItem value="site_furniture">Site Furniture</SelectItem>
               </SelectContent>
             </Select>
 

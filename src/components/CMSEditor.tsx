@@ -30,7 +30,7 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
   const [slug, setSlug] = useState(initialData?.slug || "");
   const [excerpt, setExcerpt] = useState(initialData?.excerpt || "");
   const [content, setContent] = useState(initialData?.content || "");
-  const [articleType, setArticleType] = useState(initialData?.article_type || "news");
+  const [articleType, setArticleType] = useState(initialData?.article_type || "article");
   const [status, setStatus] = useState(initialData?.status || "draft");
   const [featuredImage, setFeaturedImage] = useState(initialData?.featured_image_url || "");
   const [featuredImageAlt, setFeaturedImageAlt] = useState(initialData?.featured_image_alt || "");
@@ -601,11 +601,12 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="feature">Feature</SelectItem>
-                    <SelectItem value="news">News</SelectItem>
-                    <SelectItem value="opinion">Opinion</SelectItem>
-                    <SelectItem value="tools">Tools</SelectItem>
-                    <SelectItem value="life">Life</SelectItem>
+                    <SelectItem value="article">Article</SelectItem>
+                    <SelectItem value="voice">Voice</SelectItem>
+                    <SelectItem value="guide">Guide</SelectItem>
+                    <SelectItem value="tool">Tool</SelectItem>
+                    <SelectItem value="video">Video</SelectItem>
+                    <SelectItem value="site_furniture">Site Furniture</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

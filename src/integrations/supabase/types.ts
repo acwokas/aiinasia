@@ -109,7 +109,7 @@ export type Database = {
           ai_generated_at: string | null
           ai_summary: string | null
           ai_tags: string[] | null
-          article_type: Database["public"]["Enums"]["article_type"]
+          article_type: Database["public"]["Enums"]["article_type_new"]
           author_id: string | null
           canonical_url: string | null
           comment_count: number | null
@@ -149,7 +149,7 @@ export type Database = {
           ai_generated_at?: string | null
           ai_summary?: string | null
           ai_tags?: string[] | null
-          article_type?: Database["public"]["Enums"]["article_type"]
+          article_type?: Database["public"]["Enums"]["article_type_new"]
           author_id?: string | null
           canonical_url?: string | null
           comment_count?: number | null
@@ -189,7 +189,7 @@ export type Database = {
           ai_generated_at?: string | null
           ai_summary?: string | null
           ai_tags?: string[] | null
-          article_type?: Database["public"]["Enums"]["article_type"]
+          article_type?: Database["public"]["Enums"]["article_type_new"]
           author_id?: string | null
           canonical_url?: string | null
           comment_count?: number | null
@@ -825,6 +825,13 @@ export type Database = {
       app_role: "admin" | "editor" | "contributor" | "user"
       article_status: "draft" | "review" | "published" | "archived"
       article_type: "feature" | "news" | "opinion" | "tools" | "life"
+      article_type_new:
+        | "article"
+        | "voice"
+        | "guide"
+        | "tool"
+        | "video"
+        | "site_furniture"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -955,6 +962,14 @@ export const Constants = {
       app_role: ["admin", "editor", "contributor", "user"],
       article_status: ["draft", "review", "published", "archived"],
       article_type: ["feature", "news", "opinion", "tools", "life"],
+      article_type_new: [
+        "article",
+        "voice",
+        "guide",
+        "tool",
+        "video",
+        "site_furniture",
+      ],
     },
   },
 } as const
