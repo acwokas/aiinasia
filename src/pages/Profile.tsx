@@ -69,6 +69,7 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [activeTab, setActiveTab] = useState("bookmarks");
   
   // Edit state
   const [editFirstName, setEditFirstName] = useState("");
@@ -648,10 +649,18 @@ const Profile = () => {
               </div>
             </Card>
 
-            <Card className="p-6 cursor-pointer hover:shadow-lg transition-shadow" onClick={() => {
-              const achievementsTab = document.querySelector('[value="achievements"]') as HTMLElement;
-              achievementsTab?.click();
-            }}>
+            <Card 
+              className="p-6 cursor-pointer hover:shadow-lg transition-shadow" 
+              onClick={() => setActiveTab("achievements")}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setActiveTab("achievements");
+                }
+              }}
+            >
               <div className="flex items-center gap-3">
                 <Award className="h-8 w-8 text-accent" />
                 <div>
@@ -666,7 +675,7 @@ const Profile = () => {
         </div>
 
         {/* Tabs */}
-        <Tabs defaultValue="bookmarks" className="space-y-4">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
           <TabsList>
             <TabsTrigger value="bookmarks">Bookmarks</TabsTrigger>
             <TabsTrigger value="achievements">Achievements</TabsTrigger>
