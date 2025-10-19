@@ -139,7 +139,7 @@ const About = () => {
           
           <h2 className="headline text-3xl mt-8 mb-4">Editorial Standards</h2>
           <p>
-            We maintain strict editorial independence and transparency. Our content is researched, fact-checked, and written to the highest journalistic standards. Where AI assists in our editorial process, including our Scout AI assistant, we clearly disclose it. Our gamification system is designed to reward engagement, not influence editorial decisions.
+            We maintain strict editorial independence and transparency. Our content is researched, fact-checked, and written to the highest journalistic standards. Our gamification system is designed to reward engagement, not influence editorial decisions.
           </p>
           
           <div className="bg-muted/50 rounded-lg p-8 mt-12">
