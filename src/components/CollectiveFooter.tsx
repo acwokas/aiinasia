@@ -87,7 +87,11 @@ export const CollectiveFooter = () => {
                         <img
                           src={link.logo}
                           alt={link.displayName}
-                          className="max-w-full max-h-full object-contain"
+                          className={`max-w-full max-h-full object-contain ${
+                            link.subdomain === "shop.withthepowerof.ai" || link.subdomain === "learn.withthepowerof.ai"
+                              ? "scale-125"
+                              : ""
+                          }`}
                           loading="lazy"
                         />
                       </div>
