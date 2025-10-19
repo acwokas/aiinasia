@@ -207,12 +207,11 @@ const Index = () => {
         <section className="container mx-auto px-4 py-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             {/* Trending Section - Left */}
-            <div className="lg:col-span-3 space-y-6 order-2 lg:order-1">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="bg-primary text-primary-foreground px-3 py-1 text-xs font-bold uppercase">
-                  Trending
-                </div>
+            <div className="lg:col-span-3 order-2 lg:order-1">
+              <div className="bg-primary text-primary-foreground px-3 py-1.5 text-xs font-bold uppercase mb-6">
+                Trending
               </div>
+              <div className="space-y-6">
               {trendingArticles?.slice(0, 4).filter((article: any) => article.slug).map((article: any, index: number) => (
                 <Link 
                   key={article.id}
@@ -249,6 +248,7 @@ const Index = () => {
                   )}
                 </Link>
               ))}
+              </div>
             </div>
 
             {/* Featured Article - Center */}
@@ -337,19 +337,20 @@ const Index = () => {
             </div>
 
             {/* Latest Articles - Right */}
-            <div className="lg:col-span-3 space-y-4 order-3">
+            <div className="lg:col-span-3 order-3">
               {/* Advertisement Slot */}
               <div className="mb-6">
                 <p className="text-xs text-muted-foreground text-center mb-2">Advertisement</p>
                 <BusinessInAByteAd />
               </div>
 
-              <div className="flex items-center gap-2 mb-4">
-                <div className="bg-secondary text-secondary-foreground px-3 py-1 text-xs font-bold uppercase">
+              <div className="flex items-center gap-2 bg-secondary text-secondary-foreground px-3 py-1.5 mb-6">
+                <div className="text-xs font-bold uppercase">
                   Latest
                 </div>
-                <span className="text-xs text-muted-foreground">Videos</span>
+                <span className="text-xs opacity-80">Videos</span>
               </div>
+              <div className="space-y-4">
               {latestArticles?.filter((article: any) => article.slug).map((article: any) => (
                 <Link 
                   key={article.id}
@@ -373,6 +374,7 @@ const Index = () => {
                   </div>
                 </Link>
               ))}
+              </div>
             </div>
           </div>
         </section>
