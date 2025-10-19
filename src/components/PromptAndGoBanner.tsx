@@ -18,15 +18,23 @@ export const PromptAndGoBanner = () => {
         <div className="absolute inset-0 flex items-center justify-between px-4 md:px-8 max-w-7xl mx-auto">
           {/* Text content */}
           <div className="flex-1 pr-3 md:pr-8">
-            <p className="text-white font-bold text-sm md:text-xl leading-tight mb-0.5 md:mb-1">
-              Better and faster AI results, every time
+            {/* Mobile text */}
+            <p className="text-white font-bold text-sm leading-tight md:hidden">
+              Battle-ready prompts which Scout optimises for any chatbot for free.
             </p>
-            <p className="text-white/90 text-xs md:text-base mb-0.5 md:mb-1 line-clamp-2 md:line-clamp-none">
-              Browse 3,000+ tested prompts and let Scout optimise the prompt for your favourite AI chatbot
-            </p>
-            <p className="text-white/80 text-xs md:text-sm">
-              100% Free
-            </p>
+            
+            {/* Desktop text */}
+            <div className="hidden md:block">
+              <p className="text-white font-bold text-xl leading-tight mb-1">
+                Better and faster AI results, every time
+              </p>
+              <p className="text-white/90 text-base mb-1">
+                Browse 3,000+ tested prompts and let Scout optimise the prompt for your favourite AI chatbot
+              </p>
+              <p className="text-white/80 text-sm">
+                100% Free
+              </p>
+            </div>
           </div>
 
           {/* Logo on white background */}
