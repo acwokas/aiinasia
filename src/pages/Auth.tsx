@@ -172,12 +172,48 @@ const Auth = () => {
           _user_id: data.user.id,
           _points: signupPoints
         });
+
+        // Award signup achievements
+        // Digital Pioneer - for basic signup (always awarded)
+        await supabase
+          .from('user_achievements')
+          .insert({
+            user_id: data.user.id,
+            achievement_id: (await supabase
+              .from('achievements')
+              .select('id')
+              .eq('name', 'Digital Pioneer')
+              .single()).data?.id
+          });
+
+        // Profile Master - for completing optional info (45+ points)
+        if (signupPoints >= 45) {
+          await supabase
+            .from('user_achievements')
+            .insert({
+              user_id: data.user.id,
+              achievement_id: (await supabase
+                .from('achievements')
+                .select('id')
+                .eq('name', 'Profile Master')
+                .single()).data?.id
+            });
+        }
+
+        // Check for other achievements after signup
+        await supabase.rpc('check_and_award_achievements', {
+          _user_id: data.user.id
+        });
       }
 
       const earnedPoints = calculateSignupPoints();
+      const achievementText = earnedPoints >= 45 
+        ? " You've earned the 'Profile Master' badge! 👑" 
+        : " You've earned the 'Digital Pioneer' badge! 🌟";
+      
       toast({
         title: "Welcome! 🎉",
-        description: `Account created successfully! You earned ${earnedPoints} points!`,
+        description: `Account created successfully! You earned ${earnedPoints} points!${achievementText}`,
       });
     } catch (error) {
       toast({
@@ -377,8 +413,8 @@ const Auth = () => {
                       </span>
                     </div>
                     <div className="bg-primary/10 border border-primary/20 rounded-lg p-3 mb-4">
-                      <p className="text-xs text-muted-foreground mb-2">💡 Earn more points:</p>
-                      <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                      <p className="text-xs font-medium mb-2">🏆 Earn More Rewards:</p>
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs mb-3">
                         <div className="flex justify-between">
                           <span>Avatar:</span>
                           <span className="font-medium">+5 pts</span>
@@ -403,6 +439,13 @@ const Auth = () => {
                           <span>Per Interest:</span>
                           <span className="font-medium">+2 pts</span>
                         </div>
+                      </div>
+                      <div className="pt-2 border-t border-primary/20">
+                        <p className="text-xs font-medium text-primary">
+                          {calculateSignupPoints() >= 45 
+                            ? "🎯 Unlock 'Profile Master' badge! 👑" 
+                            : `Need ${45 - calculateSignupPoints()} more pts for 'Profile Master' badge 👑`}
+                        </p>
                       </div>
                     </div>
                     
