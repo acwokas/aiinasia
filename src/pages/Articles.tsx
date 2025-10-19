@@ -97,7 +97,7 @@ const Articles = () => {
       }
 
       if (typeFilter !== "all") {
-        query = query.eq("article_type", typeFilter as "article" | "voice" | "guide" | "tool" | "video" | "site_furniture");
+        query = query.eq("article_type", typeFilter as "article" | "voice" | "guide" | "tool" | "video" | "site_furniture" | "event" | "interview" | "review" | "explainer" | "podcast");
       }
 
       if (categoryFilter !== "all") {
@@ -301,6 +301,11 @@ const Articles = () => {
                 <SelectItem value="guide">Guide</SelectItem>
                 <SelectItem value="tool">Tool</SelectItem>
                 <SelectItem value="video">Video</SelectItem>
+                <SelectItem value="event">Event</SelectItem>
+                <SelectItem value="interview">Interview</SelectItem>
+                <SelectItem value="review">Review</SelectItem>
+                <SelectItem value="explainer">Explainer</SelectItem>
+                <SelectItem value="podcast">Podcast</SelectItem>
                 <SelectItem value="site_furniture">Site Furniture</SelectItem>
               </SelectContent>
             </Select>

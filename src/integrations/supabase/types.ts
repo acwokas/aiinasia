@@ -118,7 +118,11 @@ export type Database = {
           created_at: string
           created_by: string | null
           event_date: string | null
+          event_end_date: string | null
           event_location: string | null
+          event_registration_url: string | null
+          event_start_date: string | null
+          event_venue: string | null
           excerpt: string | null
           featured_image_alt: string | null
           featured_image_caption: string | null
@@ -131,9 +135,13 @@ export type Database = {
           like_count: number | null
           meta_description: string | null
           meta_title: string | null
+          podcast_audio_url: string | null
+          podcast_duration_minutes: number | null
           primary_category_id: string | null
           published_at: string | null
           reading_time_minutes: number | null
+          review_product_name: string | null
+          review_rating: number | null
           scheduled_for: string | null
           seo_title: string | null
           slug: string
@@ -158,7 +166,11 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           event_date?: string | null
+          event_end_date?: string | null
           event_location?: string | null
+          event_registration_url?: string | null
+          event_start_date?: string | null
+          event_venue?: string | null
           excerpt?: string | null
           featured_image_alt?: string | null
           featured_image_caption?: string | null
@@ -171,9 +183,13 @@ export type Database = {
           like_count?: number | null
           meta_description?: string | null
           meta_title?: string | null
+          podcast_audio_url?: string | null
+          podcast_duration_minutes?: number | null
           primary_category_id?: string | null
           published_at?: string | null
           reading_time_minutes?: number | null
+          review_product_name?: string | null
+          review_rating?: number | null
           scheduled_for?: string | null
           seo_title?: string | null
           slug: string
@@ -198,7 +214,11 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           event_date?: string | null
+          event_end_date?: string | null
           event_location?: string | null
+          event_registration_url?: string | null
+          event_start_date?: string | null
+          event_venue?: string | null
           excerpt?: string | null
           featured_image_alt?: string | null
           featured_image_caption?: string | null
@@ -211,9 +231,13 @@ export type Database = {
           like_count?: number | null
           meta_description?: string | null
           meta_title?: string | null
+          podcast_audio_url?: string | null
+          podcast_duration_minutes?: number | null
           primary_category_id?: string | null
           published_at?: string | null
           reading_time_minutes?: number | null
+          review_product_name?: string | null
+          review_rating?: number | null
           scheduled_for?: string | null
           seo_title?: string | null
           slug?: string
@@ -832,6 +856,11 @@ export type Database = {
         | "tool"
         | "video"
         | "site_furniture"
+        | "event"
+        | "interview"
+        | "review"
+        | "explainer"
+        | "podcast"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -969,6 +998,11 @@ export const Constants = {
         "tool",
         "video",
         "site_furniture",
+        "event",
+        "interview",
+        "review",
+        "explainer",
+        "podcast",
       ],
     },
   },
