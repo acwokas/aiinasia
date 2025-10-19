@@ -65,15 +65,15 @@ const Header = () => {
               size="icon"
               onClick={toggleTheme}
               aria-label="Toggle theme"
-              className="h-16 w-16"
+              className="h-12 w-12 md:h-16 md:w-16"
             >
-              {isDark ? <Sun className="h-8 w-8" /> : <Moon className="h-8 w-8" />}
+              {isDark ? <Sun className="h-6 w-6 md:h-8 md:w-8" /> : <Moon className="h-6 w-6 md:h-8 md:w-8" />}
             </Button>
 
             {user ? (
-              <Button variant="ghost" size="icon" asChild className="h-16 w-16">
+              <Button variant="ghost" size="icon" asChild className="h-12 w-12 md:h-16 md:w-16">
                 <Link to="/profile">
-                  <User className="h-8 w-8" />
+                  <User className="h-6 w-6 md:h-8 md:w-8" />
                 </Link>
               </Button>
             ) : (
@@ -85,10 +85,10 @@ const Header = () => {
             <Button
               variant="ghost"
               size="icon"
-              className="md:hidden h-16 w-16"
+              className="md:hidden h-12 w-12"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
-              <Menu className="h-8 w-8" />
+              <Menu className="h-6 w-6" />
             </Button>
           </div>
         </div>
