@@ -3,6 +3,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import aiinasiaLogo from "@/assets/aiinasia-logo.png";
 import businessInAByteLogo from "@/assets/businessinabyte-logo.png";
 import promptAndGoLogo from "@/assets/promptandgo-logo.png";
+import myOfferClubLogo from "@/assets/myofferclub-logo.png";
+import aiAcademyLogo from "@/assets/aiacademy-logo.png";
 
 const collectiveLinks = [
   {
@@ -27,13 +29,13 @@ const collectiveLinks = [
     subdomain: "shop.withthepowerof.ai",
     url: "https://www.myofferclub.com",
     displayName: "MyOfferClub.com",
-    logo: businessInAByteLogo, // Placeholder - needs MyOfferClub logo
+    logo: myOfferClubLogo,
   },
   {
     subdomain: "learn.withthepowerof.ai",
     url: "https://www.aiacademy.asia",
     displayName: "AIAcademy.asia",
-    logo: aiinasiaLogo, // Placeholder - needs AIAcademy logo
+    logo: aiAcademyLogo,
   },
 ];
 
