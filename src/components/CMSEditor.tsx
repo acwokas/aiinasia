@@ -41,7 +41,7 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
   const [keyphraseSynonyms, setKeyphraseSynonyms] = useState(initialData?.keyphrase_synonyms || "");
   const [featuredOnHomepage, setFeaturedOnHomepage] = useState(initialData?.featured_on_homepage || false);
   const [sticky, setSticky] = useState(initialData?.sticky || false);
-  const [authorId, setAuthorId] = useState(initialData?.author_id || "");
+  const [authorId, setAuthorId] = useState(initialData?.author_id || "dc6a0958-a872-48ab-ae1a-76eb4e1ea4a4");
   const [primaryCategoryId, setPrimaryCategoryId] = useState(initialData?.primary_category_id || "");
   const [scheduledFor, setScheduledFor] = useState<Date | undefined>(
     initialData?.scheduled_for ? new Date(initialData.scheduled_for) : undefined
