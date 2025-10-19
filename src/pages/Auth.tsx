@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Eye, EyeOff, Upload, ChevronRight } from "lucide-react";
+import { Loader2, Eye, EyeOff, Upload, ChevronRight, Zap } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { compressImage } from "@/lib/imageCompression";
@@ -52,6 +52,19 @@ const Auth = () => {
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Calculate potential points
+  const calculateSignupPoints = () => {
+    let points = 20; // Base signup points
+    if (newsletterOptIn) points += 5;
+    if (avatarFile) points += 5;
+    if (lastName) points += 3;
+    if (company) points += 5;
+    if (jobTitle) points += 5;
+    if (country) points += 3;
+    points += interests.length * 2; // 2 points per interest
+    return points;
+  };
 
   useEffect(() => {
     if (user) {
@@ -152,11 +165,19 @@ const Auth = () => {
             .from('newsletter_subscribers')
             .insert({ email, confirmed: true });
         }
+
+        // Award signup points based on information provided
+        const signupPoints = calculateSignupPoints();
+        await supabase.rpc('award_points', {
+          _user_id: data.user.id,
+          _points: signupPoints
+        });
       }
 
+      const earnedPoints = calculateSignupPoints();
       toast({
-        title: "Success!",
-        description: "Account created successfully!",
+        title: "Welcome! 🎉",
+        description: `Account created successfully! You earned ${earnedPoints} points!`,
       });
     } catch (error) {
       toast({
@@ -257,8 +278,12 @@ const Auth = () => {
               <form onSubmit={handleSignUp} className="space-y-4">
                 {!showStep2 ? (
                   <>
-                    <div className="text-sm text-muted-foreground mb-4">
-                      Step 1 of 2 - Essential Info
+                    <div className="flex items-center justify-between text-sm mb-4">
+                      <span className="text-muted-foreground">Step 1 of 2 - Essential Info</span>
+                      <span className="flex items-center gap-1 text-primary font-medium">
+                        <Zap className="h-4 w-4" />
+                        {20 + (newsletterOptIn ? 5 : 0)} pts
+                      </span>
                     </div>
                     <div>
                       <Label htmlFor="signup-firstname">First Name *</Label>
@@ -344,8 +369,41 @@ const Auth = () => {
                   </>
                 ) : (
                   <>
-                    <div className="text-sm text-muted-foreground mb-4">
-                      Step 2 of 2 - Customize Your Experience (Optional)
+                    <div className="flex items-center justify-between text-sm mb-4">
+                      <span className="text-muted-foreground">Step 2 of 2 - Customize Your Experience</span>
+                      <span className="flex items-center gap-1 text-primary font-medium">
+                        <Zap className="h-4 w-4" />
+                        Total: {calculateSignupPoints()} pts
+                      </span>
+                    </div>
+                    <div className="bg-primary/10 border border-primary/20 rounded-lg p-3 mb-4">
+                      <p className="text-xs text-muted-foreground mb-2">💡 Earn more points:</p>
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                        <div className="flex justify-between">
+                          <span>Avatar:</span>
+                          <span className="font-medium">+5 pts</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Company:</span>
+                          <span className="font-medium">+5 pts</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Job Title:</span>
+                          <span className="font-medium">+5 pts</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Country:</span>
+                          <span className="font-medium">+3 pts</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Last Name:</span>
+                          <span className="font-medium">+3 pts</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Per Interest:</span>
+                          <span className="font-medium">+2 pts</span>
+                        </div>
+                      </div>
                     </div>
                     
                     <div className="flex flex-col items-center mb-4">
