@@ -28,6 +28,7 @@ import ScoutChatbot from "./components/ScoutChatbot";
 import GoogleAnalytics from "./components/GoogleAnalytics";
 import { loadGoogleAdsScript } from "./components/GoogleAds";
 import ConsentBanner from "./components/ConsentBanner";
+import { CollectiveFooter } from "./components/CollectiveFooter";
 
 loadGoogleAdsScript();
 
@@ -66,6 +67,7 @@ const App = () => (
             <Route path="/redirects" element={<Redirects />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <CollectiveFooter />
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>
