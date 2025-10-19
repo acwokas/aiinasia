@@ -856,6 +856,7 @@ export type Database = {
         | "published"
         | "archived"
         | "scheduled"
+        | "unpublished"
       article_type: "feature" | "news" | "opinion" | "tools" | "life"
       article_type_new:
         | "article"
@@ -997,7 +998,14 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "editor", "contributor", "user"],
-      article_status: ["draft", "review", "published", "archived", "scheduled"],
+      article_status: [
+        "draft",
+        "review",
+        "published",
+        "archived",
+        "scheduled",
+        "unpublished",
+      ],
       article_type: ["feature", "news", "opinion", "tools", "life"],
       article_type_new: [
         "article",
