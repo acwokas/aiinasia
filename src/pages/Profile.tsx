@@ -169,6 +169,117 @@ const Profile = () => {
     return levels[level as keyof typeof levels] || levels.explorer;
   };
 
+  const handleAchievementClick = (achievement: Achievement) => {
+    if (achievement.earned_at) return; // Already earned, do nothing
+    
+    // Route to appropriate section based on achievement
+    switch (achievement.name) {
+      // Reading achievements
+      case 'First Steps':
+      case 'Knowledge Seeker':
+      case 'Dedicated Reader':
+      case 'AI Scholar':
+        navigate('/');
+        toast({
+          title: "Start Reading! 📚",
+          description: "Browse our latest AI articles to earn this achievement",
+        });
+        break;
+      
+      // Streak achievements
+      case 'Week Warrior':
+      case 'Month Master':
+      case 'Early Adopter':
+        navigate('/');
+        toast({
+          title: "Build Your Streak! 🔥",
+          description: "Read articles daily to maintain your reading streak",
+        });
+        break;
+      
+      // Comment achievements
+      case 'Conversationalist':
+      case 'Comment Champion':
+      case 'Thought Leader':
+        navigate('/');
+        toast({
+          title: "Join the Discussion! 💬",
+          description: "Comment on articles to earn this achievement",
+        });
+        break;
+      
+      // Bookmark achievements
+      case 'Bookworm':
+        navigate('/');
+        toast({
+          title: "Start Bookmarking! 🔖",
+          description: "Save articles you love to earn this achievement",
+        });
+        break;
+      
+      // Sharing achievements
+      case 'Social Sharer':
+      case 'Social Butterfly':
+        navigate('/');
+        toast({
+          title: "Share the Knowledge! 📢",
+          description: "Share articles on social media to earn this achievement",
+        });
+        break;
+      
+      // Profile completion achievements
+      case 'Digital Pioneer':
+      case 'Profile Master':
+        // Switch to account settings tab
+        const accountTab = document.querySelector('[value="account"]') as HTMLElement;
+        accountTab?.click();
+        toast({
+          title: "Complete Your Profile! ✨",
+          description: "Fill in your profile information to earn this achievement",
+        });
+        break;
+      
+      // Level achievements
+      case 'Explorer':
+      case 'Enthusiast':
+      case 'Expert':
+        // Switch to stats tab to show progress
+        const statsTab = document.querySelector('[value="stats"]') as HTMLElement;
+        statsTab?.click();
+        toast({
+          title: "Keep Earning Points! ⚡",
+          description: "Read articles and engage with content to level up",
+        });
+        break;
+      
+      // Newsletter achievement
+      case 'Newsletter Insider':
+        const accountTab2 = document.querySelector('[value="account"]') as HTMLElement;
+        accountTab2?.click();
+        toast({
+          title: "Subscribe to Newsletter! 📧",
+          description: "Enable newsletter subscription in account settings",
+        });
+        break;
+      
+      // Regional achievements
+      case 'Asia Expert':
+        navigate('/');
+        toast({
+          title: "Explore All Regions! 🌏",
+          description: "Read articles from different Asian countries",
+        });
+        break;
+      
+      default:
+        navigate('/');
+        toast({
+          title: "Keep Exploring! 🚀",
+          description: "Continue using the platform to unlock this achievement",
+        });
+    }
+  };
+
   const handleSignOut = async () => {
     await signOut();
     navigate('/');
@@ -441,8 +552,9 @@ const Profile = () => {
                     className={`p-6 transition-all ${
                       isEarned 
                         ? 'border-primary/50 shadow-md' 
-                        : 'opacity-50 grayscale border-dashed'
+                        : 'opacity-50 grayscale border-dashed cursor-pointer hover:opacity-70 hover:scale-105'
                     }`}
+                    onClick={() => handleAchievementClick(achievement)}
                   >
                     <div className={`text-4xl mb-3 ${!isEarned && 'opacity-40'}`}>
                       {achievement.badge_icon}
@@ -458,8 +570,8 @@ const Profile = () => {
                         ✓ Earned {new Date(achievement.earned_at).toLocaleDateString()}
                       </p>
                     ) : (
-                      <p className="text-xs text-muted-foreground italic">
-                        🔒 Not yet unlocked
+                      <p className="text-xs text-primary font-medium italic">
+                        🔒 Click to start earning this badge
                       </p>
                     )}
                   </Card>
