@@ -39,8 +39,10 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
   const [metaDescription, setMetaDescription] = useState(initialData?.meta_description || "");
   const [focusKeyphrase, setFocusKeyphrase] = useState(initialData?.focus_keyphrase || "");
   const [keyphraseSynonyms, setKeyphraseSynonyms] = useState(initialData?.keyphrase_synonyms || "");
-  const [featuredOnHomepage, setFeaturedOnHomepage] = useState(initialData?.featured_on_homepage || false);
-  const [sticky, setSticky] = useState(initialData?.sticky || false);
+  const [featuredOnHomepage, setFeaturedOnHomepage] = useState(
+    initialData?.featured_on_homepage ?? true
+  );
+  const [sticky, setSticky] = useState(initialData?.sticky ?? true);
   const [authorId, setAuthorId] = useState(initialData?.author_id || "dc6a0958-a872-48ab-ae1a-76eb4e1ea4a4");
   const [primaryCategoryId, setPrimaryCategoryId] = useState(initialData?.primary_category_id || "");
   const [scheduledFor, setScheduledFor] = useState<Date | undefined>(
@@ -666,9 +668,9 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
 
               <div className="flex items-center justify-between">
                 <div>
-                  <Label htmlFor="sticky">Sticky</Label>
+                  <Label htmlFor="sticky">Make Sticky</Label>
                   <p className="text-xs text-muted-foreground">
-                    Keep this article at the top of lists
+                    Pin this article in the top 3 positions of homepage featured section
                   </p>
                 </div>
                 <Switch

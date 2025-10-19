@@ -32,6 +32,7 @@ const Index = () => {
         `)
         .eq("status", "published")
         .eq("featured_on_homepage", true)
+        .order("sticky", { ascending: false })
         .order("published_at", { ascending: false, nullsFirst: false })
         .limit(1)
         .maybeSingle();
@@ -95,7 +96,8 @@ const Index = () => {
   const { data: latestArticles, isLoading } = useQuery({
     queryKey: ["latest-articles"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // First get sticky articles
+      const { data: stickyArticles, error: stickyError } = await supabase
         .from("articles")
         .select(`
           *,
@@ -103,11 +105,44 @@ const Index = () => {
           categories:primary_category_id (name)
         `)
         .eq("status", "published")
+        .eq("sticky", true)
+        .eq("featured_on_homepage", true)
         .order("published_at", { ascending: false, nullsFirst: false })
-        .limit(8);
+        .limit(3);
       
-      if (error) throw error;
-      return data || [];
+      if (stickyError) throw stickyError;
+      
+      // Then get remaining articles to fill up to 8
+      const stickyIds = (stickyArticles || []).map(a => a.id);
+      const remainingCount = 8 - (stickyArticles?.length || 0);
+      
+      if (remainingCount > 0) {
+        const query = supabase
+          .from("articles")
+          .select(`
+            *,
+            authors (name, slug),
+            categories:primary_category_id (name)
+          `)
+          .eq("status", "published")
+          .eq("featured_on_homepage", true)
+          .order("published_at", { ascending: false, nullsFirst: false })
+          .limit(remainingCount);
+        
+        // Exclude sticky articles if we have any
+        if (stickyIds.length > 0) {
+          query.not('id', 'in', `(${stickyIds.join(',')})`);
+        }
+        
+        const { data: regularArticles, error: regularError } = await query;
+        
+        if (regularError) throw regularError;
+        
+        // Combine sticky articles at the top with regular articles
+        return [...(stickyArticles || []), ...(regularArticles || [])];
+      }
+      
+      return stickyArticles || [];
     },
   });
 
