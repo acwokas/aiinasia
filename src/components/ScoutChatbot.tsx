@@ -194,12 +194,19 @@ const ScoutChatbot = () => {
   }
 
   return (
-    <div className="fixed bottom-4 right-4 left-4 md:left-auto md:right-6 md:w-96 h-[600px] max-h-[85vh] z-50 animate-scale-in">
-      {/* Outer glow effect */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 rounded-2xl blur-xl" />
+    <>
+      {/* Backdrop overlay */}
+      <div 
+        className="fixed inset-0 bg-background/60 backdrop-blur-sm z-40"
+        onClick={() => setIsOpen(false)}
+      />
       
-      {/* Main container */}
-      <div className="relative bg-card/95 backdrop-blur-xl border border-primary/30 rounded-2xl shadow-[0_0_50px_rgba(0,188,212,0.3)] flex flex-col overflow-hidden">
+      <div className="fixed bottom-4 right-4 left-4 md:left-auto md:right-6 md:w-96 h-[600px] max-h-[85vh] z-50 animate-scale-in">
+        {/* Outer glow effect */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/30 to-accent/30 rounded-2xl blur-2xl" />
+        
+        {/* Main container */}
+        <div className="relative bg-card backdrop-blur-xl border-2 border-primary/50 rounded-2xl shadow-[0_8px_80px_rgba(0,188,212,0.6),0_0_0_1px_rgba(0,188,212,0.2)] flex flex-col overflow-hidden">
         {/* Animated background grid */}
         <div className="absolute inset-0 opacity-[0.03]" style={{
           backgroundImage: 'linear-gradient(hsl(var(--primary)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)',
@@ -338,7 +345,8 @@ const ScoutChatbot = () => {
         </form>
       </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 };
 
