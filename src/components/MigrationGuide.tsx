@@ -100,22 +100,37 @@ This is paragraph two.","Brief excerpt"`}
 
             <div className="space-y-4">
               <div className="border rounded p-4 bg-primary/10 border-primary/30">
-                <h3 className="font-semibold mb-2 text-primary">✨ Recommended: Custom Export Script</h3>
+                <h3 className="font-semibold mb-2 text-primary">✨ Method 1: WordPress Plugin (EASIEST)</h3>
                 <ol className="list-decimal list-inside space-y-1 text-sm">
-                  <li>Download the export script: <a href="/wordpress-export-script.php" download className="text-primary underline font-semibold">wordpress-export-script.php</a></li>
-                  <li>Upload it to your WordPress site root (same folder as wp-config.php)</li>
-                  <li>Log in to WordPress as administrator</li>
-                  <li>Visit: <code className="bg-muted px-1">https://yoursite.com/wordpress-export-script.php</code></li>
-                  <li>CSV will download automatically in the correct format</li>
-                  <li><strong className="text-destructive">Delete the script file after use</strong> for security</li>
+                  <li>Download the plugin: <a href="/ai-in-asia-exporter-plugin.php" download className="text-primary underline font-semibold">ai-in-asia-exporter-plugin.php</a></li>
+                  <li>Go to <strong>WordPress Admin → Plugins → Add New → Upload Plugin</strong></li>
+                  <li>Upload the downloaded file and click <strong>Activate</strong></li>
+                  <li>Navigate to <strong>Tools → AI in Asia Export</strong></li>
+                  <li>Click <strong>Download CSV Export</strong> button</li>
+                  <li>Your CSV file will download in the correct format</li>
                 </ol>
                 <p className="text-xs text-muted-foreground mt-2">
-                  <strong>Why this is best:</strong> Generates CSV in exact format needed, includes Yoast SEO data, handles special characters automatically, no manual formatting required.
+                  <strong>Why this is best:</strong> Works directly in WordPress admin, no file uploads needed, includes Yoast SEO data, handles UTF-8 properly, most reliable method.
                 </p>
               </div>
 
               <div className="border rounded p-4 bg-muted/30">
-                <h3 className="font-semibold mb-2">Method 2: Built-in WordPress Exporter</h3>
+                <h3 className="font-semibold mb-2">Method 2: Standalone PHP Script (Alternative)</h3>
+                <ol className="list-decimal list-inside space-y-1 text-sm">
+                  <li>Download the export script: <a href="/wordpress-export-script.php" download className="underline">wordpress-export-script.php</a></li>
+                  <li>Upload it to your WordPress site root (same folder as wp-config.php)</li>
+                  <li>Log in to WordPress as administrator</li>
+                  <li>Visit: <code className="bg-muted px-1">https://yoursite.com/wordpress-export-script.php</code></li>
+                  <li>CSV will download automatically</li>
+                  <li><strong className="text-destructive">Delete the script file after use</strong> for security</li>
+                </ol>
+                <p className="text-xs text-muted-foreground mt-2">
+                  <strong>⚠️ Troubleshooting:</strong> If you see PHP code instead of a download, use Method 1 (plugin) instead. Some servers don't execute standalone scripts properly.
+                </p>
+              </div>
+
+              <div className="border rounded p-4 bg-muted/30">
+                <h3 className="font-semibold mb-2">Method 3: Built-in WordPress Exporter</h3>
                 <ol className="list-decimal list-inside space-y-1 text-sm">
                   <li>Go to <strong>Tools → Export</strong> in WordPress admin</li>
                   <li>Select <strong>Posts</strong></li>
@@ -123,12 +138,12 @@ This is paragraph two.","Brief excerpt"`}
                   <li>Convert XML to CSV using an online converter</li>
                 </ol>
                 <p className="text-xs text-muted-foreground mt-2">
-                  <strong>Note:</strong> This exports basic fields only. For SEO data and custom fields, use Method 2.
+                  <strong>Note:</strong> This exports basic fields only. For SEO data and custom fields, use Method 1 or 2.
                 </p>
               </div>
 
               <div className="border rounded p-4 bg-muted/30">
-                <h3 className="font-semibold mb-2">Method 3: WP All Import (with All Export addon)</h3>
+                <h3 className="font-semibold mb-2">Method 4: WP All Import (with All Export addon)</h3>
                 <ol className="list-decimal list-inside space-y-1 text-sm">
                   <li>Install <strong>WP All Import</strong> plugin</li>
                   <li>Install <strong>WP All Export</strong> addon (Pro recommended)</li>
@@ -150,7 +165,7 @@ This is paragraph two.","Brief excerpt"`}
               </div>
 
               <div className="border rounded p-4 bg-muted/30">
-                <h3 className="font-semibold mb-2">Method 4: phpMyAdmin SQL Query</h3>
+                <h3 className="font-semibold mb-2">Method 5: phpMyAdmin SQL Query</h3>
                 <ol className="list-decimal list-inside space-y-1 text-sm">
                   <li>Access phpMyAdmin from your hosting panel</li>
                   <li>Select your WordPress database</li>
