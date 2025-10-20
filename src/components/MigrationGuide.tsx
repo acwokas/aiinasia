@@ -101,16 +101,41 @@ This is paragraph two.","Brief excerpt"`}
             <div className="space-y-4">
               <div className="border rounded p-4 bg-primary/10 border-primary/30">
                 <h3 className="font-semibold mb-2 text-primary">✨ Method 1: WordPress Plugin (EASIEST)</h3>
-                <ol className="list-decimal list-inside space-y-1 text-sm">
-                  <li>Download the plugin: <a href="/ai-in-asia-exporter-plugin.php" download className="text-primary underline font-semibold">ai-in-asia-exporter-plugin.php</a></li>
-                  <li>Go to <strong>WordPress Admin → Plugins → Add New → Upload Plugin</strong></li>
-                  <li>Upload the downloaded file and click <strong>Activate</strong></li>
-                  <li>Navigate to <strong>Tools → AI in Asia Export</strong></li>
-                  <li>Click <strong>Download CSV Export</strong> button</li>
-                  <li>Your CSV file will download in the correct format</li>
-                </ol>
+                <p className="text-sm mb-2">Download the plugin: <a href="/ai-in-asia-exporter-plugin.php" download className="text-primary underline font-semibold">ai-in-asia-exporter-plugin.php</a></p>
+                
+                <div className="space-y-3">
+                  <div className="bg-background/50 p-3 rounded">
+                    <p className="font-semibold text-sm mb-1">Option A: FTP Upload (Recommended)</p>
+                    <ol className="list-decimal list-inside space-y-1 text-xs">
+                      <li>Download the plugin file above</li>
+                      <li>Connect to your site via FTP (FileZilla, etc.)</li>
+                      <li>Create a new folder: <code className="bg-muted px-1">/wp-content/plugins/ai-in-asia-exporter/</code></li>
+                      <li>Upload the PHP file into this new folder</li>
+                      <li>Go to <strong>WordPress Admin → Plugins</strong></li>
+                      <li>Find "AI in Asia Content Exporter" and click <strong>Activate</strong></li>
+                      <li>Navigate to <strong>Tools → AI in Asia Export</strong></li>
+                      <li>Click <strong>Download CSV Export</strong></li>
+                    </ol>
+                  </div>
+                  
+                  <div className="bg-background/50 p-3 rounded">
+                    <p className="font-semibold text-sm mb-1">Option B: Upload as ZIP</p>
+                    <ol className="list-decimal list-inside space-y-1 text-xs">
+                      <li>Download the plugin file above</li>
+                      <li>Create a new folder named <code className="bg-muted px-1">ai-in-asia-exporter</code></li>
+                      <li>Move the downloaded PHP file into this folder</li>
+                      <li>Zip the folder (right-click → Compress/Send to → Compressed folder)</li>
+                      <li>Go to <strong>WordPress Admin → Plugins → Add New → Upload Plugin</strong></li>
+                      <li>Upload the ZIP file and click <strong>Install Now</strong></li>
+                      <li>Click <strong>Activate Plugin</strong></li>
+                      <li>Navigate to <strong>Tools → AI in Asia Export</strong></li>
+                      <li>Click <strong>Download CSV Export</strong></li>
+                    </ol>
+                  </div>
+                </div>
+                
                 <p className="text-xs text-muted-foreground mt-2">
-                  <strong>Why this is best:</strong> Works directly in WordPress admin, no file uploads needed, includes Yoast SEO data, handles UTF-8 properly, most reliable method.
+                  <strong>Why this is best:</strong> Works directly in WordPress admin, includes Yoast SEO data, handles UTF-8 properly, most reliable method.
                 </p>
               </div>
 
