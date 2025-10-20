@@ -71,74 +71,45 @@ const CategoryMapper = () => {
     setProcessing(true);
     
     try {
-      const text = await file.text();
-      const lines = text.split('\n');
-      const header = lines[0];
-      
-      let totalRows = 0;
-      let mappedRows = 0;
-      let ignoredRows = 0;
-      let unchangedRows = 0;
-      
-      const processedLines: string[] = [header];
+      toast({
+        title: "Processing...",
+        description: "Sending CSV to backend for category mapping",
+      });
 
-      for (let i = 1; i < lines.length; i++) {
-        const line = lines[i];
-        if (!line.trim()) continue;
+      // Create FormData with the file
+      const formData = new FormData();
+      formData.append('file', file);
 
-        totalRows++;
-        
-        // Simple but robust CSV parsing
-        const match = line.match(/^([^,]*),([^,]*),([^,]*),("(?:[^"]|"")*"),("(?:[^"]|"")*"),([^,]*),("(?:[^"]|"")*"),("(?:[^"]|"")*"),("(?:[^"]|"")*"),("(?:[^"]|"")*"),([^,]*),([^,]*),([^,]*),(.*)$/);
-        
-        if (!match) {
-          processedLines.push(line);
-          unchangedRows++;
-          continue;
+      // Call edge function
+      const response = await fetch(
+        'https://ppvifagplcdjpdpqknzt.supabase.co/functions/v1/map-csv-categories',
+        {
+          method: 'POST',
+          body: formData,
         }
+      );
 
-        // Extract categories field (7th field, index 7 in match array)
-        let categoriesField = match[7];
-        categoriesField = categoriesField.replace(/^"|"$/g, ''); // Remove surrounding quotes
-        
-        const categories = categoriesField.split(',').map(c => c.trim());
-        
-        const mappedCategories = categories
-          .map(cat => mapCategory(cat))
-          .filter(cat => cat !== null);
-        
-        if (mappedCategories.length === 0) {
-          ignoredRows++;
-          continue; // Skip rows with only ignored categories
-        }
-        
-        const originalCategoriesStr = categories.join(',');
-        const mappedCategoriesStr = mappedCategories.join(',');
-        
-        if (originalCategoriesStr !== mappedCategoriesStr) {
-          mappedRows++;
-        } else {
-          unchangedRows++;
-        }
-        
-        // Replace categories in the matched line
-        const newLine = `${match[1]},${match[2]},${match[3]},${match[4]},${match[5]},${match[6]},"${mappedCategoriesStr}",${match[8]},${match[9]},${match[10]},${match[11]},${match[12]},${match[13]},${match[14]}`;
-        processedLines.push(newLine);
+      if (!response.ok) {
+        throw new Error('Failed to process CSV');
       }
 
+      const result = await response.json();
+      
+      const { csv: processedCSV, stats, filename } = result;
+      
       setStats({
-        total: totalRows,
-        mapped: mappedRows,
-        ignored: ignoredRows,
-        unchanged: unchangedRows,
+        total: stats.total,
+        mapped: stats.mapped,
+        unchanged: stats.unchanged,
+        ignored: stats.ignored,
       });
 
       // Create download
-      const blob = new Blob([processedLines.join('\n')], { type: 'text/csv' });
+      const blob = new Blob([processedCSV], { type: 'text/csv' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `mapped-${file.name}`;
+      a.download = filename;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -146,7 +117,7 @@ const CategoryMapper = () => {
 
       toast({
         title: "Success!",
-        description: `Processed ${totalRows} articles. Download started.`,
+        description: `Processed ${stats.total} articles. Download started.`,
       });
     } catch (error) {
       console.error('Error processing CSV:', error);
