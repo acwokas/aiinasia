@@ -21,12 +21,13 @@ Deno.serve(async (req) => {
       }
     );
 
-    console.log('Fetching all articles...');
+    console.log('Fetching all draft articles...');
 
-    // Fetch all articles
+    // Fetch only draft articles
     const { data: articles, error: fetchError } = await supabaseClient
       .from('articles')
-      .select('id, title, slug, status, featured_on_homepage, published_at');
+      .select('id, title, slug, status, featured_on_homepage, published_at')
+      .eq('status', 'draft');
 
     if (fetchError) {
       console.error('Error fetching articles:', fetchError);
@@ -39,52 +40,43 @@ Deno.serve(async (req) => {
     const results = [];
 
     for (const article of articles || []) {
-      // Only update if status is not published or not featured on homepage
-      if (article.status !== 'published' || !article.featured_on_homepage) {
-        console.log(`Publishing article: ${article.title} (${article.slug})`);
+      console.log(`Publishing article: ${article.title} (${article.slug})`);
         
-        try {
-          const { error: updateError } = await supabaseClient
-            .from('articles')
-            .update({ 
-              status: 'published',
-              featured_on_homepage: true,
-              published_at: article.published_at || new Date().toISOString(),
-              updated_at: new Date().toISOString()
-            })
-            .eq('id', article.id);
+      try {
+        const { error: updateError } = await supabaseClient
+          .from('articles')
+          .update({ 
+            status: 'published',
+            featured_on_homepage: true,
+            published_at: article.published_at || new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', article.id);
 
-          if (updateError) {
-            console.error(`Error updating article ${article.slug}:`, updateError);
-            results.push({
-              id: article.id,
-              slug: article.slug,
-              status: 'error',
-              error: updateError.message
-            });
-          } else {
-            updatedCount++;
-            results.push({
-              id: article.id,
-              slug: article.slug,
-              status: 'updated'
-            });
-          }
-        } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-          console.error(`Error processing article ${article.slug}:`, error);
+        if (updateError) {
+          console.error(`Error updating article ${article.slug}:`, updateError);
           results.push({
             id: article.id,
             slug: article.slug,
             status: 'error',
-            error: errorMessage
+            error: updateError.message
+          });
+        } else {
+          updatedCount++;
+          results.push({
+            id: article.id,
+            slug: article.slug,
+            status: 'updated'
           });
         }
-      } else {
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        console.error(`Error processing article ${article.slug}:`, error);
         results.push({
           id: article.id,
           slug: article.slug,
-          status: 'already_published'
+          status: 'error',
+          error: errorMessage
         });
       }
     }

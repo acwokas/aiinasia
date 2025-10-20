@@ -89,9 +89,9 @@ const PublishAllArticles = () => {
         
         <Card className="max-w-2xl mx-auto">
           <CardHeader>
-            <CardTitle>Publish All Articles</CardTitle>
+            <CardTitle>Publish All Draft Articles</CardTitle>
             <CardDescription>
-              Set all articles to published status and make them visible on the homepage
+              Set all draft articles to published status and make them visible on the homepage
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -101,7 +101,7 @@ const PublishAllArticles = () => {
               className="w-full"
             >
               {isRunning && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isRunning ? "Publishing Articles..." : "Publish All Articles"}
+              {isRunning ? "Publishing Draft Articles..." : "Publish All Draft Articles"}
             </Button>
 
             {results && (
