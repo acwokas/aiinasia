@@ -9,16 +9,19 @@ import ArticleCard from "@/components/ArticleCard";
 import TldrSnapshot from "@/components/TldrSnapshot";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Clock, User, Share2, Bookmark, Twitter, Linkedin, Facebook, Instagram, Loader2, ExternalLink } from "lucide-react";
+import { Clock, User, Share2, Bookmark, Twitter, Linkedin, Facebook, Instagram, Loader2, ExternalLink, Edit, Eye, EyeOff } from "lucide-react";
 import { Helmet } from "react-helmet";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
+import { useAdminRole } from "@/hooks/useAdminRole";
 
 const Article = () => {
   const { slug } = useParams();
   const { toast } = useToast();
   const { user } = useAuth();
+  const { isAdmin } = useAdminRole();
   const [isBookmarked, setIsBookmarked] = useState(false);
+  const [showAdminView, setShowAdminView] = useState(false);
   const cleanSlug = slug?.replace(/\/+$/g, '');
   
   // Check for preview code in URL
@@ -433,6 +436,60 @@ const Article = () => {
                   </p>
                 </div>
               )}
+
+              {/* Admin Controls */}
+              {isAdmin && (
+                <div className="mb-4 p-4 bg-primary/5 border border-primary/20 rounded-lg flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Edit className="h-4 w-4 text-primary" />
+                    <span className="text-sm font-medium">Admin Controls</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowAdminView(!showAdminView)}
+                    >
+                      {showAdminView ? (
+                        <>
+                          <Eye className="h-4 w-4 mr-2" />
+                          Normal View
+                        </>
+                      ) : (
+                        <>
+                          <EyeOff className="h-4 w-4 mr-2" />
+                          Admin View
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      asChild
+                      size="sm"
+                    >
+                      <Link to={`/editor?articleId=${article.id}`}>
+                        <Edit className="h-4 w-4 mr-2" />
+                        Edit Article
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Admin Debug Info */}
+              {isAdmin && showAdminView && (
+                <div className="mb-4 p-4 bg-muted/50 border border-border rounded-lg space-y-2">
+                  <h3 className="text-sm font-semibold mb-2">Article Metadata</h3>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div><span className="text-muted-foreground">ID:</span> {article.id}</div>
+                    <div><span className="text-muted-foreground">Status:</span> {article.status}</div>
+                    <div><span className="text-muted-foreground">Slug:</span> {article.slug}</div>
+                    <div><span className="text-muted-foreground">Views:</span> {article.view_count || 0}</div>
+                    <div><span className="text-muted-foreground">Published:</span> {article.published_at ? new Date(article.published_at).toLocaleDateString() : 'Not published'}</div>
+                    <div><span className="text-muted-foreground">Featured:</span> {article.featured_on_homepage ? 'Yes' : 'No'}</div>
+                  </div>
+                </div>
+              )}
+              
               <Badge className="mb-4 bg-primary text-primary-foreground">
                 {article.categories?.name || 'Article'}
               </Badge>
