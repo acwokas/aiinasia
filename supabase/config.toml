@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.publish-scheduled-articles]
 verify_jwt = false
+
+[functions.map-csv-categories]
+verify_jwt = false

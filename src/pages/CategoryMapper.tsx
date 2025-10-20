@@ -76,9 +76,13 @@ const CategoryMapper = () => {
         description: "Sending CSV to backend for category mapping",
       });
 
+      console.log('Starting CSV processing for file:', file.name, 'Size:', file.size);
+
       // Create FormData with the file
       const formData = new FormData();
       formData.append('file', file);
+
+      console.log('Calling edge function...');
 
       // Call edge function
       const response = await fetch(
@@ -89,11 +93,17 @@ const CategoryMapper = () => {
         }
       );
 
+      console.log('Response status:', response.status);
+      console.log('Response ok:', response.ok);
+
       if (!response.ok) {
-        throw new Error('Failed to process CSV');
+        const errorText = await response.text();
+        console.error('Error response:', errorText);
+        throw new Error(`Server error: ${response.status} - ${errorText}`);
       }
 
       const result = await response.json();
+      console.log('Result stats:', result.stats);
       
       const { csv: processedCSV, stats, filename } = result;
       
@@ -121,9 +131,11 @@ const CategoryMapper = () => {
       });
     } catch (error) {
       console.error('Error processing CSV:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error('Error details:', errorMessage);
       toast({
         title: "Error",
-        description: "Failed to process CSV. Please check the file format.",
+        description: errorMessage || "Failed to process CSV. Please check the file format.",
         variant: "destructive",
       });
     } finally {
