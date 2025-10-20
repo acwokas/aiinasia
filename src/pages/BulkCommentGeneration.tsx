@@ -36,19 +36,15 @@ const BulkCommentGeneration = () => {
     },
   });
 
-  // Get articles from past 24 months without comments
+  // Get all published articles without comments
   const { data: eligibleArticles, isLoading: loadingArticles } = useQuery({
     queryKey: ["eligible-articles"],
     enabled: isAdmin === true,
     queryFn: async () => {
-      const twentyFourMonthsAgo = new Date();
-      twentyFourMonthsAgo.setMonth(twentyFourMonthsAgo.getMonth() - 24);
-
       const { data: articles, error } = await supabase
         .from("articles")
         .select("id, title, published_at")
         .eq("status", "published")
-        .gte("published_at", twentyFourMonthsAgo.toISOString())
         .order("published_at", { ascending: false });
 
       if (error) throw error;
@@ -165,7 +161,7 @@ const BulkCommentGeneration = () => {
         <div className="mb-8">
           <h1 className="headline text-4xl mb-2">Bulk Comment Generation</h1>
           <p className="text-muted-foreground">
-            Generate AI-powered comments for articles from the past 24 months
+            Generate AI-powered comments for all published articles
           </p>
         </div>
 
@@ -176,7 +172,7 @@ const BulkCommentGeneration = () => {
               Articles Without Comments
             </CardTitle>
             <CardDescription>
-              Found {eligibleArticles?.length || 0} articles from the past 24 months that need comments
+              Found {eligibleArticles?.length || 0} published articles that need comments
             </CardDescription>
           </CardHeader>
           <CardContent>
