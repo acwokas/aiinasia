@@ -56,13 +56,13 @@ const Index = () => {
         .eq("status", "published")
         .order("view_count", { ascending: false })
         .order("published_at", { ascending: false, nullsFirst: false })
-        .limit(10);
+        .limit(15);
       
       if (topError) throw topError;
       
-      // If we have at least 4, return them
-      if (topViewed && topViewed.length >= 4) {
-        return topViewed.slice(0, 4);
+      // If we have at least 7, return them
+      if (topViewed && topViewed.length >= 7) {
+        return topViewed.slice(0, 7);
       }
       
       // Otherwise, supplement with latest articles
@@ -75,7 +75,7 @@ const Index = () => {
         `)
         .eq("status", "published")
         .order("published_at", { ascending: false, nullsFirst: false })
-        .limit(4);
+        .limit(7);
       
       if (latestError) throw latestError;
       
@@ -84,12 +84,12 @@ const Index = () => {
       const existingIds = new Set(combined.map(a => a.id));
       
       for (const article of (latest || [])) {
-        if (!existingIds.has(article.id) && combined.length < 4) {
+        if (!existingIds.has(article.id) && combined.length < 7) {
           combined.push(article);
         }
       }
       
-      return combined.slice(0, 4);
+      return combined.slice(0, 7);
     },
   });
 
@@ -112,9 +112,9 @@ const Index = () => {
       
       if (stickyError) throw stickyError;
       
-      // Then get remaining articles to fill up to 8
+      // Then get remaining articles to fill up to 12
       const stickyIds = (stickyArticles || []).map(a => a.id);
-      const remainingCount = 8 - (stickyArticles?.length || 0);
+      const remainingCount = 12 - (stickyArticles?.length || 0);
       
       if (remainingCount > 0) {
         const query = supabase
@@ -281,7 +281,7 @@ const Index = () => {
                 Trending
               </div>
               <div className="space-y-6">
-              {trendingArticles?.slice(0, 4).filter((article: any) => article.slug).map((article: any, index: number) => (
+              {trendingArticles?.slice(0, 7).filter((article: any) => article.slug).map((article: any, index: number) => (
                 <Link 
                   key={article.id}
                   to={`/article/${article.slug}`}
@@ -419,7 +419,7 @@ const Index = () => {
                 </div>
               </div>
               <div className="space-y-4">
-              {latestArticles?.filter((article: any) => article.slug).map((article: any) => (
+              {latestArticles?.filter((article: any) => article.slug).slice(0, 7).map((article: any) => (
                 <Link 
                   key={article.id}
                   to={`/article/${article.slug}`}
