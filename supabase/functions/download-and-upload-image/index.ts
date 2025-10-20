@@ -10,6 +10,34 @@ interface DownloadRequest {
   fileName: string;
 }
 
+function cleanUrl(url: string): string {
+  // Remove common corrupted UTF-8 sequences
+  let cleaned = url
+    .replace(/‚Äö√Ñ√´/g, '-')  // corrupted dash
+    .replace(/‚Äô/g, "'")      // corrupted apostrophe
+    .replace(/‚Äù/g, '"')      // corrupted quote
+    .replace(/‚Äî/g, '-')      // corrupted en-dash
+    .replace(/√¢‚Ç¨/g, '')     // corrupted characters
+    .replace(/[\u0000-\u001F\u007F-\u009F]/g, ''); // control characters
+  
+  // Try to encode properly if needed
+  try {
+    // Decode if it's double-encoded
+    const decoded = decodeURIComponent(cleaned);
+    // Re-encode properly
+    const parts = decoded.split('/');
+    const encodedParts = parts.map((part, index) => {
+      // Don't encode the protocol part (https:)
+      if (index < 3) return part;
+      return encodeURIComponent(decodeURIComponent(part));
+    });
+    return encodedParts.join('/');
+  } catch (e) {
+    // If decoding fails, return cleaned version
+    return cleaned;
+  }
+}
+
 Deno.serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -30,7 +58,14 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.log(`Downloading image from: ${imageUrl}`);
+    // Clean the URL to handle encoding issues
+    const cleanedUrl = cleanUrl(imageUrl);
+    console.log(`Original URL: ${imageUrl}`);
+    if (cleanedUrl !== imageUrl) {
+      console.log(`Cleaned URL: ${cleanedUrl}`);
+    }
+
+    console.log(`Downloading image from: ${cleanedUrl}`);
 
     // Download the image from the external URL with timeout
     const controller = new AbortController();
@@ -39,7 +74,7 @@ Deno.serve(async (req) => {
     let imageBlob: Blob;
 
     try {
-      const imageResponse = await fetch(imageUrl, {
+      const imageResponse = await fetch(cleanedUrl, {
         signal: controller.signal,
         headers: {
           'User-Agent': 'Mozilla/5.0 (compatible; ImageMigrationBot/1.0)',
@@ -50,7 +85,7 @@ Deno.serve(async (req) => {
 
       if (!imageResponse.ok) {
         const errorMsg = `Failed to download image: ${imageResponse.status} ${imageResponse.statusText}`;
-        console.error(errorMsg, { url: imageUrl });
+        console.error(errorMsg, { originalUrl: imageUrl, cleanedUrl });
         throw new Error(errorMsg);
       }
 
@@ -64,9 +99,14 @@ Deno.serve(async (req) => {
       clearTimeout(timeoutId);
       if (fetchError instanceof Error && fetchError.name === 'AbortError') {
         const errorMsg = 'Download timeout - image took too long to fetch';
-        console.error(errorMsg, { url: imageUrl });
+        console.error(errorMsg, { originalUrl: imageUrl, cleanedUrl });
         throw new Error(errorMsg);
       }
+      console.error('Fetch error:', { 
+        error: fetchError instanceof Error ? fetchError.message : String(fetchError),
+        originalUrl: imageUrl,
+        cleanedUrl
+      });
       throw fetchError;
     }
 
