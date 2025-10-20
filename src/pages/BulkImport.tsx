@@ -49,6 +49,7 @@ export default function BulkImport() {
   const [cancelRequested, setCancelRequested] = useState(false);
   const [recentImports, setRecentImports] = useState<ImportLog[]>([]);
   const [rollingBack, setRollingBack] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState<string | null>(null);
 
   useEffect(() => {
     checkAdminStatus();
@@ -141,6 +142,39 @@ export default function BulkImport() {
       });
     } finally {
       setRollingBack(null);
+    }
+  };
+
+  const handleDeleteLog = async (logId: string) => {
+    if (!confirm("Are you sure you want to delete this import log? This will only remove the log entry, not the imported articles.")) {
+      return;
+    }
+
+    setDeleting(logId);
+
+    try {
+      const { error } = await supabase
+        .from("migration_logs")
+        .delete()
+        .eq("id", logId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Log Deleted",
+        description: "Import log entry has been removed.",
+      });
+
+      // Refresh the imports list
+      fetchRecentImports();
+    } catch (error: any) {
+      toast({
+        title: "Delete Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setDeleting(null);
     }
   };
 
@@ -1108,26 +1142,46 @@ Special characters are fine as long as the file is UTF-8 encoded.","Guide to for
                           </span>
                         </div>
                       </div>
-                      {importLog.status !== 'rolled_back' && (
+                      <div className="flex gap-2">
+                        {importLog.status !== 'rolled_back' && (
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleRollback(importLog.batch_id)}
+                            disabled={rollingBack === importLog.batch_id}
+                          >
+                            {rollingBack === importLog.batch_id ? (
+                              <>
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                Rolling back...
+                              </>
+                            ) : (
+                              <>
+                                <Undo2 className="mr-2 h-4 w-4" />
+                                Rollback
+                              </>
+                            )}
+                          </Button>
+                        )}
                         <Button
-                          variant="destructive"
+                          variant="outline"
                           size="sm"
-                          onClick={() => handleRollback(importLog.batch_id)}
-                          disabled={rollingBack === importLog.batch_id}
+                          onClick={() => handleDeleteLog(importLog.id)}
+                          disabled={deleting === importLog.id}
                         >
-                          {rollingBack === importLog.batch_id ? (
+                          {deleting === importLog.id ? (
                             <>
-                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                              Rolling back...
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+                              Deleting...
                             </>
                           ) : (
                             <>
-                              <Undo2 className="mr-2 h-4 w-4" />
-                              Rollback
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete Log
                             </>
                           )}
                         </Button>
-                      )}
+                      </div>
                     </div>
                   ))}
                 </div>
