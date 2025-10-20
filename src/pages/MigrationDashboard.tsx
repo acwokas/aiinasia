@@ -10,6 +10,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { Upload, Image as ImageIcon, FileText, CheckCircle2, XCircle, Clock } from "lucide-react";
+import MigrationGuide from "@/components/MigrationGuide";
 
 export default function MigrationDashboard() {
   const navigate = useNavigate();
@@ -123,6 +124,20 @@ export default function MigrationDashboard() {
                 </ol>
               </AlertDescription>
             </Alert>
+          </div>
+
+          <div className="mb-6">
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle>📚 Getting Started</CardTitle>
+                <CardDescription>
+                  View the comprehensive guide for CSV format, WordPress export instructions, and migration best practices
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <MigrationGuide />
+              </CardContent>
+            </Card>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
