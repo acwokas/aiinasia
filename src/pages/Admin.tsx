@@ -534,9 +534,9 @@ const Admin = () => {
               <CardContent>
                 <div className="space-y-4">
                   {pendingComments?.map((comment: any) => (
-                    <div key={comment.id} className="p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors">
+                    <div key={comment.id} className="p-4 bg-destructive/10 border-2 border-destructive rounded-lg hover:bg-destructive/20 transition-colors">
                       <div className="flex items-start justify-between mb-2">
-                        <p className="font-semibold">{comment.author_name}</p>
+                        <p className="font-semibold text-destructive">{comment.author_name}</p>
                         <div className="flex gap-2">
                           <Button 
                             variant="outline" 
@@ -546,7 +546,7 @@ const Admin = () => {
                             Approve
                           </Button>
                           <Button 
-                            variant="outline" 
+                            variant="destructive" 
                             size="sm"
                             onClick={() => deleteComment(comment.id)}
                           >
@@ -554,7 +554,7 @@ const Admin = () => {
                           </Button>
                         </div>
                       </div>
-                      <p className="text-sm mb-2">{comment.content}</p>
+                      <p className="text-sm mb-2 text-foreground">{comment.content}</p>
                       <button 
                         onClick={() => {
                           const article = comment.articles as any;
@@ -562,7 +562,7 @@ const Admin = () => {
                             window.open(`/article/${article.slug}#comments`, '_blank');
                           }
                         }}
-                        className="text-xs text-primary hover:underline flex items-center gap-1"
+                        className="text-xs text-destructive hover:underline flex items-center gap-1 font-medium"
                       >
                         On: {comment.articles?.title}
                         <ExternalLink className="h-3 w-3" />
