@@ -49,25 +49,19 @@ serve(async (req) => {
         continue; // Skip if already has 3+ comments
       }
 
-      // Call the generate-article-comments function
-      const response = await fetch(
-        `${supabaseUrl}/functions/v1/generate-article-comments`,
+      // Call the generate-article-comments function using supabase.functions.invoke
+      const { data: result, error: invokeError } = await supabase.functions.invoke(
+        'generate-article-comments',
         {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${supabaseKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ articleId: article.id, batchMode: false }),
+          body: { articleId: article.id, batchMode: false }
         }
       );
 
-      const result = await response.json();
       results.push({
         articleId: article.id,
         title: article.title,
-        success: response.ok,
-        result
+        success: !invokeError,
+        result: invokeError ? { error: invokeError.message } : result
       });
     }
 
