@@ -46,7 +46,7 @@ with open(input_file, 'r', encoding='utf-8-sig') as f_in, \
         if total % 100 == 0:
             print(f"Processing article {total}...")
         
-        cats = [c.strip() for c in row.get('categories', '').split(',')]
+        cats = [c.strip() for c in (row.get('categories') or '').split(',')]
         mapped_cats = [map_cat(c) for c in cats]
         mapped_cats = [c for c in mapped_cats if c]
         
