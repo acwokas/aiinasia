@@ -57,45 +57,69 @@ export default function ExtractImageUrls() {
     setLoading(false);
   };
 
-  const parseCSVLine = (line: string): string[] => {
-    const values: string[] = [];
-    let currentValue = '';
+  const parseCSV = (csvText: string): string[] => {
+    const urls = new Set<string>();
+    
+    // Use a more robust CSV parsing approach that handles multi-line fields
+    const rows: string[][] = [];
+    let currentRow: string[] = [];
+    let currentField = '';
     let insideQuotes = false;
-
-    for (let i = 0; i < line.length; i++) {
-      const char = line[i];
-      const nextChar = line[i + 1];
+    
+    // Parse the entire CSV into rows and fields
+    for (let i = 0; i < csvText.length; i++) {
+      const char = csvText[i];
+      const nextChar = csvText[i + 1];
       
       if (char === '"') {
         if (insideQuotes && nextChar === '"') {
           // Escaped quote
-          currentValue += '"';
-          i++; // Skip next quote
+          currentField += '"';
+          i++;
         } else {
           // Toggle quote state
           insideQuotes = !insideQuotes;
         }
       } else if (char === ',' && !insideQuotes) {
-        values.push(currentValue.trim());
-        currentValue = '';
+        currentRow.push(currentField.trim());
+        currentField = '';
+      } else if ((char === '\n' || char === '\r') && !insideQuotes) {
+        // End of row
+        if (currentField || currentRow.length > 0) {
+          currentRow.push(currentField.trim());
+          if (currentRow.some(f => f.length > 0)) {
+            rows.push(currentRow);
+          }
+          currentRow = [];
+          currentField = '';
+        }
+        // Skip \r\n combinations
+        if (char === '\r' && nextChar === '\n') {
+          i++;
+        }
       } else {
-        currentValue += char;
+        currentField += char;
       }
     }
-    values.push(currentValue.trim());
-    return values;
-  };
-
-  const parseCSV = (csvText: string): string[] => {
-    const lines = csvText.trim().split('\n');
-    const urls = new Set<string>();
+    
+    // Don't forget the last field/row
+    if (currentField || currentRow.length > 0) {
+      currentRow.push(currentField.trim());
+      if (currentRow.some(f => f.length > 0)) {
+        rows.push(currentRow);
+      }
+    }
+    
+    if (rows.length === 0) {
+      throw new Error('CSV file is empty or could not be parsed');
+    }
     
     // Parse header row
-    const headers = parseCSVLine(lines[0]).map(h => h.replace(/"/g, '').trim().toLowerCase());
+    const headers = rows[0].map(h => h.replace(/"/g, '').trim().toLowerCase());
     
     console.log('Found CSV headers:', headers);
     
-    // Find the image URL column (case insensitive, multiple possible names)
+    // Find the image URL column
     const imageUrlIndex = headers.findIndex(h => 
       h === 'featured_image_url' || 
       h === 'image_url' || 
@@ -116,23 +140,16 @@ export default function ExtractImageUrls() {
 
     console.log(`Using column "${headers[imageUrlIndex]}" at index ${imageUrlIndex}`);
 
-    // Process each row
-    for (let i = 1; i < lines.length; i++) {
-      const line = lines[i];
-      if (!line.trim()) continue;
-
-      try {
-        const values = parseCSVLine(line);
-        
-        // Get the image URL
-        const imageUrl = values[imageUrlIndex]?.replace(/"/g, '').trim();
-        
-        // Only add valid URLs
-        if (imageUrl && (imageUrl.startsWith('http://') || imageUrl.startsWith('https://'))) {
-          urls.add(imageUrl);
-        }
-      } catch (error) {
-        console.warn(`Error parsing line ${i + 1}:`, error);
+    // Process each data row
+    for (let i = 1; i < rows.length; i++) {
+      const row = rows[i];
+      if (row.length <= imageUrlIndex) continue;
+      
+      const imageUrl = row[imageUrlIndex]?.replace(/"/g, '').trim();
+      
+      // Only add valid URLs
+      if (imageUrl && (imageUrl.startsWith('http://') || imageUrl.startsWith('https://'))) {
+        urls.add(imageUrl);
       }
     }
     
