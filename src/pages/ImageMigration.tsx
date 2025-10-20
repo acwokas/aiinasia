@@ -81,34 +81,22 @@ export default function ImageMigration() {
 
   const migrateImage = async (url: string): Promise<MigrationResult> => {
     try {
-      // Download the image
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`Failed to download: ${response.statusText}`);
-      }
-
-      const blob = await response.blob();
       const fileName = getFileNameFromUrl(url);
-      const filePath = `migrated/${Date.now()}-${fileName}`;
 
-      // Upload to Supabase storage
-      const { data, error } = await supabase.storage
-        .from('article-images')
-        .upload(filePath, blob, {
-          contentType: blob.type,
-          cacheControl: '3600',
-        });
+      // Use edge function to download and upload the image (bypasses CORS)
+      const { data, error } = await supabase.functions.invoke('download-and-upload-image', {
+        body: { imageUrl: url, fileName }
+      });
 
       if (error) throw error;
-
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('article-images')
-        .getPublicUrl(filePath);
+      
+      if (!data.success) {
+        throw new Error(data.error || 'Unknown error');
+      }
 
       return {
         oldUrl: url,
-        newUrl: publicUrl,
+        newUrl: data.publicUrl,
         status: 'success',
       };
     } catch (error: any) {
