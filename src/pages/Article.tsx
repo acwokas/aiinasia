@@ -171,6 +171,22 @@ const Article = () => {
     }
   };
 
+  const handleTwitterShare = () => {
+    const url = encodeURIComponent(window.location.href);
+    const text = encodeURIComponent(article?.title || '');
+    window.open(`https://twitter.com/intent/tweet?url=${url}&text=${text}`, '_blank', 'width=600,height=400');
+  };
+
+  const handleLinkedInShare = () => {
+    const url = encodeURIComponent(window.location.href);
+    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, '_blank', 'width=600,height=400');
+  };
+
+  const handleFacebookShare = () => {
+    const url = encodeURIComponent(window.location.href);
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank', 'width=600,height=400');
+  };
+
   const { data: relatedArticles } = useQuery({
     queryKey: ["related-articles", article?.primary_category_id, article?.id],
     enabled: !!article?.id,
@@ -535,13 +551,13 @@ const Article = () => {
               <div className="flex items-center justify-between mb-8">
                 <h3 className="font-semibold text-lg">Share this article</h3>
                 <div className="flex gap-2">
-                  <Button variant="outline" size="icon">
+                  <Button variant="outline" size="icon" onClick={handleTwitterShare} title="Share on Twitter">
                     <Twitter className="h-4 w-4" />
                   </Button>
-                  <Button variant="outline" size="icon">
+                  <Button variant="outline" size="icon" onClick={handleLinkedInShare} title="Share on LinkedIn">
                     <Linkedin className="h-4 w-4" />
                   </Button>
-                  <Button variant="outline" size="icon">
+                  <Button variant="outline" size="icon" onClick={handleFacebookShare} title="Share on Facebook">
                     <Facebook className="h-4 w-4" />
                   </Button>
                 </div>
