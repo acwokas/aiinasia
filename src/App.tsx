@@ -23,6 +23,7 @@ import CookiePolicy from "./pages/CookiePolicy";
 import Redirects from "./pages/Redirects";
 import BulkImport from "./pages/BulkImport";
 import ImageMigration from "./pages/ImageMigration";
+import ExtractImageUrls from "./pages/ExtractImageUrls";
 import UpdateArticleImages from "./pages/UpdateArticleImages";
 import MigrationDashboard from "./pages/MigrationDashboard";
 import BulkRedirects from "./pages/BulkRedirects";
@@ -79,6 +80,7 @@ const App = () => (
             <Route path="/cookie-policy" element={<CookiePolicy />} />
             <Route path="/redirects" element={<Redirects />} />
             <Route path="/admin/bulk-import" element={<BulkImport />} />
+            <Route path="/admin/extract-image-urls" element={<ExtractImageUrls />} />
             <Route path="/admin/image-migration" element={<ImageMigration />} />
             <Route path="/admin/update-article-images" element={<UpdateArticleImages />} />
             <Route path="/admin/migration-dashboard" element={<MigrationDashboard />} />
