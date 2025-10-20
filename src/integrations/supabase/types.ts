@@ -131,6 +131,7 @@ export type Database = {
           featured_on_homepage: boolean | null
           focus_keyphrase: string | null
           id: string
+          is_launch_article: boolean | null
           keyphrase_synonyms: string | null
           like_count: number | null
           meta_description: string | null
@@ -180,6 +181,7 @@ export type Database = {
           featured_on_homepage?: boolean | null
           focus_keyphrase?: string | null
           id?: string
+          is_launch_article?: boolean | null
           keyphrase_synonyms?: string | null
           like_count?: number | null
           meta_description?: string | null
@@ -229,6 +231,7 @@ export type Database = {
           featured_on_homepage?: boolean | null
           focus_keyphrase?: string | null
           id?: string
+          is_launch_article?: boolean | null
           keyphrase_synonyms?: string | null
           like_count?: number | null
           meta_description?: string | null
