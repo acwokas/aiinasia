@@ -27,37 +27,37 @@ export default function MigrationGuide() {
             <h2>Column Definitions</h2>
             
             <h3>Required Fields</h3>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+            <div className="overflow-x-auto -mx-4 px-4">
+              <table className="min-w-full text-sm border-collapse">
                 <thead>
                   <tr className="border-b">
-                    <th className="text-left p-2">Column</th>
-                    <th className="text-left p-2">Description</th>
-                    <th className="text-left p-2">Example</th>
-                    <th className="text-left p-2">Notes</th>
+                    <th className="text-left p-2 min-w-[120px]">Column</th>
+                    <th className="text-left p-2 min-w-[150px]">Description</th>
+                    <th className="text-left p-2 min-w-[250px]">Example</th>
+                    <th className="text-left p-2 min-w-[180px]">Notes</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr className="border-b">
-                    <td className="p-2 font-mono">title</td>
+                    <td className="p-2 font-mono whitespace-nowrap">title</td>
                     <td className="p-2">Article title</td>
                     <td className="p-2">"AI Revolution in Asia: 2024 Trends"</td>
                     <td className="p-2">Max 200 characters</td>
                   </tr>
                   <tr className="border-b">
-                    <td className="p-2 font-mono">slug</td>
+                    <td className="p-2 font-mono whitespace-nowrap">slug</td>
                     <td className="p-2">New URL slug</td>
                     <td className="p-2">"ai-revolution-asia-2024-trends"</td>
                     <td className="p-2">Lowercase, hyphens only</td>
                   </tr>
                   <tr className="border-b">
-                    <td className="p-2 font-mono">content</td>
+                    <td className="p-2 font-mono whitespace-nowrap">content</td>
                     <td className="p-2">Article body</td>
                     <td className="p-2">See content section below</td>
                     <td className="p-2">Plain text or JSON</td>
                   </tr>
                   <tr className="border-b">
-                    <td className="p-2 font-mono">old_slug</td>
+                    <td className="p-2 font-mono whitespace-nowrap">old_slug</td>
                     <td className="p-2">Original slug from old site</td>
                     <td className="p-2">"2024/01/ai-revolution-asia"</td>
                     <td className="p-2">Used for redirect mapping</td>
