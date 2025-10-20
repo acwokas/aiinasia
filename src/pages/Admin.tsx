@@ -6,11 +6,12 @@ import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Loader2, FileText, Users, Tag, Folder, MessageSquare, Mail, BarChart, Home, Pencil, Trash2, Plus, Upload, X, ExternalLink } from "lucide-react";
+import { Loader2, FileText, Users, Tag, Folder, MessageSquare, Mail, BarChart, Home, Pencil, Trash2, Plus, Upload, X, ExternalLink, Settings } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { compressImage } from "@/lib/imageCompression";
 
@@ -23,6 +24,17 @@ const Admin = () => {
   const [authorsDialogOpen, setAuthorsDialogOpen] = useState(false);
   const [editingAuthor, setEditingAuthor] = useState<any>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [googleAdsDialogOpen, setGoogleAdsDialogOpen] = useState(false);
+  const [newsletterDialogOpen, setNewsletterDialogOpen] = useState(false);
+  const [googleAdsSettings, setGoogleAdsSettings] = useState({
+    enabled: true,
+    client_id: "",
+  });
+  const [newsletterSettings, setNewsletterSettings] = useState({
+    enabled: true,
+    delay: 5000,
+    frequency: "once_per_session",
+  });
   const [authorForm, setAuthorForm] = useState({
     name: "",
     slug: "",
@@ -142,6 +154,40 @@ const Admin = () => {
       return data;
     },
   });
+
+  const { data: settings } = useQuery({
+    queryKey: ["site-settings"],
+    enabled: isAdmin === true,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("site_settings")
+        .select("*");
+      return data;
+    },
+  });
+
+  useEffect(() => {
+    if (settings) {
+      const googleAds = settings.find((s: any) => s.setting_key === 'google_ads');
+      const newsletter = settings.find((s: any) => s.setting_key === 'newsletter_popup');
+      
+      if (googleAds && googleAds.setting_value) {
+        const value = googleAds.setting_value as any;
+        setGoogleAdsSettings({
+          enabled: value.enabled ?? true,
+          client_id: value.client_id ?? "",
+        });
+      }
+      if (newsletter && newsletter.setting_value) {
+        const value = newsletter.setting_value as any;
+        setNewsletterSettings({
+          enabled: value.enabled ?? true,
+          delay: value.delay ?? 5000,
+          frequency: value.frequency ?? "once_per_session",
+        });
+      }
+    }
+  }, [settings]);
 
   const approveComment = async (commentId: string) => {
     try {
@@ -358,6 +404,62 @@ const Admin = () => {
 
   const handleRemoveAvatar = () => {
     setAuthorForm({ ...authorForm, avatar_url: "" });
+  };
+
+  const handleSaveGoogleAdsSettings = async () => {
+    try {
+      const { error } = await supabase
+        .from("site_settings")
+        .upsert({
+          setting_key: 'google_ads',
+          setting_value: googleAdsSettings,
+          updated_by: user?.id,
+        }, { onConflict: 'setting_key' });
+
+      if (error) throw error;
+
+      toast({
+        title: "Settings saved",
+        description: "Google Ads settings have been updated",
+      });
+
+      queryClient.invalidateQueries({ queryKey: ["site-settings"] });
+      setGoogleAdsDialogOpen(false);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to save settings",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSaveNewsletterSettings = async () => {
+    try {
+      const { error } = await supabase
+        .from("site_settings")
+        .upsert({
+          setting_key: 'newsletter_popup',
+          setting_value: newsletterSettings,
+          updated_by: user?.id,
+        }, { onConflict: 'setting_key' });
+
+      if (error) throw error;
+
+      toast({
+        title: "Settings saved",
+        description: "Newsletter popup settings have been updated",
+      });
+
+      queryClient.invalidateQueries({ queryKey: ["site-settings"] });
+      setNewsletterDialogOpen(false);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to save settings",
+        variant: "destructive",
+      });
+    }
   };
 
   if (isAdmin === null) {
@@ -593,12 +695,7 @@ const Admin = () => {
                   </div>
                   <Button 
                     variant="outline"
-                    onClick={() => {
-                      toast({
-                        title: "Feature Coming Soon",
-                        description: "Google Ads configuration will be available soon. Ads are currently managed via the GoogleAds component.",
-                      });
-                    }}
+                    onClick={() => setGoogleAdsDialogOpen(true)}
                   >
                     Configure
                   </Button>
@@ -610,12 +707,7 @@ const Admin = () => {
                   </div>
                   <Button 
                     variant="outline"
-                    onClick={() => {
-                      toast({
-                        title: "Feature Coming Soon",
-                        description: "Newsletter popup settings will be available soon. The popup is currently managed via the NewsletterPopup component.",
-                      });
-                    }}
+                    onClick={() => setNewsletterDialogOpen(true)}
                   >
                     Configure
                   </Button>
@@ -650,6 +742,132 @@ const Admin = () => {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Google Ads Configuration Dialog */}
+        <Dialog open={googleAdsDialogOpen} onOpenChange={setGoogleAdsDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Google Ads Configuration</DialogTitle>
+              <DialogDescription>
+                Configure Google Ads settings for your site
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4 py-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>Enable Google Ads</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Show ads across the site
+                  </p>
+                </div>
+                <Switch
+                  checked={googleAdsSettings.enabled}
+                  onCheckedChange={(checked) => 
+                    setGoogleAdsSettings({ ...googleAdsSettings, enabled: checked })
+                  }
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="client_id">Google Ads Client ID</Label>
+                <Input
+                  id="client_id"
+                  value={googleAdsSettings.client_id}
+                  onChange={(e) => 
+                    setGoogleAdsSettings({ ...googleAdsSettings, client_id: e.target.value })
+                  }
+                  placeholder="ca-pub-XXXXXXXXXXXXXXXX"
+                />
+                <p className="text-sm text-muted-foreground">
+                  Your Google AdSense publisher ID
+                </p>
+              </div>
+            </div>
+            
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setGoogleAdsDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSaveGoogleAdsSettings}>
+                Save Settings
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Newsletter Popup Configuration Dialog */}
+        <Dialog open={newsletterDialogOpen} onOpenChange={setNewsletterDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Newsletter Popup Configuration</DialogTitle>
+              <DialogDescription>
+                Configure newsletter popup behavior
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4 py-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>Enable Newsletter Popup</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Show newsletter signup popup to visitors
+                  </p>
+                </div>
+                <Switch
+                  checked={newsletterSettings.enabled}
+                  onCheckedChange={(checked) => 
+                    setNewsletterSettings({ ...newsletterSettings, enabled: checked })
+                  }
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="delay">Popup Delay (milliseconds)</Label>
+                <Input
+                  id="delay"
+                  type="number"
+                  value={newsletterSettings.delay}
+                  onChange={(e) => 
+                    setNewsletterSettings({ ...newsletterSettings, delay: parseInt(e.target.value) || 0 })
+                  }
+                  placeholder="5000"
+                />
+                <p className="text-sm text-muted-foreground">
+                  How long to wait before showing the popup (in milliseconds)
+                </p>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="frequency">Popup Frequency</Label>
+                <select
+                  id="frequency"
+                  value={newsletterSettings.frequency}
+                  onChange={(e) => 
+                    setNewsletterSettings({ ...newsletterSettings, frequency: e.target.value })
+                  }
+                  className="w-full h-10 px-3 py-2 text-sm rounded-md border border-input bg-background"
+                >
+                  <option value="once_per_session">Once per session</option>
+                  <option value="once_per_day">Once per day</option>
+                  <option value="always">Every visit</option>
+                </select>
+                <p className="text-sm text-muted-foreground">
+                  How often to show the popup to the same visitor
+                </p>
+              </div>
+            </div>
+            
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setNewsletterDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSaveNewsletterSettings}>
+                Save Settings
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* Authors Management Dialog */}
         <Dialog open={authorsDialogOpen} onOpenChange={setAuthorsDialogOpen}>
