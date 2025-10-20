@@ -18,7 +18,6 @@ export const BusinessInAByteAd = () => {
               src={businessInAByteLogo}
               alt="Business in a Byte"
               className="w-full h-auto"
-              loading="lazy"
             />
           </div>
 
