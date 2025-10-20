@@ -91,7 +91,7 @@ const PublishAllArticles = () => {
           <CardHeader>
             <CardTitle>Publish All Draft Articles</CardTitle>
             <CardDescription>
-              Set all draft articles to published status and make them visible on the homepage
+              This will change the status of all draft articles to "published" and make them featured on the homepage. Only articles currently in draft status will be affected.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
