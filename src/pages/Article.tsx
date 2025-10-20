@@ -8,7 +8,7 @@ import Comments from "@/components/Comments";
 import ArticleCard from "@/components/ArticleCard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Clock, User, Share2, Bookmark, Twitter, Linkedin, Facebook, Loader2, ExternalLink, ChevronDown, ChevronUp } from "lucide-react";
+import { Clock, User, Share2, Bookmark, Twitter, Linkedin, Facebook, Instagram, Loader2, ExternalLink, ChevronDown, ChevronUp } from "lucide-react";
 import { Helmet } from "react-helmet";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
@@ -185,6 +185,22 @@ const Article = () => {
   const handleFacebookShare = () => {
     const url = encodeURIComponent(window.location.href);
     window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank', 'width=600,height=400');
+  };
+
+  const handleInstagramShare = async () => {
+    // Instagram doesn't support direct web sharing, so we'll copy the link and show a helpful message
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      toast({
+        title: "Link copied!",
+        description: "Share this link in your Instagram story or post",
+      });
+    } catch (err) {
+      toast({
+        title: "Share on Instagram",
+        description: "Copy the article link and share it on Instagram",
+      });
+    }
   };
 
   const { data: relatedArticles } = useQuery({
@@ -559,6 +575,9 @@ const Article = () => {
                   </Button>
                   <Button variant="outline" size="icon" onClick={handleFacebookShare} title="Share on Facebook">
                     <Facebook className="h-4 w-4" />
+                  </Button>
+                  <Button variant="outline" size="icon" onClick={handleInstagramShare} title="Share on Instagram">
+                    <Instagram className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
