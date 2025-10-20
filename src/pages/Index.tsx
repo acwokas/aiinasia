@@ -56,12 +56,53 @@ const Index = () => {
           categories:primary_category_id (name)
         `)
         .eq("status", "published")
-        .gte("view_count", 5) // Only articles with at least 5 views
+        .gte("view_count", 5)
         .order("view_count", { ascending: false })
         .limit(7);
       
       if (topError) throw topError;
-      return topViewed || [];
+      
+      const minArticles = 5;
+      
+      // If we have enough articles, return them
+      if (topViewed && topViewed.length >= minArticles) {
+        return topViewed.slice(0, 5);
+      }
+      
+      // Otherwise, backfill with random articles from past 10 weeks
+      const tenWeeksAgo = new Date();
+      tenWeeksAgo.setDate(tenWeeksAgo.getDate() - 70);
+      
+      const { data: recentArticles, error: recentError } = await supabase
+        .from("articles")
+        .select(`
+          *,
+          authors (name, slug),
+          categories:primary_category_id (name)
+        `)
+        .eq("status", "published")
+        .gte("published_at", tenWeeksAgo.toISOString())
+        .order("published_at", { ascending: false })
+        .limit(20);
+      
+      if (recentError) throw recentError;
+      
+      // Combine and deduplicate
+      const combined = [...(topViewed || [])];
+      const existingIds = new Set(combined.map(a => a.id));
+      
+      // Shuffle recent articles for randomness
+      const shuffled = (recentArticles || [])
+        .filter(a => !existingIds.has(a.id))
+        .sort(() => Math.random() - 0.5);
+      
+      // Add random articles until we have 5
+      for (const article of shuffled) {
+        if (combined.length >= minArticles) break;
+        combined.push(article);
+      }
+      
+      return combined.slice(0, 5);
     },
   });
 
