@@ -9,8 +9,16 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
-import { Upload, Image as ImageIcon, FileText, CheckCircle2, XCircle, Clock, Settings } from "lucide-react";
+import { Upload, Image as ImageIcon, FileText, CheckCircle2, XCircle, Clock, Settings, Home } from "lucide-react";
 import MigrationGuide from "@/components/MigrationGuide";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 
 export default function MigrationDashboard() {
   const navigate = useNavigate();
@@ -103,6 +111,29 @@ export default function MigrationDashboard() {
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
       <main className="flex-grow container mx-auto px-4 py-8">
+        <Breadcrumb className="mb-6 max-w-6xl mx-auto">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link to="/" className="inline-flex items-center gap-1">
+                  <Home className="h-3 w-3" />
+                  Home
+                </Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link to="/admin">Admin</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Migration Dashboard</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+        
         <div className="max-w-6xl mx-auto">
           <div className="mb-6">
             <h1 className="text-3xl font-bold mb-2">Migration Dashboard</h1>
