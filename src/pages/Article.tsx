@@ -1,5 +1,5 @@
 import { useParams, Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import Header from "@/components/Header";
@@ -9,7 +9,7 @@ import ArticleCard from "@/components/ArticleCard";
 import TldrSnapshot from "@/components/TldrSnapshot";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Clock, User, Share2, Bookmark, Twitter, Linkedin, Facebook, Instagram, Loader2, ExternalLink, Edit, Eye, EyeOff } from "lucide-react";
+import { Clock, User, Share2, Bookmark, Twitter, Linkedin, Facebook, Instagram, Loader2, ExternalLink, Edit, Eye, EyeOff, Send } from "lucide-react";
 import { Helmet } from "react-helmet";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
@@ -20,8 +20,10 @@ const Article = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const { isAdmin } = useAdminRole();
+  const queryClient = useQueryClient();
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [showAdminView, setShowAdminView] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
   const cleanSlug = slug?.replace(/\/+$/g, '');
   
   // Check for preview code in URL
@@ -129,6 +131,40 @@ const Article = () => {
       
       setIsBookmarked(true);
       toast({ title: "Bookmarked!" });
+    }
+  };
+
+  const handlePublish = async () => {
+    if (!article || !isAdmin) return;
+
+    setIsPublishing(true);
+    try {
+      const { error } = await supabase
+        .from('articles')
+        .update({ 
+          status: 'published',
+          published_at: new Date().toISOString()
+        })
+        .eq('id', article.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Article published",
+        description: "The article is now live",
+      });
+
+      // Invalidate queries to refresh the article data
+      queryClient.invalidateQueries({ queryKey: ["article", cleanSlug] });
+    } catch (error) {
+      console.error("Error publishing article:", error);
+      toast({
+        title: "Error",
+        description: "Failed to publish article",
+        variant: "destructive",
+      });
+    } finally {
+      setIsPublishing(false);
     }
   };
 
@@ -443,6 +479,11 @@ const Article = () => {
                   <div className="flex items-center gap-2">
                     <Edit className="h-4 w-4 text-primary" />
                     <span className="text-sm font-medium">Admin Controls</span>
+                    {article.status !== 'published' && (
+                      <Badge variant="outline" className="ml-2">
+                        {article.status}
+                      </Badge>
+                    )}
                   </div>
                   <div className="flex items-center gap-2">
                     <Button
@@ -462,9 +503,30 @@ const Article = () => {
                         </>
                       )}
                     </Button>
+                    {article.status !== 'published' && (
+                      <Button
+                        variant="default"
+                        size="sm"
+                        onClick={handlePublish}
+                        disabled={isPublishing}
+                      >
+                        {isPublishing ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Publishing...
+                          </>
+                        ) : (
+                          <>
+                            <Send className="h-4 w-4 mr-2" />
+                            Publish Now
+                          </>
+                        )}
+                      </Button>
+                    )}
                     <Button
                       asChild
                       size="sm"
+                      variant="outline"
                     >
                       <Link to={`/editor?articleId=${article.id}`}>
                         <Edit className="h-4 w-4 mr-2" />
