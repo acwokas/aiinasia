@@ -582,21 +582,51 @@ const Admin = () => {
                     <h4 className="font-semibold">Google Ads</h4>
                     <p className="text-sm text-muted-foreground">Enable or disable ads site-wide</p>
                   </div>
-                  <Button variant="outline">Configure</Button>
+                  <Button 
+                    variant="outline"
+                    onClick={() => {
+                      toast({
+                        title: "Feature Coming Soon",
+                        description: "Google Ads configuration will be available soon. Ads are currently managed via the GoogleAds component.",
+                      });
+                    }}
+                  >
+                    Configure
+                  </Button>
                 </div>
                 <div className="flex items-center justify-between">
                   <div>
                     <h4 className="font-semibold">Newsletter Popup</h4>
                     <p className="text-sm text-muted-foreground">Manage newsletter signup popup</p>
                   </div>
-                  <Button variant="outline">Configure</Button>
+                  <Button 
+                    variant="outline"
+                    onClick={() => {
+                      toast({
+                        title: "Feature Coming Soon",
+                        description: "Newsletter popup settings will be available soon. The popup is currently managed via the NewsletterPopup component.",
+                      });
+                    }}
+                  >
+                    Configure
+                  </Button>
                 </div>
                 <div className="flex items-center justify-between">
                   <div>
                     <h4 className="font-semibold">Comment Moderation</h4>
                     <p className="text-sm text-muted-foreground">Moderate and manage comments</p>
                   </div>
-                  <Button variant="outline">Configure</Button>
+                  <Button 
+                    variant="outline"
+                    onClick={() => {
+                      toast({
+                        title: "View Pending Comments",
+                        description: "Switch to the Comments tab above to moderate pending comments.",
+                      });
+                    }}
+                  >
+                    Configure
+                  </Button>
                 </div>
                 <div className="flex items-center justify-between">
                   <div>
