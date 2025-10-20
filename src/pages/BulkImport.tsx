@@ -246,29 +246,24 @@ export default function BulkImport() {
 
     const blocks: any[] = [];
     
-    // Helper function to preserve inline formatting (bold, italic, links) but NOT in headings
+    // Helper function to clean HTML tags and preserve links only
     const preserveInlineFormatting = (html: string, isHeading: boolean = false): string => {
       let result = html;
       
-      if (!isHeading) {
-        // Only preserve bold/italic for non-headings
-        result = result
-          .replace(/<strong>(.*?)<\/strong>/g, '**$1**')
-          .replace(/<b>(.*?)<\/b>/g, '**$1**')
-          .replace(/<em>(.*?)<\/em>/g, '*$1*')
-          .replace(/<i>(.*?)<\/i>/g, '*$1*');
-      } else {
-        // Strip bold/italic tags from headings completely
-        result = result
-          .replace(/<\/?strong>/g, '')
-          .replace(/<\/?b>/g, '')
-          .replace(/<\/?em>/g, '')
-          .replace(/<\/?i>/g, '');
-      }
+      // Strip all bold/italic HTML tags completely (don't convert to markdown)
+      result = result
+        .replace(/<\/?strong>/g, '')
+        .replace(/<\/?b>/g, '')
+        .replace(/<\/?em>/g, '')
+        .replace(/<\/?i>/g, '');
       
+      // Preserve links as markdown
       result = result
         .replace(/<a\s+(?:[^>]*?\s+)?href="([^"]*)"[^>]*>(.*?)<\/a>/g, '[$2]($1)')
         .replace(/<br\s*\/?>/g, '\n');
+      
+      // Strip any remaining ** markers that might be in the content
+      result = result.replace(/\*\*/g, '');
       
       return result;
     };
@@ -287,10 +282,10 @@ export default function BulkImport() {
       }
     }
     
-    // Extract headings (strip bold markers from headings)
+    // Extract headings
     for (const match of wpContent.matchAll(/<!-- wp:heading[^>]*-->\s*<h(\d)[^>]*>(.*?)<\/h\d>\s*<!-- \/wp:heading -->/gs)) {
       const level = parseInt(match[1]);
-      const text = preserveInlineFormatting(match[2], true).trim().replace(/^\*\*|\*\*$/g, ''); // isHeading=true, strip ** markers
+      const text = preserveInlineFormatting(match[2]).trim();
       if (text && text.length > 0) {
         allMatches.push({
           index: match.index!,
