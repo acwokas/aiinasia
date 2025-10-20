@@ -492,11 +492,15 @@ export default function BulkImport() {
             if (row.categories && article) {
               const categoryNames = row.categories.split(',').map((c: string) => c.trim()).filter(Boolean);
               for (const catName of categoryNames) {
-                const { data: category } = await supabase
+                // Try matching by name (case-insensitive) first, then by slug
+                const { data: categories } = await supabase
                   .from("categories")
-                  .select("id")
-                  .eq("name", catName)
-                  .maybeSingle();
+                  .select("id, name, slug");
+                
+                const category = categories?.find(cat => 
+                  cat.name.toLowerCase() === catName.toLowerCase() ||
+                  cat.slug.toLowerCase() === catName.toLowerCase()
+                );
                 
                 if (category) {
                   await supabase.from("article_categories").insert({
