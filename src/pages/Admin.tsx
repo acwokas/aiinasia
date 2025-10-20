@@ -466,6 +466,23 @@ const Admin = () => {
           </Card>
         </div>
 
+        <Card className="mb-8 bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <BarChart className="h-5 w-5" />
+              Content Migration Tools
+            </CardTitle>
+            <CardDescription>
+              Import articles from your old site and manage the migration process
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button onClick={() => navigate("/admin/migration-dashboard")} size="lg" variant="default">
+              Open Migration Dashboard
+            </Button>
+          </CardContent>
+        </Card>
+
         <Tabs defaultValue="articles" className="space-y-4">
           <TabsList>
             <TabsTrigger value="articles">Recent Articles</TabsTrigger>
