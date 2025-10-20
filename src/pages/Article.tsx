@@ -28,6 +28,7 @@ const Article = () => {
 
   const { data: article, isLoading } = useQuery({
     queryKey: ["article", cleanSlug, previewCode],
+    staleTime: 5 * 60 * 1000, // 5 minutes
     queryFn: async () => {
       console.log('Article fetch:', { slug: cleanSlug, previewCode, isPreview });
       

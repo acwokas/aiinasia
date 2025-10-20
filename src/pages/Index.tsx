@@ -22,6 +22,7 @@ const Index = () => {
 
   const { data: featuredArticle } = useQuery({
     queryKey: ["featured-article"],
+    staleTime: 5 * 60 * 1000, // 5 minutes
     queryFn: async () => {
       const { data, error } = await supabase
         .from("articles")
@@ -44,6 +45,7 @@ const Index = () => {
 
   const { data: trendingArticles } = useQuery({
     queryKey: ["trending-articles"],
+    staleTime: 5 * 60 * 1000, // 5 minutes
     queryFn: async () => {
       // First get top articles by view count
       const { data: topViewed, error: topError } = await supabase
@@ -95,6 +97,7 @@ const Index = () => {
 
   const { data: latestArticles, isLoading } = useQuery({
     queryKey: ["latest-articles"],
+    staleTime: 5 * 60 * 1000, // 5 minutes
     queryFn: async () => {
       // First get sticky articles
       const { data: stickyArticles, error: stickyError } = await supabase
@@ -148,6 +151,7 @@ const Index = () => {
 
   const { data: featuredAuthors } = useQuery({
     queryKey: ["featured-authors"],
+    staleTime: 10 * 60 * 1000, // 10 minutes
     queryFn: async () => {
       // Fetch Intelligence Desk author
       const { data: intelligenceDesk, error: idError } = await supabase
@@ -195,6 +199,7 @@ const Index = () => {
 
   const { data: upcomingEvents } = useQuery({
     queryKey: ["upcoming-events"],
+    staleTime: 10 * 60 * 1000, // 10 minutes
     queryFn: async () => {
       const { data, error } = await supabase
         .from("events")
@@ -291,6 +296,7 @@ const Index = () => {
                     <img 
                       src={article.featured_image_url || "/placeholder.svg"} 
                       alt={article.title}
+                      loading="lazy"
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                     <Badge className="absolute top-3 left-3 bg-primary text-primary-foreground text-xs">
@@ -329,6 +335,7 @@ const Index = () => {
                     <img 
                       src={featuredArticle.featured_image_url || "/placeholder.svg"} 
                       alt={featuredArticle.title}
+                      loading="eager"
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
@@ -385,6 +392,7 @@ const Index = () => {
                       <img 
                         src={article.featured_image_url || "/placeholder.svg"} 
                         alt={article.title}
+                        loading="lazy"
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
@@ -429,6 +437,7 @@ const Index = () => {
                     <img 
                       src={article.featured_image_url || "/placeholder.svg"} 
                       alt={article.title}
+                      loading="lazy"
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                   </div>
