@@ -154,24 +154,68 @@ export default function BulkImport() {
   };
 
   const parseCSV = (text: string): any[] => {
-    const lines = text.split('\n');
-    const headers = lines[0].split(',').map(h => h.trim());
-    const data = [];
-
-    for (let i = 1; i < lines.length; i++) {
-      if (!lines[i].trim()) continue;
+    const rows: any[] = [];
+    let currentRow: string[] = [];
+    let currentField = '';
+    let insideQuotes = false;
+    let headers: string[] = [];
+    
+    // Parse character by character to handle quoted multi-line fields
+    for (let i = 0; i < text.length; i++) {
+      const char = text[i];
+      const nextChar = text[i + 1];
       
-      const values = lines[i].split(',');
-      const row: any = {};
-      
-      headers.forEach((header, index) => {
-        row[header] = values[index]?.trim() || '';
-      });
-      
-      data.push(row);
+      if (char === '"') {
+        if (insideQuotes && nextChar === '"') {
+          // Escaped quote
+          currentField += '"';
+          i++; // Skip next quote
+        } else {
+          // Toggle quote mode
+          insideQuotes = !insideQuotes;
+        }
+      } else if (char === ',' && !insideQuotes) {
+        // End of field
+        currentRow.push(currentField.trim());
+        currentField = '';
+      } else if (char === '\n' && !insideQuotes) {
+        // End of row
+        if (currentField || currentRow.length > 0) {
+          currentRow.push(currentField.trim());
+          
+          if (headers.length === 0) {
+            // First row is headers
+            headers = currentRow;
+          } else if (currentRow.length === headers.length) {
+            // Create object from row
+            const rowObj: any = {};
+            headers.forEach((header, index) => {
+              rowObj[header] = currentRow[index] || '';
+            });
+            rows.push(rowObj);
+          }
+          
+          currentRow = [];
+          currentField = '';
+        }
+      } else {
+        currentField += char;
+      }
     }
     
-    return data;
+    // Handle last row
+    if (currentField || currentRow.length > 0) {
+      currentRow.push(currentField.trim());
+      if (headers.length > 0 && currentRow.length === headers.length) {
+        const rowObj: any = {};
+        headers.forEach((header, index) => {
+          rowObj[header] = currentRow[index] || '';
+        });
+        rows.push(rowObj);
+      }
+    }
+    
+    return rows;
   };
 
   const validateRow = (row: any, index: number): ImportError[] => {
