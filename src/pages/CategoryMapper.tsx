@@ -88,56 +88,42 @@ const CategoryMapper = () => {
 
         totalRows++;
         
-        // Parse CSV line (handle quoted fields with commas)
-        const fields: string[] = [];
-        let currentField = '';
-        let inQuotes = false;
-        let j = 0;
-
-        while (j < line.length) {
-          const char = line[j];
-          
-          if (char === '"' && (j === 0 || line[j-1] !== '\\')) {
-            inQuotes = !inQuotes;
-            currentField += char;
-          } else if (char === ',' && !inQuotes) {
-            fields.push(currentField);
-            currentField = '';
-          } else {
-            currentField += char;
-          }
-          j++;
+        // Simple but robust CSV parsing
+        const match = line.match(/^([^,]*),([^,]*),([^,]*),("(?:[^"]|"")*"),("(?:[^"]|"")*"),([^,]*),("(?:[^"]|"")*"),("(?:[^"]|"")*"),("(?:[^"]|"")*"),("(?:[^"]|"")*"),([^,]*),([^,]*),([^,]*),(.*)$/);
+        
+        if (!match) {
+          processedLines.push(line);
+          unchangedRows++;
+          continue;
         }
-        fields.push(currentField);
 
-        // Categories is the 7th field (index 6)
-        if (fields.length > 6) {
-          const categoriesField = fields[6];
-          const categories = categoriesField.replace(/^"|"$/g, '').split(',');
-          
-          const mappedCategories = categories
-            .map(cat => mapCategory(cat))
-            .filter(cat => cat !== null);
-          
-          if (mappedCategories.length === 0) {
-            ignoredRows++;
-            continue; // Skip rows with only ignored categories
-          }
-          
-          const originalCategoriesStr = categories.join(',');
-          const mappedCategoriesStr = mappedCategories.join(',');
-          
-          if (originalCategoriesStr !== mappedCategoriesStr) {
-            mappedRows++;
-          } else {
-            unchangedRows++;
-          }
-          
-          // Replace categories field
-          fields[6] = `"${mappedCategoriesStr}"`;
+        // Extract categories field (7th field, index 7 in match array)
+        let categoriesField = match[7];
+        categoriesField = categoriesField.replace(/^"|"$/g, ''); // Remove surrounding quotes
+        
+        const categories = categoriesField.split(',').map(c => c.trim());
+        
+        const mappedCategories = categories
+          .map(cat => mapCategory(cat))
+          .filter(cat => cat !== null);
+        
+        if (mappedCategories.length === 0) {
+          ignoredRows++;
+          continue; // Skip rows with only ignored categories
         }
         
-        processedLines.push(fields.join(','));
+        const originalCategoriesStr = categories.join(',');
+        const mappedCategoriesStr = mappedCategories.join(',');
+        
+        if (originalCategoriesStr !== mappedCategoriesStr) {
+          mappedRows++;
+        } else {
+          unchangedRows++;
+        }
+        
+        // Replace categories in the matched line
+        const newLine = `${match[1]},${match[2]},${match[3]},${match[4]},${match[5]},${match[6]},"${mappedCategoriesStr}",${match[8]},${match[9]},${match[10]},${match[11]},${match[12]},${match[13]},${match[14]}`;
+        processedLines.push(newLine);
       }
 
       setStats({
