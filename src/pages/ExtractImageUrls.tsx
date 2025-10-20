@@ -103,7 +103,7 @@ export default function ExtractImageUrls() {
       h === 'image' ||
       h === 'featured image url' ||
       h === 'featuredimageurl' ||
-      h.includes('image') && h.includes('url')
+      (h.includes('image') && h.includes('url'))
     );
 
     if (imageUrlIndex === -1) {
