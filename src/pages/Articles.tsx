@@ -105,7 +105,9 @@ const Articles = () => {
         query = query.eq("article_type", typeFilter as "article" | "voice" | "guide" | "tool" | "video" | "site_furniture" | "event" | "interview" | "review" | "explainer" | "podcast");
       }
 
-      if (categoryFilter !== "all") {
+      if (categoryFilter === "no-category") {
+        query = query.is("primary_category_id", null);
+      } else if (categoryFilter !== "all") {
         query = query.eq("primary_category_id", categoryFilter);
       }
 
@@ -321,8 +323,9 @@ const Articles = () => {
               <SelectTrigger>
                 <SelectValue placeholder="Category" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-background z-50">
                 <SelectItem value="all">All Categories</SelectItem>
+                <SelectItem value="no-category">No Category</SelectItem>
                 {categories?.map((category) => (
                   <SelectItem key={category.id} value={category.id}>
                     {category.name}
