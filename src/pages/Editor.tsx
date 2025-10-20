@@ -53,9 +53,18 @@ const Editor = () => {
         .from("articles")
         .select("*")
         .eq("id", articleId)
-        .single();
+        .maybeSingle();
       
       if (error) throw error;
+      if (!data) {
+        toast({
+          title: "Article Not Found",
+          description: "This article doesn't exist or you don't have permission to view it.",
+          variant: "destructive",
+        });
+        navigate("/admin");
+        return null;
+      }
       return data;
     },
   });

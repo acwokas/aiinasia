@@ -374,6 +374,22 @@ export default function BulkImport() {
           }
 
           try {
+            // Check if article with this slug already exists
+            const { data: existingArticle } = await supabase
+              .from("articles")
+              .select("id, slug")
+              .eq("slug", row.slug)
+              .maybeSingle();
+
+            if (existingArticle) {
+              allErrors.push({
+                row: i + index + 2,
+                field: 'slug',
+                message: `Article with slug "${row.slug}" already exists. Skipped.`,
+              });
+              continue;
+            }
+
             // Get author by name or create default
             let authorId = null;
             if (row.author) {
