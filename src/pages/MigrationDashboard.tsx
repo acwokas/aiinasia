@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
-import { Upload, Image as ImageIcon, FileText, CheckCircle2, XCircle, Clock } from "lucide-react";
+import { Upload, Image as ImageIcon, FileText, CheckCircle2, XCircle, Clock, Settings } from "lucide-react";
 import MigrationGuide from "@/components/MigrationGuide";
 
 export default function MigrationDashboard() {
@@ -140,10 +140,24 @@ export default function MigrationDashboard() {
             </Card>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium">Step 1: Articles</CardTitle>
+                <CardTitle className="text-sm font-medium">Step 1: Map Categories</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Link to="/admin/category-mapper">
+                  <Button className="w-full" variant="outline">
+                    <Settings className="mr-2 h-4 w-4" />
+                    Category Mapper
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium">Step 2: Articles</CardTitle>
               </CardHeader>
               <CardContent>
                 <Link to="/admin/bulk-import">
@@ -157,7 +171,7 @@ export default function MigrationDashboard() {
 
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium">Step 2: Images</CardTitle>
+                <CardTitle className="text-sm font-medium">Step 3: Images</CardTitle>
               </CardHeader>
               <CardContent>
                 <Link to="/admin/image-migration">
@@ -171,7 +185,7 @@ export default function MigrationDashboard() {
 
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium">Step 3: Redirects</CardTitle>
+                <CardTitle className="text-sm font-medium">Step 4: Redirects</CardTitle>
               </CardHeader>
               <CardContent>
                 <Link to="/admin/bulk-redirects">
@@ -185,7 +199,7 @@ export default function MigrationDashboard() {
 
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium">Step 4: Links</CardTitle>
+                <CardTitle className="text-sm font-medium">Step 5: Links</CardTitle>
               </CardHeader>
               <CardContent>
                 <Link to="/admin/content-processor">
