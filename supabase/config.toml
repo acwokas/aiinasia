@@ -17,3 +17,9 @@ verify_jwt = false
 
 [functions.notify-new-comment]
 verify_jwt = false
+
+[functions.generate-article-comments]
+verify_jwt = false
+
+[functions.auto-comment-new-articles]
+verify_jwt = false

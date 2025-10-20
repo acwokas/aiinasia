@@ -171,7 +171,7 @@ export default function MigrationDashboard() {
             </Card>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-8">
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium">Step 1: Map Categories</CardTitle>
@@ -237,6 +237,20 @@ export default function MigrationDashboard() {
                   <Button className="w-full" variant="outline">
                     <FileText className="mr-2 h-4 w-4" />
                     Process Content
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium">Step 6: Comments</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Link to="/admin/bulk-comments">
+                  <Button className="w-full" variant="outline">
+                    <FileText className="mr-2 h-4 w-4" />
+                    Generate Comments
                   </Button>
                 </Link>
               </CardContent>

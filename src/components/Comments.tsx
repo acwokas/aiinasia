@@ -28,7 +28,7 @@ const Comments = ({ articleId }: CommentsProps) => {
   const [authorName, setAuthorName] = useState("");
   const [authorEmail, setAuthorEmail] = useState("");
   const [content, setContent] = useState("");
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true); // Open by default
   const { toast } = useToast();
 
   useEffect(() => {
