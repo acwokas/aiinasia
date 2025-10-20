@@ -287,6 +287,33 @@ export default function BulkImport() {
       }
     }
     
+    // Extract quotes/blockquotes
+    const quoteMatches = wpContent.matchAll(/<!-- wp:quote[^>]*-->\s*<blockquote[^>]*>(.*?)<\/blockquote>\s*<!-- \/wp:quote -->/gs);
+    for (const match of quoteMatches) {
+      const quoteText = match[1].replace(/<p[^>]*>/g, '').replace(/<\/p>/g, ' ').replace(/<[^>]+>/g, '').trim();
+      if (quoteText && quoteText.length > 0) {
+        blocks.push({
+          type: 'quote',
+          content: quoteText
+        });
+      }
+    }
+    
+    // Also catch plain blockquotes without WordPress comment markers
+    const plainQuoteMatches = wpContent.matchAll(/<blockquote[^>]*>(.*?)<\/blockquote>/gs);
+    for (const match of plainQuoteMatches) {
+      // Skip if already processed by WordPress quote block
+      if (!match[0].includes('<!-- wp:quote')) {
+        const quoteText = match[1].replace(/<p[^>]*>/g, '').replace(/<\/p>/g, ' ').replace(/<[^>]+>/g, '').trim();
+        if (quoteText && quoteText.length > 0) {
+          blocks.push({
+            type: 'quote',
+            content: quoteText
+          });
+        }
+      }
+    }
+    
     // Fallback: if no blocks found, try to extract plain HTML paragraphs
     if (blocks.length === 0) {
       const plainParas = wpContent.matchAll(/<p[^>]*>(.*?)<\/p>/gs);
