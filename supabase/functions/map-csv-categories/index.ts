@@ -40,14 +40,16 @@ function mapCategory(category: string): string | null {
   return trimmed;
 }
 
-function parseCSVLine(line: string): string[] {
+function parseCSVRecords(csvContent: string): string[][] {
+  const records: string[][] = [];
   const fields: string[] = [];
   let currentField = '';
   let inQuotes = false;
+  let currentRecord: string[] = [];
   
-  for (let i = 0; i < line.length; i++) {
-    const char = line[i];
-    const nextChar = line[i + 1];
+  for (let i = 0; i < csvContent.length; i++) {
+    const char = csvContent[i];
+    const nextChar = csvContent[i + 1];
     
     if (char === '"' && nextChar === '"' && inQuotes) {
       // Escaped quote
@@ -59,50 +61,76 @@ function parseCSVLine(line: string): string[] {
       currentField += char;
     } else if (char === ',' && !inQuotes) {
       // Field separator
-      fields.push(currentField);
+      currentRecord.push(currentField);
       currentField = '';
+    } else if (char === '\n' && !inQuotes) {
+      // Record separator (only when not inside quotes)
+      currentRecord.push(currentField);
+      if (currentRecord.some(f => f.trim())) {
+        records.push(currentRecord);
+      }
+      currentRecord = [];
+      currentField = '';
+    } else if (char === '\r' && nextChar === '\n' && !inQuotes) {
+      // Windows line ending
+      currentRecord.push(currentField);
+      if (currentRecord.some(f => f.trim())) {
+        records.push(currentRecord);
+      }
+      currentRecord = [];
+      currentField = '';
+      i++; // Skip \n
     } else {
       currentField += char;
     }
   }
   
-  fields.push(currentField);
-  return fields;
+  // Don't forget the last field and record
+  if (currentField || currentRecord.length > 0) {
+    currentRecord.push(currentField);
+    if (currentRecord.some(f => f.trim())) {
+      records.push(currentRecord);
+    }
+  }
+  
+  return records;
 }
 
 function processCSV(csvContent: string): { csv: string; stats: any } {
-  const lines = csvContent.split('\n');
-  const header = lines[0];
+  console.log('Starting CSV processing...');
+  console.log(`CSV content size: ${csvContent.length} bytes`);
+  
+  const records = parseCSVRecords(csvContent);
+  console.log(`Parsed ${records.length} records`);
+  
+  if (records.length === 0) {
+    throw new Error('No records found in CSV');
+  }
+  
+  const header = records[0];
+  const processedRecords: string[][] = [header];
   
   let totalRows = 0;
   let mappedRows = 0;
   let ignoredRows = 0;
   let unchangedRows = 0;
   
-  const processedLines: string[] = [header];
-  
-  console.log('Starting CSV processing...');
-  
-  for (let i = 1; i < lines.length; i++) {
-    const line = lines[i].trim();
-    if (!line) continue;
-    
+  for (let i = 1; i < records.length; i++) {
+    const record = records[i];
     totalRows++;
     
     if (totalRows % 100 === 0) {
-      console.log(`Processed ${totalRows} rows...`);
+      console.log(`Processed ${totalRows} articles...`);
     }
     
-    const fields = parseCSVLine(line);
-    
-    if (fields.length < 7) {
-      processedLines.push(line);
+    if (record.length < 7) {
+      processedRecords.push(record);
       unchangedRows++;
       continue;
     }
     
     // Categories is the 7th field (index 6)
-    let categoriesField = fields[6];
+    let categoriesField = record[6];
     categoriesField = categoriesField.replace(/^"|"$/g, ''); // Remove surrounding quotes
     
     const categories = categoriesField.split(',').map(c => c.trim());
@@ -127,17 +155,18 @@ function processCSV(csvContent: string): { csv: string; stats: any } {
     }
     
     // Replace categories field
-    fields[6] = `"${mappedCategoriesStr}"`;
-    
-    // Reconstruct line
-    processedLines.push(fields.join(','));
+    record[6] = `"${mappedCategoriesStr}"`;
+    processedRecords.push(record);
   }
   
   console.log('CSV processing complete');
-  console.log(`Total: ${totalRows}, Mapped: ${mappedRows}, Unchanged: ${unchangedRows}, Ignored: ${ignoredRows}`);
+  console.log(`Total articles: ${totalRows}, Mapped: ${mappedRows}, Unchanged: ${unchangedRows}, Ignored: ${ignoredRows}`);
+  
+  // Reconstruct CSV
+  const csvLines = processedRecords.map(record => record.join(','));
   
   return {
-    csv: processedLines.join('\n'),
+    csv: csvLines.join('\n'),
     stats: {
       total: totalRows,
       mapped: mappedRows,
