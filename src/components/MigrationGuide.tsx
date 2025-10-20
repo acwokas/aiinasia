@@ -99,8 +99,23 @@ This is paragraph two.","Brief excerpt"`}
             <h2>Exporting from WordPress</h2>
 
             <div className="space-y-4">
+              <div className="border rounded p-4 bg-primary/10 border-primary/30">
+                <h3 className="font-semibold mb-2 text-primary">✨ Recommended: Custom Export Script</h3>
+                <ol className="list-decimal list-inside space-y-1 text-sm">
+                  <li>Download the export script: <a href="/wordpress-export-script.php" download className="text-primary underline font-semibold">wordpress-export-script.php</a></li>
+                  <li>Upload it to your WordPress site root (same folder as wp-config.php)</li>
+                  <li>Log in to WordPress as administrator</li>
+                  <li>Visit: <code className="bg-muted px-1">https://yoursite.com/wordpress-export-script.php</code></li>
+                  <li>CSV will download automatically in the correct format</li>
+                  <li><strong className="text-destructive">Delete the script file after use</strong> for security</li>
+                </ol>
+                <p className="text-xs text-muted-foreground mt-2">
+                  <strong>Why this is best:</strong> Generates CSV in exact format needed, includes Yoast SEO data, handles special characters automatically, no manual formatting required.
+                </p>
+              </div>
+
               <div className="border rounded p-4 bg-muted/30">
-                <h3 className="font-semibold mb-2">Method 1: Built-in WordPress Exporter</h3>
+                <h3 className="font-semibold mb-2">Method 2: Built-in WordPress Exporter</h3>
                 <ol className="list-decimal list-inside space-y-1 text-sm">
                   <li>Go to <strong>Tools → Export</strong> in WordPress admin</li>
                   <li>Select <strong>Posts</strong></li>
@@ -113,7 +128,7 @@ This is paragraph two.","Brief excerpt"`}
               </div>
 
               <div className="border rounded p-4 bg-muted/30">
-                <h3 className="font-semibold mb-2">Method 2: WP All Import (with All Export addon)</h3>
+                <h3 className="font-semibold mb-2">Method 3: WP All Import (with All Export addon)</h3>
                 <ol className="list-decimal list-inside space-y-1 text-sm">
                   <li>Install <strong>WP All Import</strong> plugin</li>
                   <li>Install <strong>WP All Export</strong> addon (Pro recommended)</li>
@@ -135,7 +150,7 @@ This is paragraph two.","Brief excerpt"`}
               </div>
 
               <div className="border rounded p-4 bg-muted/30">
-                <h3 className="font-semibold mb-2">Method 3: phpMyAdmin SQL Query</h3>
+                <h3 className="font-semibold mb-2">Method 4: phpMyAdmin SQL Query</h3>
                 <ol className="list-decimal list-inside space-y-1 text-sm">
                   <li>Access phpMyAdmin from your hosting panel</li>
                   <li>Select your WordPress database</li>
