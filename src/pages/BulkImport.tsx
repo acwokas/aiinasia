@@ -244,81 +244,202 @@ export default function BulkImport() {
 
     const blocks: any[] = [];
     
-    // Extract content between WordPress block comments
-    const paragraphMatches = wpContent.matchAll(/<!-- wp:paragraph -->\s*<p[^>]*>(.*?)<\/p>\s*<!-- \/wp:paragraph -->/gs);
-    for (const match of paragraphMatches) {
-      const text = match[1].replace(/<[^>]+>/g, '').trim();
+    // Helper function to preserve inline formatting (bold, italic, links)
+    const preserveInlineFormatting = (html: string): string => {
+      return html
+        .replace(/<strong>(.*?)<\/strong>/g, '**$1**')
+        .replace(/<b>(.*?)<\/b>/g, '**$1**')
+        .replace(/<em>(.*?)<\/em>/g, '*$1*')
+        .replace(/<i>(.*?)<\/i>/g, '*$1*')
+        .replace(/<a\s+(?:[^>]*?\s+)?href="([^"]*)"[^>]*>(.*?)<\/a>/g, '[$2]($1)')
+        .replace(/<br\s*\/?>/g, '\n');
+    };
+    
+    // Extract all blocks with their positions to maintain order
+    const allMatches: Array<{index: number, block: any}> = [];
+    
+    // Extract paragraphs
+    for (const match of wpContent.matchAll(/<!-- wp:paragraph -->\s*<p[^>]*>(.*?)<\/p>\s*<!-- \/wp:paragraph -->/gs)) {
+      const text = preserveInlineFormatting(match[1]).trim();
       if (text && text.length > 0) {
-        blocks.push({
-          type: 'paragraph',
-          content: text
+        allMatches.push({
+          index: match.index!,
+          block: { type: 'paragraph', content: text }
         });
       }
     }
     
     // Extract headings
-    const headingMatches = wpContent.matchAll(/<!-- wp:heading[^>]*-->\s*<h(\d)[^>]*>(.*?)<\/h\d>\s*<!-- \/wp:heading -->/gs);
-    for (const match of headingMatches) {
+    for (const match of wpContent.matchAll(/<!-- wp:heading[^>]*-->\s*<h(\d)[^>]*>(.*?)<\/h\d>\s*<!-- \/wp:heading -->/gs)) {
       const level = parseInt(match[1]);
-      const text = match[2].replace(/<[^>]+>/g, '').trim();
+      const text = preserveInlineFormatting(match[2]).trim();
       if (text && text.length > 0) {
-        blocks.push({
-          type: 'heading',
-          attrs: { level },
-          content: text
+        allMatches.push({
+          index: match.index!,
+          block: { type: 'heading', attrs: { level }, content: text }
         });
       }
     }
     
-    // Extract lists
-    const listMatches = wpContent.matchAll(/<!-- wp:list -->\s*<ul[^>]*>(.*?)<\/ul>\s*<!-- \/wp:list -->/gs);
-    for (const match of listMatches) {
+    // Extract unordered lists
+    for (const match of wpContent.matchAll(/<!-- wp:list -->\s*<ul[^>]*>(.*?)<\/ul>\s*<!-- \/wp:list -->/gs)) {
       const listContent = match[1];
       const items = Array.from(listContent.matchAll(/<li[^>]*>(.*?)<\/li>/gs))
-        .map(m => m[1].replace(/<[^>]+>/g, '').trim())
+        .map(m => preserveInlineFormatting(m[1]).trim())
         .filter(text => text.length > 0);
       
       if (items.length > 0) {
-        blocks.push({
-          type: 'list',
-          attrs: { listType: 'unordered' },
-          content: items
+        allMatches.push({
+          index: match.index!,
+          block: { type: 'list', attrs: { listType: 'unordered' }, content: items }
+        });
+      }
+    }
+    
+    // Extract ordered lists
+    for (const match of wpContent.matchAll(/<!-- wp:list\s+{"ordered":true}[^>]*-->\s*<ol[^>]*>(.*?)<\/ol>\s*<!-- \/wp:list -->/gs)) {
+      const listContent = match[1];
+      const items = Array.from(listContent.matchAll(/<li[^>]*>(.*?)<\/li>/gs))
+        .map(m => preserveInlineFormatting(m[1]).trim())
+        .filter(text => text.length > 0);
+      
+      if (items.length > 0) {
+        allMatches.push({
+          index: match.index!,
+          block: { type: 'list', attrs: { listType: 'ordered' }, content: items }
         });
       }
     }
     
     // Extract quotes/blockquotes
-    const quoteMatches = wpContent.matchAll(/<!-- wp:quote[^>]*-->\s*<blockquote[^>]*>(.*?)<\/blockquote>\s*<!-- \/wp:quote -->/gs);
-    for (const match of quoteMatches) {
-      const quoteText = match[1].replace(/<p[^>]*>/g, '').replace(/<\/p>/g, ' ').replace(/<[^>]+>/g, '').trim();
-      if (quoteText && quoteText.length > 0) {
-        blocks.push({
-          type: 'quote',
-          content: quoteText
+    for (const match of wpContent.matchAll(/<!-- wp:quote[^>]*-->\s*<blockquote[^>]*>(.*?)<\/blockquote>\s*<!-- \/wp:quote -->/gs)) {
+      const quoteText = match[1]
+        .replace(/<p[^>]*>/g, '')
+        .replace(/<\/p>/g, ' ')
+        .replace(/<cite[^>]*>.*?<\/cite>/g, '')
+        .trim();
+      const cleanText = preserveInlineFormatting(quoteText).trim();
+      if (cleanText && cleanText.length > 0) {
+        allMatches.push({
+          index: match.index!,
+          block: { type: 'quote', content: cleanText }
         });
       }
     }
     
-    // Also catch plain blockquotes without WordPress comment markers
-    const plainQuoteMatches = wpContent.matchAll(/<blockquote[^>]*>(.*?)<\/blockquote>/gs);
-    for (const match of plainQuoteMatches) {
-      // Skip if already processed by WordPress quote block
-      if (!match[0].includes('<!-- wp:quote')) {
-        const quoteText = match[1].replace(/<p[^>]*>/g, '').replace(/<\/p>/g, ' ').replace(/<[^>]+>/g, '').trim();
-        if (quoteText && quoteText.length > 0) {
-          blocks.push({
-            type: 'quote',
-            content: quoteText
-          });
-        }
+    // Extract pullquotes (styled quotes)
+    for (const match of wpContent.matchAll(/<!-- wp:pullquote[^>]*-->\s*<figure[^>]*>(.*?)<\/figure>\s*<!-- \/wp:pullquote -->/gs)) {
+      const quoteText = match[1]
+        .replace(/<blockquote[^>]*>/g, '')
+        .replace(/<\/blockquote>/g, '')
+        .replace(/<p[^>]*>/g, '')
+        .replace(/<\/p>/g, ' ')
+        .replace(/<cite[^>]*>.*?<\/cite>/g, '')
+        .trim();
+      const cleanText = preserveInlineFormatting(quoteText).trim();
+      if (cleanText && cleanText.length > 0) {
+        allMatches.push({
+          index: match.index!,
+          block: { type: 'quote', content: cleanText }
+        });
       }
     }
+    
+    // Extract inline images
+    for (const match of wpContent.matchAll(/<!-- wp:image[^>]*-->\s*<figure[^>]*>.*?<img[^>]*src="([^"]*)"[^>]*(?:alt="([^"]*)")?[^>]*>.*?(?:<figcaption[^>]*>(.*?)<\/figcaption>)?.*?<\/figure>\s*<!-- \/wp:image -->/gs)) {
+      const imageUrl = sanitizeUrl(match[1]);
+      const alt = match[2] || '';
+      const caption = match[3] ? match[3].replace(/<[^>]+>/g, '').trim() : '';
+      
+      allMatches.push({
+        index: match.index!,
+        block: { 
+          type: 'image', 
+          attrs: { 
+            src: imageUrl,
+            alt: alt,
+            caption: caption
+          }
+        }
+      });
+    }
+    
+    // Extract horizontal separators
+    for (const match of wpContent.matchAll(/<!-- wp:separator[^>]*-->\s*<hr[^>]*\/>\s*<!-- \/wp:separator -->/gs)) {
+      allMatches.push({
+        index: match.index!,
+        block: { type: 'separator' }
+      });
+    }
+    
+    // Extract code blocks
+    for (const match of wpContent.matchAll(/<!-- wp:code[^>]*-->\s*<pre[^>]*><code[^>]*>(.*?)<\/code><\/pre>\s*<!-- \/wp:code -->/gs)) {
+      const code = match[1]
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&amp;/g, '&')
+        .trim();
+      
+      if (code) {
+        allMatches.push({
+          index: match.index!,
+          block: { type: 'code', content: code }
+        });
+      }
+    }
+    
+    // Extract YouTube embeds
+    for (const match of wpContent.matchAll(/<!-- wp:embed[^>]*{"url":"([^"]*youtube[^"]*)"}[^>]*-->/gs)) {
+      const url = match[1];
+      if (url) {
+        allMatches.push({
+          index: match.index!,
+          block: { type: 'embed', attrs: { url, provider: 'youtube' } }
+        });
+      }
+    }
+    
+    // Extract tables
+    for (const match of wpContent.matchAll(/<!-- wp:table[^>]*-->\s*<figure[^>]*><table[^>]*>(.*?)<\/table><\/figure>\s*<!-- \/wp:table -->/gs)) {
+      const tableContent = match[1];
+      const rows: string[][] = [];
+      
+      // Extract header row
+      const theadMatch = tableContent.match(/<thead>(.*?)<\/thead>/s);
+      if (theadMatch) {
+        const headerCells = Array.from(theadMatch[1].matchAll(/<th[^>]*>(.*?)<\/th>/gs))
+          .map(m => preserveInlineFormatting(m[1]).trim());
+        if (headerCells.length > 0) rows.push(headerCells);
+      }
+      
+      // Extract body rows
+      const tbodyMatch = tableContent.match(/<tbody>(.*?)<\/tbody>/s);
+      if (tbodyMatch) {
+        const rowMatches = tbodyMatch[1].matchAll(/<tr[^>]*>(.*?)<\/tr>/gs);
+        for (const rowMatch of rowMatches) {
+          const cells = Array.from(rowMatch[1].matchAll(/<td[^>]*>(.*?)<\/td>/gs))
+            .map(m => preserveInlineFormatting(m[1]).trim());
+          if (cells.length > 0) rows.push(cells);
+        }
+      }
+      
+      if (rows.length > 0) {
+        allMatches.push({
+          index: match.index!,
+          block: { type: 'table', content: rows }
+        });
+      }
+    }
+    
+    // Sort blocks by their position in the original content
+    allMatches.sort((a, b) => a.index - b.index);
+    blocks.push(...allMatches.map(m => m.block));
     
     // Fallback: if no blocks found, try to extract plain HTML paragraphs
     if (blocks.length === 0) {
       const plainParas = wpContent.matchAll(/<p[^>]*>(.*?)<\/p>/gs);
       for (const match of plainParas) {
-        const text = match[1].replace(/<[^>]+>/g, '').trim();
+        const text = preserveInlineFormatting(match[1]).trim();
         if (text && text.length > 0 && !text.startsWith('wp-block')) {
           blocks.push({
             type: 'paragraph',
@@ -367,6 +488,37 @@ export default function BulkImport() {
       .replace(/[\u2026]/g, '...')      // Replace ellipsis
       .replace(/[\u00A0]/g, ' ')        // Replace non-breaking space
       .trim();
+  };
+
+  // Calculate reading time based on word count (average 200 words per minute)
+  const calculateReadingTime = (contentJson: any[]): number => {
+    let wordCount = 0;
+    
+    for (const block of contentJson) {
+      if (block.content) {
+        if (typeof block.content === 'string') {
+          // Count words in string content
+          wordCount += block.content.split(/\s+/).filter(word => word.length > 0).length;
+        } else if (Array.isArray(block.content)) {
+          // Count words in array content (like lists or table rows)
+          for (const item of block.content) {
+            if (typeof item === 'string') {
+              wordCount += item.split(/\s+/).filter(word => word.length > 0).length;
+            } else if (Array.isArray(item)) {
+              // For tables (array of arrays)
+              for (const cell of item) {
+                if (typeof cell === 'string') {
+                  wordCount += cell.split(/\s+/).filter(word => word.length > 0).length;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    
+    // Average reading speed is 200 words per minute, round up
+    return Math.max(1, Math.ceil(wordCount / 200));
   };
 
   const handleImport = async () => {
@@ -485,6 +637,9 @@ export default function BulkImport() {
               }
             }
 
+            // Calculate reading time
+            const readingTime = calculateReadingTime(contentJson);
+
             // Insert article
             const { data: article, error } = await supabase
               .from("articles")
@@ -500,6 +655,7 @@ export default function BulkImport() {
                 featured_image_url: sanitizeUrl(row.featured_image_url || ''),
                 featured_image_alt: sanitizeText(row.featured_image_alt || row.title),
                 published_at: row.published_at ? new Date(row.published_at).toISOString() : null,
+                reading_time_minutes: readingTime,
                 batch_id: batchId,
               })
               .select()
