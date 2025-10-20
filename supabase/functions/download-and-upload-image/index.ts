@@ -70,56 +70,62 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Clean the URL to handle encoding issues
+    // Try original URL first (server may have files with corrupted names),
+    // then try cleaned URL as fallback
     const cleanedUrl = cleanUrl(imageUrl);
     console.log(`Original URL: ${imageUrl}`);
     if (cleanedUrl !== imageUrl) {
       console.log(`Cleaned URL: ${cleanedUrl}`);
     }
 
-    console.log(`Downloading image from: ${cleanedUrl}`);
-
-    // Download the image from the external URL with timeout
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
 
-    let imageBlob: Blob;
+    let imageBlob: Blob | undefined;
+    let successfulUrl: string | undefined;
+    const urlsToTry = [imageUrl]; // Try original first
+    if (cleanedUrl !== imageUrl) {
+      urlsToTry.push(cleanedUrl); // Then try cleaned
+    }
 
-    try {
-      const imageResponse = await fetch(cleanedUrl, {
-        signal: controller.signal,
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (compatible; ImageMigrationBot/1.0)',
-          'Accept': 'image/*',
-        },
-      });
-      clearTimeout(timeoutId);
+    for (const urlToTry of urlsToTry) {
+      try {
+        console.log(`Attempting download from: ${urlToTry}`);
+        const imageResponse = await fetch(urlToTry, {
+          signal: controller.signal,
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (compatible; ImageMigrationBot/1.0)',
+            'Accept': 'image/*',
+          },
+        });
 
-      if (!imageResponse.ok) {
-        const errorMsg = `Failed to download image: ${imageResponse.status} ${imageResponse.statusText}`;
-        console.error(errorMsg, { originalUrl: imageUrl, cleanedUrl });
-        throw new Error(errorMsg);
+        if (imageResponse.ok) {
+          imageBlob = await imageResponse.blob();
+          
+          if (imageBlob.size === 0) {
+            console.log(`Downloaded 0 bytes from ${urlToTry}, trying next URL`);
+            continue;
+          }
+          
+          successfulUrl = urlToTry;
+          console.log(`Success! Downloaded ${imageBlob.size} bytes from: ${urlToTry}`);
+          break;
+        } else {
+          console.log(`${urlToTry} returned ${imageResponse.status}, trying next URL`);
+        }
+      } catch (fetchError) {
+        if (fetchError instanceof Error && fetchError.name === 'AbortError') {
+          clearTimeout(timeoutId);
+          throw new Error('Download timeout - image took too long to fetch');
+        }
+        console.log(`Error with ${urlToTry}: ${fetchError instanceof Error ? fetchError.message : String(fetchError)}`);
       }
+    }
 
-      imageBlob = await imageResponse.blob();
-      console.log(`Downloaded image, size: ${imageBlob.size} bytes, type: ${imageBlob.type}`);
+    clearTimeout(timeoutId);
 
-      if (imageBlob.size === 0) {
-        throw new Error('Downloaded image is empty (0 bytes)');
-      }
-    } catch (fetchError) {
-      clearTimeout(timeoutId);
-      if (fetchError instanceof Error && fetchError.name === 'AbortError') {
-        const errorMsg = 'Download timeout - image took too long to fetch';
-        console.error(errorMsg, { originalUrl: imageUrl, cleanedUrl });
-        throw new Error(errorMsg);
-      }
-      console.error('Fetch error:', { 
-        error: fetchError instanceof Error ? fetchError.message : String(fetchError),
-        originalUrl: imageUrl,
-        cleanedUrl
-      });
-      throw fetchError;
+    if (!imageBlob || !successfulUrl) {
+      throw new Error('Failed to download image from all attempted URLs');
     }
 
     // Upload to Supabase Storage
