@@ -47,7 +47,7 @@ const Index = () => {
     queryKey: ["trending-articles"],
     staleTime: 5 * 60 * 1000, // 5 minutes
     queryFn: async () => {
-      // First get top articles by view count
+      // Get articles with significant view counts, sorted purely by engagement
       const { data: topViewed, error: topError } = await supabase
         .from("articles")
         .select(`
@@ -56,42 +56,12 @@ const Index = () => {
           categories:primary_category_id (name)
         `)
         .eq("status", "published")
+        .gte("view_count", 5) // Only articles with at least 5 views
         .order("view_count", { ascending: false })
-        .order("published_at", { ascending: false, nullsFirst: false })
-        .limit(15);
-      
-      if (topError) throw topError;
-      
-      // If we have at least 7, return them
-      if (topViewed && topViewed.length >= 7) {
-        return topViewed.slice(0, 7);
-      }
-      
-      // Otherwise, supplement with latest articles
-      const { data: latest, error: latestError } = await supabase
-        .from("articles")
-        .select(`
-          *,
-          authors (name, slug),
-          categories:primary_category_id (name)
-        `)
-        .eq("status", "published")
-        .order("published_at", { ascending: false, nullsFirst: false })
         .limit(7);
       
-      if (latestError) throw latestError;
-      
-      // Combine and deduplicate
-      const combined = [...(topViewed || [])];
-      const existingIds = new Set(combined.map(a => a.id));
-      
-      for (const article of (latest || [])) {
-        if (!existingIds.has(article.id) && combined.length < 7) {
-          combined.push(article);
-        }
-      }
-      
-      return combined.slice(0, 7);
+      if (topError) throw topError;
+      return topViewed || [];
     },
   });
 
