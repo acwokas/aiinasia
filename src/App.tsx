@@ -28,6 +28,7 @@ import BulkRedirects from "./pages/BulkRedirects";
 import ContentProcessor from "./pages/ContentProcessor";
 import CategoryMapper from "./pages/CategoryMapper";
 import CleanArticles from "./pages/CleanArticles";
+import PublishAllArticles from "./pages/PublishAllArticles";
 import NotFound from "./pages/NotFound";
 import Events from "./pages/Events";
 import NewsletterPopup from "./components/NewsletterPopup";
@@ -79,6 +80,7 @@ const App = () => (
             <Route path="/admin/content-processor" element={<ContentProcessor />} />
             <Route path="/admin/category-mapper" element={<CategoryMapper />} />
             <Route path="/admin/clean-articles" element={<CleanArticles />} />
+            <Route path="/admin/publish-all" element={<PublishAllArticles />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <CollectiveFooter />
