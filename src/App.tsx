@@ -32,6 +32,7 @@ import PublishAllArticles from "./pages/PublishAllArticles";
 import BulkCommentGeneration from "./pages/BulkCommentGeneration";
 import GenerateTldrBulk from "./pages/GenerateTldrBulk";
 import AssignCategories from "./pages/AssignCategories";
+import FixBrokenImage from "./pages/FixBrokenImage";
 import NotFound from "./pages/NotFound";
 import Events from "./pages/Events";
 import NewsletterPopup from "./components/NewsletterPopup";
@@ -85,8 +86,9 @@ const App = () => (
             <Route path="/admin/clean-articles" element={<CleanArticles />} />
             <Route path="/admin/publish-all" element={<PublishAllArticles />} />
             <Route path="/admin/bulk-comments" element={<BulkCommentGeneration />} />
-          <Route path="/admin/generate-tldr" element={<GenerateTldrBulk />} />
+           <Route path="/admin/generate-tldr" element={<GenerateTldrBulk />} />
           <Route path="/admin/assign-categories" element={<AssignCategories />} />
+            <Route path="/admin/fix-broken-image" element={<FixBrokenImage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <CollectiveFooter />
