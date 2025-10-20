@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Loader2, FileText, Users, Tag, Folder, MessageSquare, Mail, BarChart, Home, Pencil, Trash2, Plus, Upload, X } from "lucide-react";
+import { Loader2, FileText, Users, Tag, Folder, MessageSquare, Mail, BarChart, Home, Pencil, Trash2, Plus, Upload, X, ExternalLink } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { compressImage } from "@/lib/imageCompression";
 
@@ -122,7 +122,7 @@ const Admin = () => {
           content,
           author_name,
           created_at,
-          articles (title)
+          articles (title, slug)
         `)
         .eq("approved", false)
         .order("created_at", { ascending: false })
@@ -534,7 +534,7 @@ const Admin = () => {
               <CardContent>
                 <div className="space-y-4">
                   {pendingComments?.map((comment: any) => (
-                    <div key={comment.id} className="p-4 border border-border rounded-lg">
+                    <div key={comment.id} className="p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors">
                       <div className="flex items-start justify-between mb-2">
                         <p className="font-semibold">{comment.author_name}</p>
                         <div className="flex gap-2">
@@ -555,9 +555,18 @@ const Admin = () => {
                         </div>
                       </div>
                       <p className="text-sm mb-2">{comment.content}</p>
-                      <p className="text-xs text-muted-foreground">
+                      <button 
+                        onClick={() => {
+                          const article = comment.articles as any;
+                          if (article?.slug) {
+                            window.open(`/article/${article.slug}#comments`, '_blank');
+                          }
+                        }}
+                        className="text-xs text-primary hover:underline flex items-center gap-1"
+                      >
                         On: {comment.articles?.title}
-                      </p>
+                        <ExternalLink className="h-3 w-3" />
+                      </button>
                     </div>
                   ))}
                   {(!pendingComments || pendingComments.length === 0) && (
