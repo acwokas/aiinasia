@@ -111,6 +111,7 @@ export type Database = {
           ai_tags: string[] | null
           article_type: Database["public"]["Enums"]["article_type_new"]
           author_id: string | null
+          batch_id: string | null
           canonical_url: string | null
           comment_count: number | null
           content: Json
@@ -161,6 +162,7 @@ export type Database = {
           ai_tags?: string[] | null
           article_type?: Database["public"]["Enums"]["article_type_new"]
           author_id?: string | null
+          batch_id?: string | null
           canonical_url?: string | null
           comment_count?: number | null
           content?: Json
@@ -211,6 +213,7 @@ export type Database = {
           ai_tags?: string[] | null
           article_type?: Database["public"]["Enums"]["article_type_new"]
           author_id?: string | null
+          batch_id?: string | null
           canonical_url?: string | null
           comment_count?: number | null
           content?: Json
@@ -779,6 +782,7 @@ export type Database = {
       url_mappings: {
         Row: {
           article_id: string | null
+          batch_id: string | null
           created_at: string | null
           id: string
           new_slug: string
@@ -789,6 +793,7 @@ export type Database = {
         }
         Insert: {
           article_id?: string | null
+          batch_id?: string | null
           created_at?: string | null
           id?: string
           new_slug: string
@@ -799,6 +804,7 @@ export type Database = {
         }
         Update: {
           article_id?: string | null
+          batch_id?: string | null
           created_at?: string | null
           id?: string
           new_slug?: string

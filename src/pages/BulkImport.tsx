@@ -9,12 +9,23 @@ import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, FileText, AlertCircle, CheckCircle2, Download, XCircle } from "lucide-react";
+import { Upload, FileText, AlertCircle, CheckCircle2, Download, XCircle, Undo2, Trash2 } from "lucide-react";
 
 interface ImportError {
   row: number;
   field: string;
   message: string;
+}
+
+interface ImportLog {
+  id: string;
+  batch_id: string;
+  operation_type: string;
+  status: string;
+  total_records: number;
+  successful_records: number;
+  failed_records: number;
+  created_at: string;
 }
 
 export default function BulkImport() {
@@ -28,9 +39,12 @@ export default function BulkImport() {
   const [totalRows, setTotalRows] = useState(0);
   const [importing, setImporting] = useState(false);
   const [cancelRequested, setCancelRequested] = useState(false);
+  const [recentImports, setRecentImports] = useState<ImportLog[]>([]);
+  const [rollingBack, setRollingBack] = useState<string | null>(null);
 
   useEffect(() => {
     checkAdminStatus();
+    fetchRecentImports();
   }, []);
 
   const checkAdminStatus = async () => {
@@ -59,6 +73,67 @@ export default function BulkImport() {
       return;
     }
     setLoading(false);
+  };
+
+  const fetchRecentImports = async () => {
+    const { data, error } = await supabase
+      .from("migration_logs")
+      .select("*")
+      .eq("operation_type", "bulk_import")
+      .order("created_at", { ascending: false })
+      .limit(10);
+
+    if (!error && data) {
+      setRecentImports(data);
+    }
+  };
+
+  const handleRollback = async (batchId: string) => {
+    if (!confirm("Are you sure you want to rollback this import? This will permanently delete all articles from this batch.")) {
+      return;
+    }
+
+    setRollingBack(batchId);
+
+    try {
+      // Delete all articles with this batch_id
+      const { error: articlesError } = await supabase
+        .from("articles")
+        .delete()
+        .eq("batch_id", batchId);
+
+      if (articlesError) throw articlesError;
+
+      // Delete all url_mappings with this batch_id
+      const { error: mappingsError } = await supabase
+        .from("url_mappings")
+        .delete()
+        .eq("batch_id", batchId);
+
+      if (mappingsError) throw mappingsError;
+
+      // Update migration log status
+      await supabase
+        .from("migration_logs")
+        .update({ status: "rolled_back" })
+        .eq("batch_id", batchId);
+
+      toast({
+        title: "Rollback Complete",
+        description: "All articles from this import have been deleted.",
+      });
+
+      // Refresh the imports list
+      fetchRecentImports();
+    } catch (error: any) {
+      toast({
+        title: "Rollback Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setRollingBack(null);
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -199,6 +274,7 @@ export default function BulkImport() {
                 featured_image_url: row.featured_image_url || '',
                 featured_image_alt: row.featured_image_alt || row.title,
                 published_at: row.published_at ? new Date(row.published_at).toISOString() : null,
+                batch_id: batchId,
               })
               .select()
               .single();
@@ -213,6 +289,7 @@ export default function BulkImport() {
                 old_slug: row.old_slug,
                 new_slug: row.slug,
                 article_id: article.id,
+                batch_id: batchId,
               });
             }
 
@@ -444,6 +521,74 @@ Special characters are fine as long as the file is UTF-8 encoded.","Guide to for
               )}
             </CardContent>
           </Card>
+
+          {recentImports.length > 0 && (
+            <Card className="mt-6">
+              <CardHeader>
+                <CardTitle>Recent Imports</CardTitle>
+                <CardDescription>
+                  Manage and rollback recent bulk imports
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {recentImports.map((importLog) => (
+                    <div
+                      key={importLog.id}
+                      className="flex items-center justify-between p-4 border rounded-lg"
+                    >
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className={`px-2 py-1 text-xs rounded ${
+                            importLog.status === 'completed' ? 'bg-green-100 text-green-800' :
+                            importLog.status === 'cancelled' ? 'bg-yellow-100 text-yellow-800' :
+                            importLog.status === 'rolled_back' ? 'bg-red-100 text-red-800' :
+                            'bg-gray-100 text-gray-800'
+                          }`}>
+                            {importLog.status}
+                          </span>
+                          <span className="text-sm text-muted-foreground">
+                            {new Date(importLog.created_at).toLocaleString()}
+                          </span>
+                        </div>
+                        <div className="text-sm">
+                          <span className="font-medium">{importLog.successful_records}</span> successful
+                          {importLog.failed_records > 0 && (
+                            <span className="text-destructive ml-2">
+                              • {importLog.failed_records} failed
+                            </span>
+                          )}
+                          <span className="text-muted-foreground ml-2">
+                            of {importLog.total_records} total
+                          </span>
+                        </div>
+                      </div>
+                      {importLog.status !== 'rolled_back' && (
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => handleRollback(importLog.batch_id)}
+                          disabled={rollingBack === importLog.batch_id}
+                        >
+                          {rollingBack === importLog.batch_id ? (
+                            <>
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                              Rolling back...
+                            </>
+                          ) : (
+                            <>
+                              <Undo2 className="mr-2 h-4 w-4" />
+                              Rollback
+                            </>
+                          )}
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </main>
       <Footer />
