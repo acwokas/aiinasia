@@ -223,15 +223,37 @@ export default function BulkImport() {
       for (let i = 0; i < rows.length; i += batchSize) {
         // Check if cancel was requested
         if (cancelRequested) {
-          console.log("Import cancelled by user");
+          console.log("Import cancelled by user - rolling back...");
+          // Delete all articles from this batch
+          await supabase
+            .from("articles")
+            .delete()
+            .eq("batch_id", batchId);
+          await supabase
+            .from("url_mappings")
+            .delete()
+            .eq("batch_id", batchId);
           break;
         }
         
         const batch = rows.slice(i, i + batchSize);
         
         for (const [index, row] of batch.entries()) {
-          // Check cancel again for each row
-          if (cancelRequested) break;
+          // Check cancel again before each article
+          if (cancelRequested) {
+            console.log("Import cancelled - rolling back batch...");
+            // Delete all articles from this batch
+            await supabase
+              .from("articles")
+              .delete()
+              .eq("batch_id", batchId);
+            await supabase
+              .from("url_mappings")
+              .delete()
+              .eq("batch_id", batchId);
+            break;
+          }
+          
           const rowErrors = validateRow(row, i + index);
           
           if (rowErrors.length > 0) {
@@ -281,6 +303,20 @@ export default function BulkImport() {
 
             if (error) throw error;
 
+            // Check cancel immediately after insert
+            if (cancelRequested) {
+              console.log("Import cancelled - rolling back batch...");
+              await supabase
+                .from("articles")
+                .delete()
+                .eq("batch_id", batchId);
+              await supabase
+                .from("url_mappings")
+                .delete()
+                .eq("batch_id", batchId);
+              break;
+            }
+
             // Create URL mapping
             if (row.old_slug && article) {
               await supabase.from("url_mappings").insert({
@@ -302,6 +338,9 @@ export default function BulkImport() {
             });
           }
         }
+
+        // Break outer loop if cancelled
+        if (cancelRequested) break;
 
         setProgress(Math.round(((i + batch.length) / rows.length) * 100));
         setSuccessCount(successful);
@@ -329,7 +368,7 @@ export default function BulkImport() {
       if (cancelRequested) {
         toast({
           title: "Import Cancelled",
-          description: `Imported ${successful} articles before cancellation.`,
+          description: `Import cancelled and rolled back. No articles were imported.`,
           variant: "destructive",
         });
       } else {
@@ -338,6 +377,9 @@ export default function BulkImport() {
           description: `Successfully imported ${successful} of ${rows.length} articles.`,
         });
       }
+      
+      // Refresh the imports list
+      await fetchRecentImports();
 
     } catch (error: any) {
       toast({
