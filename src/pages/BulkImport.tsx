@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, FileText, AlertCircle, CheckCircle2, Download } from "lucide-react";
+import { Upload, FileText, AlertCircle, CheckCircle2, Download, XCircle } from "lucide-react";
 
 interface ImportError {
   row: number;
@@ -27,6 +27,7 @@ export default function BulkImport() {
   const [successCount, setSuccessCount] = useState(0);
   const [totalRows, setTotalRows] = useState(0);
   const [importing, setImporting] = useState(false);
+  const [cancelRequested, setCancelRequested] = useState(false);
 
   useEffect(() => {
     checkAdminStatus();
@@ -118,6 +119,7 @@ export default function BulkImport() {
     if (!file) return;
 
     setImporting(true);
+    setCancelRequested(false);
     setErrors([]);
     setSuccessCount(0);
     setProgress(0);
@@ -144,9 +146,17 @@ export default function BulkImport() {
       // Process in batches of 50
       const batchSize = 50;
       for (let i = 0; i < rows.length; i += batchSize) {
+        // Check if cancel was requested
+        if (cancelRequested) {
+          console.log("Import cancelled by user");
+          break;
+        }
+        
         const batch = rows.slice(i, i + batchSize);
         
         for (const [index, row] of batch.entries()) {
+          // Check cancel again for each row
+          if (cancelRequested) break;
           const rowErrors = validateRow(row, i + index);
           
           if (rowErrors.length > 0) {
@@ -221,10 +231,16 @@ export default function BulkImport() {
       }
 
       // Update log entry
+      const finalStatus = cancelRequested 
+        ? "cancelled" 
+        : allErrors.length === 0 
+          ? "completed" 
+          : "completed_with_errors";
+          
       await supabase
         .from("migration_logs")
         .update({
-          status: allErrors.length === 0 ? "completed" : "completed_with_errors",
+          status: finalStatus,
           successful_records: successful,
           failed_records: allErrors.length,
           error_details: allErrors.length > 0 ? JSON.parse(JSON.stringify(allErrors)) : null,
@@ -233,10 +249,18 @@ export default function BulkImport() {
 
       setErrors(allErrors);
 
-      toast({
-        title: "Import Complete",
-        description: `Successfully imported ${successful} of ${rows.length} articles.`,
-      });
+      if (cancelRequested) {
+        toast({
+          title: "Import Cancelled",
+          description: `Imported ${successful} articles before cancellation.`,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Import Complete",
+          description: `Successfully imported ${successful} of ${rows.length} articles.`,
+        });
+      }
 
     } catch (error: any) {
       toast({
@@ -347,13 +371,24 @@ Special characters are fine as long as the file is UTF-8 encoded.","Guide to for
                   onChange={handleFileChange}
                   disabled={importing}
                 />
-                <Button
-                  onClick={handleImport}
-                  disabled={!file || importing}
-                >
-                  <Upload className="mr-2 h-4 w-4" />
-                  Import
-                </Button>
+                {!importing ? (
+                  <Button
+                    onClick={handleImport}
+                    disabled={!file || importing}
+                  >
+                    <Upload className="mr-2 h-4 w-4" />
+                    Import
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={() => setCancelRequested(true)}
+                    variant="destructive"
+                    disabled={cancelRequested}
+                  >
+                    <XCircle className="mr-2 h-4 w-4" />
+                    {cancelRequested ? "Cancelling..." : "Cancel Import"}
+                  </Button>
+                )}
               </div>
 
               {file && (
