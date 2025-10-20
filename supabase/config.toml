@@ -26,3 +26,6 @@ verify_jwt = false
 
 [functions.generate-tldr-snapshot]
 verify_jwt = false
+
+[functions.assign-article-category]
+verify_jwt = false

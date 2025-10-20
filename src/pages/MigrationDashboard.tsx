@@ -272,6 +272,20 @@ export default function MigrationDashboard() {
 
             <Card>
               <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium">Step 8: Categories</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Link to="/admin/assign-categories">
+                  <Button className="w-full" variant="outline">
+                    <Settings className="mr-2 h-4 w-4" />
+                    Assign Categories
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium">Migration Stats</CardTitle>
               </CardHeader>
               <CardContent>
