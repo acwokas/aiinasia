@@ -527,6 +527,9 @@ const Article = () => {
               {renderContent(article.content)}
             </div>
 
+            {/* Comments Section */}
+            <Comments articleId={article.id} />
+
             {/* Article Footer */}
             <footer className="mt-12 pt-8 border-t border-border">
               <div className="flex items-center justify-between mb-8">
@@ -544,9 +547,6 @@ const Article = () => {
                 </div>
               </div>
             </footer>
-
-            {/* Comments Section */}
-            <Comments articleId={article.id} />
 
             {/* Author Bio */}
             {article.authors && (
