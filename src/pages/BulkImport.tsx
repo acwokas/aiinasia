@@ -239,6 +239,9 @@ export default function BulkImport() {
       return [{ type: 'paragraph', content: 'No content available' }];
     }
 
+    // Remove "You may also like" section from the end
+    wpContent = wpContent.replace(/<!-- wp:heading[^>]*-->\s*<h\d[^>]*>You may also like.*$/is, '');
+
     const blocks: any[] = [];
     
     // Extract content between WordPress block comments
