@@ -258,7 +258,7 @@ const Index = () => {
               <div className="space-y-4">
               {(() => {
                 const filteredTrending = trendingArticles?.filter((article: any) => article.slug) || [];
-                const leftColumnCount = Math.min(6, filteredTrending.length);
+                const leftColumnCount = Math.min(5, filteredTrending.length);
                 
                 return filteredTrending.slice(0, leftColumnCount).map((article: any, index: number) => (
                 <Link 
@@ -266,7 +266,7 @@ const Index = () => {
                   to={`/article/${article.slug}`}
                   className="block group"
                 >
-                  <div className={`relative ${index === 0 ? 'aspect-video' : 'aspect-[16/10]'} overflow-hidden rounded-lg mb-2`}>
+                  <div className={`relative ${index === 0 ? 'aspect-video' : 'aspect-[16/9]'} overflow-hidden rounded-lg mb-2`}>
                     <img 
                       src={article.featured_image_url || "/placeholder.svg"} 
                       alt={article.title}
@@ -404,30 +404,56 @@ const Index = () => {
               <div className="space-y-4">
               {(() => {
                 const filteredLatest = latestArticles?.filter((article: any) => article.slug) || [];
-                const rightColumnCount = Math.min(6, filteredLatest.length);
+                const rightColumnCount = Math.min(8, filteredLatest.length);
                 
-                return filteredLatest.slice(0, rightColumnCount).map((article: any) => (
+                return filteredLatest.slice(0, rightColumnCount).map((article: any, index: number) => (
                   <Link 
                     key={article.id}
                     to={`/article/${article.slug}`}
-                    className="flex gap-3 group"
+                    className="block group"
                   >
-                    <div className="relative w-20 h-20 flex-shrink-0 overflow-hidden rounded">
-                      <img 
-                        src={article.featured_image_url || "/placeholder.svg"} 
-                        alt={article.title}
-                        loading="lazy"
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs text-muted-foreground uppercase mb-1">
-                        {article.categories?.name || "Uncategorized"} | {article.reading_time_minutes || 5} days ago
-                      </p>
-                      <h3 className="font-bold text-sm line-clamp-3 group-hover:text-primary transition-colors">
-                        {article.title}
-                      </h3>
-                    </div>
+                    {index < 2 ? (
+                      // First 2 articles with larger images
+                      <div>
+                        <div className="relative aspect-video overflow-hidden rounded-lg mb-2">
+                          <img 
+                            src={article.featured_image_url || "/placeholder.svg"} 
+                            alt={article.title}
+                            loading="lazy"
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          />
+                          <Badge className="absolute top-2 left-2 bg-secondary text-secondary-foreground text-xs">
+                            {article.categories?.name || "Uncategorized"}
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground mb-1">
+                          {article.categories?.name || "Uncategorized"} | {article.reading_time_minutes || 5} min read
+                        </p>
+                        <h3 className="font-bold text-sm line-clamp-2 group-hover:text-primary transition-colors">
+                          {article.title}
+                        </h3>
+                      </div>
+                    ) : (
+                      // Remaining articles with small thumbnails
+                      <div className="flex gap-3">
+                        <div className="relative w-20 h-20 flex-shrink-0 overflow-hidden rounded">
+                          <img 
+                            src={article.featured_image_url || "/placeholder.svg"} 
+                            alt={article.title}
+                            loading="lazy"
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs text-muted-foreground mb-1">
+                            {article.categories?.name || "Uncategorized"}
+                          </p>
+                          <h3 className="font-bold text-sm line-clamp-3 group-hover:text-primary transition-colors">
+                            {article.title}
+                          </h3>
+                        </div>
+                      </div>
+                    )}
                   </Link>
                 ));
               })()}
