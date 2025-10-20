@@ -301,6 +301,22 @@ export default function BulkImport() {
     return blocks.length > 0 ? blocks : [{ type: 'paragraph', content: 'Content could not be parsed' }];
   };
 
+  const sanitizeUrl = (url: string): string => {
+    if (!url) return '';
+    
+    // Replace problematic Unicode characters with standard ASCII equivalents
+    return url
+      .replace(/[\u2010-\u2015]/g, '-')  // Replace various Unicode hyphens with standard hyphen
+      .replace(/[\u2018\u2019]/g, "'")   // Replace smart quotes with standard quotes
+      .replace(/[\u201C\u201D]/g, '"')   // Replace smart double quotes
+      .replace(/[\u2026]/g, '...')       // Replace ellipsis
+      .replace(/[\u00A0]/g, ' ')         // Replace non-breaking space
+      .replace(/[^\x00-\x7F]/g, (char) => {
+        // For any remaining non-ASCII characters, try to encode them properly
+        return encodeURIComponent(char);
+      });
+  };
+
   const handleImport = async () => {
     if (!file) return;
 
@@ -426,7 +442,7 @@ export default function BulkImport() {
                 author_id: authorId,
                 meta_title: row.meta_title || row.title,
                 meta_description: row.meta_description || row.excerpt || '',
-                featured_image_url: row.featured_image_url || '',
+                featured_image_url: sanitizeUrl(row.featured_image_url || ''),
                 featured_image_alt: row.featured_image_alt || row.title,
                 published_at: row.published_at ? new Date(row.published_at).toISOString() : null,
                 batch_id: batchId,
