@@ -239,9 +239,10 @@ export default function BulkImport() {
       return [{ type: 'paragraph', content: 'No content available' }];
     }
 
-    // Remove "You may also like" section from the end (including bold markers)
-    wpContent = wpContent.replace(/\*\*You [Mm]ay [Aa]lso [Ll]ike\*\*/gi, '');
-    wpContent = wpContent.replace(/<!-- wp:heading[^>]*-->\s*<h\d[^>]*>You [Mm]ay [Aa]lso [Ll]ike.*$/is, '');
+    // Remove "You may also like" section and everything after it
+    // This handles various formats: heading tags, bold text, with or without WordPress block comments
+    const youMayAlsoLikePattern = /(?:<!-- wp:heading[^>]*-->)?\s*(?:<h[1-6][^>]*>)?\s*(?:<strong>|<b>|\*\*)?You [Mm]ay [Aa]lso [Ll]ike(?:<\/strong>|<\/b>|\*\*)?.*$/is;
+    wpContent = wpContent.replace(youMayAlsoLikePattern, '');
 
     const blocks: any[] = [];
     
