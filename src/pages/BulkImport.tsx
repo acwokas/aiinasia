@@ -784,20 +784,26 @@ export default function BulkImport() {
             }
 
             successful++;
+            
+            // Update progress after each article
+            const currentIndex = i + index + 1;
+            setProgress(Math.round((currentIndex / rows.length) * 100));
+            setSuccessCount(successful);
           } catch (error: any) {
             allErrors.push({
               row: i + index + 2,
               field: 'general',
               message: error.message,
             });
+            
+            // Update progress even on error
+            const currentIndex = i + index + 1;
+            setProgress(Math.round((currentIndex / rows.length) * 100));
           }
         }
 
         // Break outer loop if cancelled
         if (cancelRequested) break;
-
-        setProgress(Math.round(((i + batch.length) / rows.length) * 100));
-        setSuccessCount(successful);
       }
 
       // Update log entry
