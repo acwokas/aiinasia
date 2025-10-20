@@ -235,71 +235,70 @@ export default function BulkImport() {
   };
 
   const parseWordPressContent = (wpContent: string) => {
-    // Convert WordPress Gutenberg blocks to JSON format
+    if (!wpContent || wpContent.trim() === '') {
+      return [{ type: 'paragraph', content: 'No content available' }];
+    }
+
     const blocks: any[] = [];
     
-    // Remove WordPress block comments and extract HTML
-    const cleanContent = wpContent
-      .replace(/<!-- \/wp:[^>]+ -->/g, '')
-      .replace(/<!-- wp:paragraph -->/g, '<p>')
-      .replace(/<!-- wp:heading -->/g, '<h2>')
-      .replace(/<!-- wp:list -->/g, '<ul>')
-      .replace(/<!-- wp:list-item -->/g, '<li>')
-      .replace(/<!-- \/wp:list-item -->/g, '</li>')
-      .replace(/<!-- \/wp:list -->/g, '</ul>')
-      .replace(/<!-- \/wp:heading -->/g, '</h2>')
-      .replace(/<!-- \/wp:paragraph -->/g, '</p>');
+    // Extract content between WordPress block comments
+    const paragraphMatches = wpContent.matchAll(/<!-- wp:paragraph -->\s*<p[^>]*>(.*?)<\/p>\s*<!-- \/wp:paragraph -->/gs);
+    for (const match of paragraphMatches) {
+      const text = match[1].replace(/<[^>]+>/g, '').trim();
+      if (text && text.length > 0) {
+        blocks.push({
+          type: 'paragraph',
+          content: text
+        });
+      }
+    }
     
-    // Split into lines and process
-    const lines = cleanContent.split('\n').filter(line => line.trim());
+    // Extract headings
+    const headingMatches = wpContent.matchAll(/<!-- wp:heading[^>]*-->\s*<h(\d)[^>]*>(.*?)<\/h\d>\s*<!-- \/wp:heading -->/gs);
+    for (const match of headingMatches) {
+      const level = parseInt(match[1]);
+      const text = match[2].replace(/<[^>]+>/g, '').trim();
+      if (text && text.length > 0) {
+        blocks.push({
+          type: 'heading',
+          attrs: { level },
+          content: text
+        });
+      }
+    }
     
-    for (const line of lines) {
-      const trimmed = line.trim();
-      if (!trimmed) continue;
+    // Extract lists
+    const listMatches = wpContent.matchAll(/<!-- wp:list -->\s*<ul[^>]*>(.*?)<\/ul>\s*<!-- \/wp:list -->/gs);
+    for (const match of listMatches) {
+      const listContent = match[1];
+      const items = Array.from(listContent.matchAll(/<li[^>]*>(.*?)<\/li>/gs))
+        .map(m => m[1].replace(/<[^>]+>/g, '').trim())
+        .filter(text => text.length > 0);
       
-      // Handle headings
-      if (trimmed.startsWith('<h2')) {
-        const text = trimmed.replace(/<[^>]+>/g, '').trim();
-        if (text) {
-          blocks.push({
-            type: 'heading',
-            attrs: { level: 2 },
-            content: text
-          });
-        }
+      if (items.length > 0) {
+        blocks.push({
+          type: 'list',
+          attrs: { listType: 'unordered' },
+          content: items
+        });
       }
-      // Handle lists
-      else if (trimmed.startsWith('<ul')) {
-        const listItems = trimmed.match(/<li[^>]*>(.*?)<\/li>/g) || [];
-        const items = listItems.map(item => item.replace(/<[^>]+>/g, '').trim());
-        if (items.length > 0) {
-          blocks.push({
-            type: 'list',
-            attrs: { listType: 'unordered' },
-            content: items
-          });
-        }
-      }
-      // Handle paragraphs
-      else if (trimmed.startsWith('<p')) {
-        const text = trimmed.replace(/<[^>]+>/g, '').trim();
-        if (text && !text.startsWith('wp-block')) {
+    }
+    
+    // Fallback: if no blocks found, try to extract plain HTML paragraphs
+    if (blocks.length === 0) {
+      const plainParas = wpContent.matchAll(/<p[^>]*>(.*?)<\/p>/gs);
+      for (const match of plainParas) {
+        const text = match[1].replace(/<[^>]+>/g, '').trim();
+        if (text && text.length > 0 && !text.startsWith('wp-block')) {
           blocks.push({
             type: 'paragraph',
             content: text
           });
         }
       }
-      // Plain text fallback
-      else if (!trimmed.startsWith('<') && trimmed.length > 10) {
-        blocks.push({
-          type: 'paragraph',
-          content: trimmed
-        });
-      }
     }
     
-    return blocks.length > 0 ? blocks : [{ type: 'paragraph', content: wpContent }];
+    return blocks.length > 0 ? blocks : [{ type: 'paragraph', content: 'Content could not be parsed' }];
   };
 
   const handleImport = async () => {
@@ -403,12 +402,16 @@ export default function BulkImport() {
 
             // Parse content from WordPress blocks
             let contentJson;
-            try {
-              // First try parsing as JSON (if already converted)
-              contentJson = JSON.parse(row.content);
-            } catch {
-              // Parse WordPress Gutenberg blocks
-              contentJson = parseWordPressContent(row.content || '');
+            if (!row.content || row.content.trim() === '') {
+              contentJson = [{ type: 'paragraph', content: 'No content available' }];
+            } else {
+              try {
+                // First try parsing as JSON (if already converted)
+                contentJson = JSON.parse(row.content);
+              } catch {
+                // Parse WordPress Gutenberg blocks
+                contentJson = parseWordPressContent(row.content);
+              }
             }
 
             // Insert article
@@ -445,6 +448,57 @@ export default function BulkImport() {
                 .delete()
                 .eq("batch_id", batchId);
               break;
+            }
+
+            // Handle categories
+            if (row.categories && article) {
+              const categoryNames = row.categories.split(',').map((c: string) => c.trim()).filter(Boolean);
+              for (const catName of categoryNames) {
+                const { data: category } = await supabase
+                  .from("categories")
+                  .select("id")
+                  .eq("name", catName)
+                  .maybeSingle();
+                
+                if (category) {
+                  await supabase.from("article_categories").insert({
+                    article_id: article.id,
+                    category_id: category.id,
+                  });
+                }
+              }
+            }
+
+            // Handle tags
+            if (row.tags && article) {
+              const tagNames = row.tags.split(',').map((t: string) => t.trim()).filter(Boolean);
+              for (const tagName of tagNames) {
+                // Try to find existing tag or create new one
+                let { data: tag } = await supabase
+                  .from("tags")
+                  .select("id")
+                  .eq("name", tagName)
+                  .maybeSingle();
+                
+                if (!tag) {
+                  const { data: newTag } = await supabase
+                    .from("tags")
+                    .insert({
+                      name: tagName,
+                      slug: tagName.toLowerCase().replace(/\s+/g, '-'),
+                    })
+                    .select()
+                    .single();
+                  tag = newTag;
+                }
+                
+                if (tag) {
+                  await supabase.from("article_tags").insert({
+                    article_id: article.id,
+                    tag_id: tag.id,
+                  });
+                }
+              }
             }
 
             // Create URL mapping
