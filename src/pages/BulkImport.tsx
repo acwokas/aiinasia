@@ -190,6 +190,74 @@ export default function BulkImport() {
     return errors;
   };
 
+  const parseWordPressContent = (wpContent: string) => {
+    // Convert WordPress Gutenberg blocks to JSON format
+    const blocks: any[] = [];
+    
+    // Remove WordPress block comments and extract HTML
+    const cleanContent = wpContent
+      .replace(/<!-- \/wp:[^>]+ -->/g, '')
+      .replace(/<!-- wp:paragraph -->/g, '<p>')
+      .replace(/<!-- wp:heading -->/g, '<h2>')
+      .replace(/<!-- wp:list -->/g, '<ul>')
+      .replace(/<!-- wp:list-item -->/g, '<li>')
+      .replace(/<!-- \/wp:list-item -->/g, '</li>')
+      .replace(/<!-- \/wp:list -->/g, '</ul>')
+      .replace(/<!-- \/wp:heading -->/g, '</h2>')
+      .replace(/<!-- \/wp:paragraph -->/g, '</p>');
+    
+    // Split into lines and process
+    const lines = cleanContent.split('\n').filter(line => line.trim());
+    
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed) continue;
+      
+      // Handle headings
+      if (trimmed.startsWith('<h2')) {
+        const text = trimmed.replace(/<[^>]+>/g, '').trim();
+        if (text) {
+          blocks.push({
+            type: 'heading',
+            attrs: { level: 2 },
+            content: text
+          });
+        }
+      }
+      // Handle lists
+      else if (trimmed.startsWith('<ul')) {
+        const listItems = trimmed.match(/<li[^>]*>(.*?)<\/li>/g) || [];
+        const items = listItems.map(item => item.replace(/<[^>]+>/g, '').trim());
+        if (items.length > 0) {
+          blocks.push({
+            type: 'list',
+            attrs: { listType: 'unordered' },
+            content: items
+          });
+        }
+      }
+      // Handle paragraphs
+      else if (trimmed.startsWith('<p')) {
+        const text = trimmed.replace(/<[^>]+>/g, '').trim();
+        if (text && !text.startsWith('wp-block')) {
+          blocks.push({
+            type: 'paragraph',
+            content: text
+          });
+        }
+      }
+      // Plain text fallback
+      else if (!trimmed.startsWith('<') && trimmed.length > 10) {
+        blocks.push({
+          type: 'paragraph',
+          content: trimmed
+        });
+      }
+    }
+    
+    return blocks.length > 0 ? blocks : [{ type: 'paragraph', content: wpContent }];
+  };
+
   const handleImport = async () => {
     if (!file) return;
 
@@ -273,12 +341,14 @@ export default function BulkImport() {
               authorId = author?.id;
             }
 
-            // Parse content (assuming it's JSON string or plain text)
+            // Parse content from WordPress blocks
             let contentJson;
             try {
+              // First try parsing as JSON (if already converted)
               contentJson = JSON.parse(row.content);
             } catch {
-              contentJson = [{ type: "paragraph", content: row.content }];
+              // Parse WordPress Gutenberg blocks
+              contentJson = parseWordPressContent(row.content || '');
             }
 
             // Insert article
