@@ -260,10 +260,16 @@ const Articles = () => {
               Manage and organize all your content
             </p>
           </div>
-          <Button onClick={() => navigate("/editor")}>
-            <Plus className="h-4 w-4 mr-2" />
-            Create New Article
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => navigate("/admin/publish-all")}>
+              <Globe className="h-4 w-4 mr-2" />
+              Publish All Drafts
+            </Button>
+            <Button onClick={() => navigate("/editor")}>
+              <Plus className="h-4 w-4 mr-2" />
+              Create New Article
+            </Button>
+          </div>
         </div>
 
         {/* Filters */}
