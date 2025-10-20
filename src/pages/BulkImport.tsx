@@ -317,6 +317,28 @@ export default function BulkImport() {
       });
   };
 
+  const sanitizeText = (text: string): string => {
+    if (!text) return '';
+    
+    // Fix common UTF-8 encoding issues
+    return text
+      .replace(/â€œ|â€�/g, '"')         // Fix encoded left/right double quotes
+      .replace(/â€˜|â€™/g, "'")         // Fix encoded left/right single quotes
+      .replace(/â€"|â€"/g, '-')         // Fix encoded em-dash/en-dash
+      .replace(/â€¦/g, '...')           // Fix encoded ellipsis
+      .replace(/Â /g, ' ')              // Fix non-breaking space
+      .replace(/‚Äú/g, '"')             // Fix double quote variant
+      .replace(/‚Äù/g, '"')             // Fix double quote variant
+      .replace(/‚Äë/g, '-')             // Fix hyphen variant
+      .replace(/‚Äô/g, "'")             // Fix apostrophe variant
+      .replace(/[\u2010-\u2015]/g, '-') // Replace Unicode hyphens
+      .replace(/[\u2018\u2019]/g, "'")  // Replace smart single quotes
+      .replace(/[\u201C\u201D]/g, '"')  // Replace smart double quotes
+      .replace(/[\u2026]/g, '...')      // Replace ellipsis
+      .replace(/[\u00A0]/g, ' ')        // Replace non-breaking space
+      .trim();
+  };
+
   const handleImport = async () => {
     if (!file) return;
 
@@ -434,16 +456,16 @@ export default function BulkImport() {
             const { data: article, error } = await supabase
               .from("articles")
               .insert({
-                title: row.title,
+                title: sanitizeText(row.title),
                 slug: row.slug,
                 content: contentJson,
-                excerpt: row.excerpt || '',
+                excerpt: sanitizeText(row.excerpt || ''),
                 status: 'draft',
                 author_id: authorId,
-                meta_title: row.meta_title || row.title,
-                meta_description: row.meta_description || row.excerpt || '',
+                meta_title: sanitizeText(row.meta_title || row.title),
+                meta_description: sanitizeText(row.meta_description || row.excerpt || ''),
                 featured_image_url: sanitizeUrl(row.featured_image_url || ''),
-                featured_image_alt: row.featured_image_alt || row.title,
+                featured_image_alt: sanitizeText(row.featured_image_alt || row.title),
                 published_at: row.published_at ? new Date(row.published_at).toISOString() : null,
                 batch_id: batchId,
               })
