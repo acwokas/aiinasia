@@ -265,6 +265,22 @@ export default function BulkImport() {
       // Strip any remaining ** markers that might be in the content
       result = result.replace(/\*\*/g, '');
       
+      // Decode HTML entities
+      result = result
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'")
+        .replace(/&apos;/g, "'")
+        .replace(/&ldquo;/g, '"')
+        .replace(/&rdquo;/g, '"')
+        .replace(/&lsquo;/g, "'")
+        .replace(/&rsquo;/g, "'")
+        .replace(/&mdash;/g, '—')
+        .replace(/&ndash;/g, '–');
+      
       return result;
     };
     

@@ -12,18 +12,36 @@ interface ArticleContent {
 }
 
 function cleanContent(content: ArticleContent[]): ArticleContent[] {
+  const decodeHtmlEntities = (text: string): string => {
+    return text
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/&apos;/g, "'")
+      .replace(/&ldquo;/g, '"')
+      .replace(/&rdquo;/g, '"')
+      .replace(/&lsquo;/g, "'")
+      .replace(/&rsquo;/g, "'")
+      .replace(/&mdash;/g, '—')
+      .replace(/&ndash;/g, '–')
+      .replace(/\*\*/g, '');
+  };
+  
   return content.map(block => {
     const cleanedBlock = { ...block };
     
     // Clean string content
     if (typeof cleanedBlock.content === 'string') {
-      cleanedBlock.content = cleanedBlock.content.replace(/\*\*/g, '');
+      cleanedBlock.content = decodeHtmlEntities(cleanedBlock.content);
     }
     
     // Clean array content (lists)
     if (Array.isArray(cleanedBlock.content)) {
       cleanedBlock.content = cleanedBlock.content.map(item => 
-        typeof item === 'string' ? item.replace(/\*\*/g, '') : item
+        typeof item === 'string' ? decodeHtmlEntities(item) : item
       );
     }
     
