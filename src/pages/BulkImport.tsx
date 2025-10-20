@@ -433,11 +433,14 @@ export default function BulkImport() {
             // Get author by name or create default
             let authorId = null;
             if (row.author) {
+              // Map AIinASIA to Intelligence Desk
+              const authorName = row.author === 'AIinASIA' ? 'Intelligence Desk' : row.author;
+              
               const { data: author } = await supabase
                 .from("authors")
                 .select("id")
-                .eq("name", row.author)
-                .single();
+                .eq("name", authorName)
+                .maybeSingle();
               authorId = author?.id;
             }
 
