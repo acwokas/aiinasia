@@ -11,29 +11,41 @@ interface DownloadRequest {
 }
 
 function cleanUrl(url: string): string {
-  // Remove common corrupted UTF-8 sequences
+  // Aggressively clean corrupted UTF-8 sequences
   let cleaned = url
-    .replace(/‚Äö√Ñ√´/g, '-')  // corrupted dash
-    .replace(/‚Äô/g, "'")      // corrupted apostrophe
-    .replace(/‚Äù/g, '"')      // corrupted quote
-    .replace(/‚Äî/g, '-')      // corrupted en-dash
-    .replace(/√¢‚Ç¨/g, '')     // corrupted characters
-    .replace(/[\u0000-\u001F\u007F-\u009F]/g, ''); // control characters
+    // DALL-E corruption patterns
+    .replace(/DALL-[¬ì¨åE]+/g, 'DALL-E')
+    .replace(/¬ì¨åE/g, 'E')
+    .replace(/‚Äö√Ñ√´/g, '-')
+    .replace(/‚Äô/g, "'")
+    .replace(/‚Äù/g, '"')
+    .replace(/‚Äî/g, '-')
+    .replace(/√¢‚Ç¨/g, '')
+    .replace(/‚Ä¶/g, '-')
+    .replace(/Ã¶/g, 'o')
+    .replace(/Ã¤/g, 'a')
+    .replace(/Ã¼/g, 'u')
+    // Remove any remaining non-ASCII characters except in query strings
+    .replace(/[^\x00-\x7F]/g, '-')
+    // Clean up multiple consecutive dashes
+    .replace(/-+/g, '-')
+    // Remove control characters
+    .replace(/[\u0000-\u001F\u007F-\u009F]/g, '');
   
-  // Try to encode properly if needed
+  // Try proper URL encoding
   try {
-    // Decode if it's double-encoded
-    const decoded = decodeURIComponent(cleaned);
-    // Re-encode properly
-    const parts = decoded.split('/');
-    const encodedParts = parts.map((part, index) => {
-      // Don't encode the protocol part (https:)
-      if (index < 3) return part;
-      return encodeURIComponent(decodeURIComponent(part));
-    });
-    return encodedParts.join('/');
+    const urlObj = new URL(cleaned);
+    // Re-encode the pathname properly
+    const pathParts = urlObj.pathname.split('/');
+    const encodedPath = pathParts.map((part, index) => {
+      if (index === 0 || !part) return part;
+      return encodeURIComponent(decodeURIComponent(part).replace(/-+/g, '-'));
+    }).join('/');
+    
+    urlObj.pathname = encodedPath;
+    return urlObj.toString();
   } catch (e) {
-    // If decoding fails, return cleaned version
+    console.warn('URL cleaning fallback:', e);
     return cleaned;
   }
 }
