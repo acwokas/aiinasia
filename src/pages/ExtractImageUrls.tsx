@@ -57,50 +57,82 @@ export default function ExtractImageUrls() {
     setLoading(false);
   };
 
+  const parseCSVLine = (line: string): string[] => {
+    const values: string[] = [];
+    let currentValue = '';
+    let insideQuotes = false;
+
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+      const nextChar = line[i + 1];
+      
+      if (char === '"') {
+        if (insideQuotes && nextChar === '"') {
+          // Escaped quote
+          currentValue += '"';
+          i++; // Skip next quote
+        } else {
+          // Toggle quote state
+          insideQuotes = !insideQuotes;
+        }
+      } else if (char === ',' && !insideQuotes) {
+        values.push(currentValue.trim());
+        currentValue = '';
+      } else {
+        currentValue += char;
+      }
+    }
+    values.push(currentValue.trim());
+    return values;
+  };
+
   const parseCSV = (csvText: string): string[] => {
     const lines = csvText.trim().split('\n');
     const urls = new Set<string>();
     
-    // Find the header row and get the index of featured_image_url column
-    const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+    // Parse header row
+    const headers = parseCSVLine(lines[0]).map(h => h.replace(/"/g, '').trim().toLowerCase());
+    
+    console.log('Found CSV headers:', headers);
+    
+    // Find the image URL column (case insensitive, multiple possible names)
     const imageUrlIndex = headers.findIndex(h => 
-      h === 'featured_image_url' || h === 'image_url' || h === 'featured_image'
+      h === 'featured_image_url' || 
+      h === 'image_url' || 
+      h === 'featured_image' ||
+      h === 'image' ||
+      h === 'featured image url' ||
+      h === 'featuredimageurl' ||
+      h.includes('image') && h.includes('url')
     );
 
     if (imageUrlIndex === -1) {
-      throw new Error('Could not find image URL column. Expected "featured_image_url", "image_url", or "featured_image"');
+      console.error('Available columns:', headers);
+      throw new Error(
+        `Could not find image URL column. Found columns: ${headers.join(', ')}. ` +
+        `Looking for: featured_image_url, image_url, featured_image, or any column containing "image" and "url".`
+      );
     }
+
+    console.log(`Using column "${headers[imageUrlIndex]}" at index ${imageUrlIndex}`);
 
     // Process each row
     for (let i = 1; i < lines.length; i++) {
       const line = lines[i];
       if (!line.trim()) continue;
 
-      // Handle CSV parsing with quoted values
-      const values: string[] = [];
-      let currentValue = '';
-      let insideQuotes = false;
-
-      for (let j = 0; j < line.length; j++) {
-        const char = line[j];
+      try {
+        const values = parseCSVLine(line);
         
-        if (char === '"') {
-          insideQuotes = !insideQuotes;
-        } else if (char === ',' && !insideQuotes) {
-          values.push(currentValue.trim());
-          currentValue = '';
-        } else {
-          currentValue += char;
+        // Get the image URL
+        const imageUrl = values[imageUrlIndex]?.replace(/"/g, '').trim();
+        
+        // Only add valid URLs
+        if (imageUrl && (imageUrl.startsWith('http://') || imageUrl.startsWith('https://'))) {
+          urls.add(imageUrl);
         }
-      }
-      values.push(currentValue.trim()); // Push the last value
-
-      // Get the image URL
-      const imageUrl = values[imageUrlIndex]?.replace(/"/g, '').trim();
-      
-      // Only add valid URLs
-      if (imageUrl && (imageUrl.startsWith('http://') || imageUrl.startsWith('https://'))) {
-        urls.add(imageUrl);
+      } catch (error) {
+        console.warn(`Error parsing line ${i + 1}:`, error);
       }
     }
     
