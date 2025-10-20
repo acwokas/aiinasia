@@ -239,20 +239,37 @@ export default function BulkImport() {
       return [{ type: 'paragraph', content: 'No content available' }];
     }
 
-    // Remove "You may also like" section from the end
-    wpContent = wpContent.replace(/<!-- wp:heading[^>]*-->\s*<h\d[^>]*>You may also like.*$/is, '');
+    // Remove "You may also like" section from the end (including bold markers)
+    wpContent = wpContent.replace(/\*\*You [Mm]ay [Aa]lso [Ll]ike\*\*/gi, '');
+    wpContent = wpContent.replace(/<!-- wp:heading[^>]*-->\s*<h\d[^>]*>You [Mm]ay [Aa]lso [Ll]ike.*$/is, '');
 
     const blocks: any[] = [];
     
-    // Helper function to preserve inline formatting (bold, italic, links)
-    const preserveInlineFormatting = (html: string): string => {
-      return html
-        .replace(/<strong>(.*?)<\/strong>/g, '**$1**')
-        .replace(/<b>(.*?)<\/b>/g, '**$1**')
-        .replace(/<em>(.*?)<\/em>/g, '*$1*')
-        .replace(/<i>(.*?)<\/i>/g, '*$1*')
+    // Helper function to preserve inline formatting (bold, italic, links) but NOT in headings
+    const preserveInlineFormatting = (html: string, isHeading: boolean = false): string => {
+      let result = html;
+      
+      if (!isHeading) {
+        // Only preserve bold/italic for non-headings
+        result = result
+          .replace(/<strong>(.*?)<\/strong>/g, '**$1**')
+          .replace(/<b>(.*?)<\/b>/g, '**$1**')
+          .replace(/<em>(.*?)<\/em>/g, '*$1*')
+          .replace(/<i>(.*?)<\/i>/g, '*$1*');
+      } else {
+        // Strip bold/italic tags from headings completely
+        result = result
+          .replace(/<\/?strong>/g, '')
+          .replace(/<\/?b>/g, '')
+          .replace(/<\/?em>/g, '')
+          .replace(/<\/?i>/g, '');
+      }
+      
+      result = result
         .replace(/<a\s+(?:[^>]*?\s+)?href="([^"]*)"[^>]*>(.*?)<\/a>/g, '[$2]($1)')
         .replace(/<br\s*\/?>/g, '\n');
+      
+      return result;
     };
     
     // Extract all blocks with their positions to maintain order
@@ -269,10 +286,10 @@ export default function BulkImport() {
       }
     }
     
-    // Extract headings
+    // Extract headings (strip bold markers from headings)
     for (const match of wpContent.matchAll(/<!-- wp:heading[^>]*-->\s*<h(\d)[^>]*>(.*?)<\/h\d>\s*<!-- \/wp:heading -->/gs)) {
       const level = parseInt(match[1]);
-      const text = preserveInlineFormatting(match[2]).trim();
+      const text = preserveInlineFormatting(match[2], true).trim().replace(/^\*\*|\*\*$/g, ''); // isHeading=true, strip ** markers
       if (text && text.length > 0) {
         allMatches.push({
           index: match.index!,
@@ -314,6 +331,8 @@ export default function BulkImport() {
     // Extract quotes/blockquotes
     for (const match of wpContent.matchAll(/<!-- wp:quote[^>]*-->\s*<blockquote[^>]*>(.*?)<\/blockquote>\s*<!-- \/wp:quote -->/gs)) {
       const quoteText = match[1]
+        .replace(/<!--\s*wp:paragraph\s*-->/g, '') // Remove WordPress paragraph comment tags
+        .replace(/<!--\s*\/wp:paragraph\s*-->/g, '')
         .replace(/<p[^>]*>/g, '')
         .replace(/<\/p>/g, ' ')
         .replace(/<cite[^>]*>.*?<\/cite>/g, '')
@@ -609,17 +628,21 @@ export default function BulkImport() {
               continue;
             }
 
-            // Get author by name or create default
+            // Get author by name (case-insensitive)
             let authorId = null;
             if (row.author) {
-              // Map AIinASIA to Intelligence Desk
-              const authorName = row.author === 'AIinASIA' ? 'Intelligence Desk' : row.author;
+              // Map AIinASIA (and variations) to Intelligence Desk
+              const authorName = row.author.toLowerCase().includes('alinasia') || 
+                                 row.author.toLowerCase().includes('aiinasia')
+                ? 'Intelligence Desk' 
+                : row.author;
               
-              const { data: author } = await supabase
+              // Case-insensitive author lookup
+              const { data: authors } = await supabase
                 .from("authors")
-                .select("id")
-                .eq("name", authorName)
-                .maybeSingle();
+                .select("id, name");
+              
+              const author = authors?.find(a => a.name.toLowerCase() === authorName.toLowerCase());
               authorId = author?.id;
             }
 
@@ -680,7 +703,10 @@ export default function BulkImport() {
             // Handle categories
             if (row.categories && article) {
               const categoryNames = row.categories.split(',').map((c: string) => c.trim()).filter(Boolean);
-              for (const catName of categoryNames) {
+              let firstCategoryId = null;
+              
+              for (let idx = 0; idx < categoryNames.length; idx++) {
+                const catName = categoryNames[idx];
                 // Try matching by name (case-insensitive) first, then by slug
                 const { data: categories } = await supabase
                   .from("categories")
@@ -692,11 +718,24 @@ export default function BulkImport() {
                 );
                 
                 if (category) {
+                  // Save first category as primary
+                  if (idx === 0) {
+                    firstCategoryId = category.id;
+                  }
+                  
                   await supabase.from("article_categories").insert({
                     article_id: article.id,
                     category_id: category.id,
                   });
                 }
+              }
+              
+              // Set primary category
+              if (firstCategoryId) {
+                await supabase
+                  .from("articles")
+                  .update({ primary_category_id: firstCategoryId })
+                  .eq("id", article.id);
               }
             }
 
