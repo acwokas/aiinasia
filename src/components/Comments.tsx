@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { MessageCircle, User, ChevronDown, Check, X } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface Comment {
@@ -28,6 +29,7 @@ const Comments = ({ articleId }: CommentsProps) => {
   const [authorName, setAuthorName] = useState("");
   const [authorEmail, setAuthorEmail] = useState("");
   const [content, setContent] = useState("");
+  const [isNotRobot, setIsNotRobot] = useState(false);
   const [isOpen, setIsOpen] = useState(true); // Open by default
   const { toast } = useToast();
 
@@ -179,6 +181,7 @@ const Comments = ({ articleId }: CommentsProps) => {
       setAuthorName("");
       setAuthorEmail("");
       setContent("");
+      setIsNotRobot(false);
     } catch (error) {
       toast({
         title: "Failed to submit comment",
@@ -201,60 +204,7 @@ const Comments = ({ articleId }: CommentsProps) => {
       </CollapsibleTrigger>
 
       <CollapsibleContent>
-        {/* Comment Form */}
-        <div className="bg-muted/30 rounded-lg p-6 mb-8">
-        <h3 className="font-semibold text-lg mb-4">Leave a Comment</h3>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid md:grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium mb-2">
-                Name *
-              </label>
-              <Input
-                id="name"
-                value={authorName}
-                onChange={(e) => setAuthorName(e.target.value)}
-                required
-                placeholder="Your name"
-              />
-            </div>
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium mb-2">
-                Email *
-              </label>
-              <Input
-                id="email"
-                type="email"
-                value={authorEmail}
-                onChange={(e) => setAuthorEmail(e.target.value)}
-                required
-                placeholder="your@email.com"
-              />
-              <p className="text-xs text-muted-foreground mt-1">
-                Your email will not be published
-              </p>
-            </div>
-          </div>
-          <div>
-            <label htmlFor="comment" className="block text-sm font-medium mb-2">
-              Comment *
-            </label>
-            <Textarea
-              id="comment"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              required
-              placeholder="Share your thoughts..."
-              className="min-h-[120px]"
-            />
-          </div>
-          <Button type="submit" disabled={submitting}>
-            {submitting ? "Submitting..." : "Post Comment"}
-          </Button>
-        </form>
-      </div>
-
-      {/* Comments List */}
+        {/* Comments List */}
       {loading ? (
         <div className="text-center text-muted-foreground py-8">Loading comments...</div>
       ) : (
@@ -306,15 +256,15 @@ const Comments = ({ articleId }: CommentsProps) => {
             </div>
           )}
 
-          {/* Approved Comments */}
+          {/* Latest Comments */}
           {comments.length === 0 && pendingComments.length === 0 ? (
             <div className="text-center text-muted-foreground py-8">
               <MessageCircle className="h-12 w-12 mx-auto mb-3 opacity-50" />
               <p>No comments yet. Be the first to share your thoughts!</p>
             </div>
           ) : comments.length > 0 && (
-            <div className="space-y-6">
-              {comments.length > 0 && <h3 className="font-semibold text-lg">Approved Comments ({comments.length})</h3>}
+            <div className="space-y-6 mb-8">
+              {comments.length > 0 && <h3 className="font-semibold text-lg">Latest Comments ({comments.length})</h3>}
               {comments.map((comment) => (
                 <div key={comment.id} className="flex gap-4">
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0">
@@ -339,6 +289,73 @@ const Comments = ({ articleId }: CommentsProps) => {
               ))}
             </div>
           )}
+
+          {/* Comment Form */}
+          <div className="bg-muted/30 rounded-lg p-6 mt-8">
+            <h3 className="font-semibold text-lg mb-4">Leave a Comment</h3>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="name" className="block text-sm font-medium mb-2">
+                    Name *
+                  </label>
+                  <Input
+                    id="name"
+                    value={authorName}
+                    onChange={(e) => setAuthorName(e.target.value)}
+                    required
+                    placeholder="Your name"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium mb-2">
+                    Email *
+                  </label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={authorEmail}
+                    onChange={(e) => setAuthorEmail(e.target.value)}
+                    required
+                    placeholder="your@email.com"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Your email will not be published
+                  </p>
+                </div>
+              </div>
+              <div>
+                <label htmlFor="comment" className="block text-sm font-medium mb-2">
+                  Comment *
+                </label>
+                <Textarea
+                  id="comment"
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  required
+                  placeholder="Share your thoughts..."
+                  className="min-h-[120px]"
+                />
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="robot-check"
+                  checked={isNotRobot}
+                  onCheckedChange={(checked) => setIsNotRobot(checked as boolean)}
+                  required
+                />
+                <label
+                  htmlFor="robot-check"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                  I'm not a robot *
+                </label>
+              </div>
+              <Button type="submit" disabled={submitting || !isNotRobot}>
+                {submitting ? "Submitting..." : "Post Comment"}
+              </Button>
+            </form>
+          </div>
         </>
       )}
       </CollapsibleContent>
