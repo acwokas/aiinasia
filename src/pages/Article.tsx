@@ -6,6 +6,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Comments from "@/components/Comments";
 import ArticleCard from "@/components/ArticleCard";
+import TldrSnapshot from "@/components/TldrSnapshot";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Clock, User, Share2, Bookmark, Twitter, Linkedin, Facebook, Instagram, Loader2, ExternalLink, ChevronDown, ChevronUp } from "lucide-react";
@@ -552,6 +553,11 @@ const Article = () => {
                   </p>
                 )}
               </div>
+            )}
+
+            {/* TL;DR Snapshot */}
+            {article.tldr_snapshot && Array.isArray(article.tldr_snapshot) && article.tldr_snapshot.length > 0 && (
+              <TldrSnapshot bullets={article.tldr_snapshot as string[]} />
             )}
 
             {/* Article Content */}

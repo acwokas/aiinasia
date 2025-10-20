@@ -258,6 +258,20 @@ export default function MigrationDashboard() {
 
             <Card>
               <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium">Step 7: TL;DR</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Link to="/admin/generate-tldr">
+                  <Button className="w-full" variant="outline">
+                    <FileText className="mr-2 h-4 w-4" />
+                    Generate TL;DR
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium">Migration Stats</CardTitle>
               </CardHeader>
               <CardContent>

@@ -30,6 +30,10 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
   const [slug, setSlug] = useState(initialData?.slug || "");
   const [excerpt, setExcerpt] = useState(initialData?.excerpt || "");
   const [content, setContent] = useState(initialData?.content || "");
+  const [tldrSnapshot, setTldrSnapshot] = useState<string[]>(
+    Array.isArray(initialData?.tldr_snapshot) ? initialData.tldr_snapshot : []
+  );
+  const [isGeneratingTldr, setIsGeneratingTldr] = useState(false);
   const [articleType, setArticleType] = useState(initialData?.article_type || "article");
   const [status, setStatus] = useState(initialData?.status || "draft");
   const [featuredImage, setFeaturedImage] = useState(initialData?.featured_image_url || "");
@@ -342,6 +346,49 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
     }
   };
 
+  const handleGenerateTldr = async () => {
+    if (!title || !content) {
+      toast({
+        title: "Missing Content",
+        description: "Please add a title and content first",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsGeneratingTldr(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-tldr-snapshot", {
+        body: {
+          articleId: initialData?.id || null,
+          content: content,
+          title: title,
+        },
+      });
+
+      if (error) throw error;
+
+      if (data?.tldr_snapshot) {
+        setTldrSnapshot(data.tldr_snapshot);
+        if (data.content) {
+          setContent(data.content);
+        }
+        toast({
+          title: "Success!",
+          description: "TL;DR Snapshot generated and existing TL;DR removed from content",
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setIsGeneratingTldr(false);
+    }
+  };
+
   const handleSave = () => {
     let scheduledDateTime = null;
     let finalStatus = status;
@@ -372,6 +419,7 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
       slug: slug.replace(/\//g, ''),
       excerpt,
       content,
+      tldr_snapshot: tldrSnapshot,
       article_type: articleType,
       status: finalStatus,
       featured_image_url: featuredImage,
@@ -486,6 +534,49 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
                   placeholder="Brief summary of the article..."
                   rows={3}
                 />
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label>TL;DR Snapshot (3 Bullet Points)</Label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleGenerateTldr}
+                    disabled={isGeneratingTldr || !title || !content}
+                  >
+                    {isGeneratingTldr ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        Generating...
+                      </>
+                    ) : (
+                      "Generate TL;DR"
+                    )}
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Appears below the featured image. Automatically removes existing TL;DR from content.
+                </p>
+                <div className="space-y-2">
+                  {[0, 1, 2].map((index) => (
+                    <div key={index} className="flex gap-2 items-start">
+                      <div className="flex-shrink-0 mt-3">
+                        <div className="w-2 h-2 rounded-full bg-primary" />
+                      </div>
+                      <Input
+                        value={tldrSnapshot[index] || ""}
+                        onChange={(e) => {
+                          const newTldr = [...tldrSnapshot];
+                          newTldr[index] = e.target.value;
+                          setTldrSnapshot(newTldr);
+                        }}
+                        placeholder={`Bullet point ${index + 1}`}
+                      />
+                    </div>
+                  ))}
+                </div>
               </div>
 
               <div className="space-y-4">

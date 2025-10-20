@@ -151,6 +151,7 @@ export type Database = {
           status: Database["public"]["Enums"]["article_status"]
           sticky: boolean | null
           title: string
+          tldr_snapshot: Json | null
           updated_at: string
           updated_by: string | null
           version: number | null
@@ -202,6 +203,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["article_status"]
           sticky?: boolean | null
           title: string
+          tldr_snapshot?: Json | null
           updated_at?: string
           updated_by?: string | null
           version?: number | null
@@ -253,6 +255,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["article_status"]
           sticky?: boolean | null
           title?: string
+          tldr_snapshot?: Json | null
           updated_at?: string
           updated_by?: string | null
           version?: number | null
