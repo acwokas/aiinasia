@@ -26,7 +26,7 @@ Deno.serve(async (req) => {
     // Fetch only draft articles
     const { data: articles, error: fetchError } = await supabaseClient
       .from('articles')
-      .select('id, title, slug, status, featured_on_homepage, published_at')
+      .select('id, title, slug, status, published_at')
       .eq('status', 'draft');
 
     if (fetchError) {
@@ -36,65 +36,100 @@ Deno.serve(async (req) => {
 
     console.log(`Found ${articles?.length || 0} articles to process`);
 
-    let updatedCount = 0;
-    const results = [];
-
-    for (const article of articles || []) {
-      console.log(`Publishing article: ${article.title} (${article.slug})`);
+    // Create a ReadableStream for progress updates
+    const stream = new ReadableStream({
+      async start(controller) {
+        const encoder = new TextEncoder();
         
-      try {
-        const { error: updateError } = await supabaseClient
-          .from('articles')
-          .update({ 
-            status: 'published',
-            featured_on_homepage: true,
-            published_at: article.published_at || new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', article.id);
+        const sendUpdate = (data: any) => {
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`));
+        };
 
-        if (updateError) {
-          console.error(`Error updating article ${article.slug}:`, updateError);
-          results.push({
-            id: article.id,
-            slug: article.slug,
-            status: 'error',
-            error: updateError.message
-          });
-        } else {
-          updatedCount++;
-          results.push({
-            id: article.id,
-            slug: article.slug,
-            status: 'updated'
-          });
+        let updatedCount = 0;
+        const results = [];
+        const total = articles?.length || 0;
+
+        sendUpdate({ type: 'total', count: total });
+
+        for (const article of articles || []) {
+          console.log(`Publishing article: ${article.title} (${article.slug})`);
+          
+          try {
+            const { error: updateError } = await supabaseClient
+              .from('articles')
+              .update({ 
+                status: 'published',
+                published_at: article.published_at || new Date().toISOString(),
+                updated_at: new Date().toISOString()
+              })
+              .eq('id', article.id);
+
+            if (updateError) {
+              console.error(`Error updating article ${article.slug}:`, updateError);
+              results.push({
+                id: article.id,
+                slug: article.slug,
+                status: 'error',
+                error: updateError.message
+              });
+              sendUpdate({ 
+                type: 'error', 
+                article: article.slug,
+                progress: Math.round(((updatedCount + 1) / total) * 100)
+              });
+            } else {
+              updatedCount++;
+              results.push({
+                id: article.id,
+                slug: article.slug,
+                status: 'updated'
+              });
+              sendUpdate({ 
+                type: 'progress', 
+                article: article.slug,
+                count: updatedCount,
+                progress: Math.round((updatedCount / total) * 100)
+              });
+            }
+          } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            console.error(`Error processing article ${article.slug}:`, error);
+            results.push({
+              id: article.id,
+              slug: article.slug,
+              status: 'error',
+              error: errorMessage
+            });
+            sendUpdate({ 
+              type: 'error', 
+              article: article.slug,
+              progress: Math.round(((updatedCount + 1) / total) * 100)
+            });
+          }
         }
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        console.error(`Error processing article ${article.slug}:`, error);
-        results.push({
-          id: article.id,
-          slug: article.slug,
-          status: 'error',
-          error: errorMessage
+
+        console.log(`Published ${updatedCount} articles`);
+
+        sendUpdate({
+          type: 'complete',
+          success: true,
+          message: `Published ${updatedCount} articles`,
+          totalProcessed: total,
+          results: results
         });
-      }
-    }
 
-    console.log(`Published ${updatedCount} articles`);
-
-    return new Response(
-      JSON.stringify({
-        success: true,
-        message: `Published ${updatedCount} articles`,
-        totalProcessed: articles?.length || 0,
-        results: results
-      }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200,
+        controller.close();
       }
-    );
+    });
+
+    return new Response(stream, {
+      headers: { 
+        ...corsHeaders, 
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive'
+      },
+    });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     console.error('Error in publish-all-articles function:', error);

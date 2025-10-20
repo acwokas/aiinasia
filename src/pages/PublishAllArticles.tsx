@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, CheckCircle, XCircle, Home } from "lucide-react";
 import Header from "@/components/Header";
@@ -17,12 +18,19 @@ import {
 
 const PublishAllArticles = () => {
   const [isRunning, setIsRunning] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [currentArticle, setCurrentArticle] = useState("");
+  const [totalArticles, setTotalArticles] = useState(0);
+  const [processedCount, setProcessedCount] = useState(0);
   const [results, setResults] = useState<any>(null);
   const { toast } = useToast();
 
   const handlePublishAll = async () => {
     setIsRunning(true);
     setResults(null);
+    setProgress(0);
+    setProcessedCount(0);
+    setCurrentArticle("");
 
     try {
       const response = await fetch(
@@ -36,16 +44,48 @@ const PublishAllArticles = () => {
         }
       );
 
-      const data = await response.json();
+      if (!response.ok || !response.body) {
+        throw new Error("Failed to start publishing");
+      }
 
-      if (data.success) {
-        setResults(data);
-        toast({
-          title: "Success!",
-          description: data.message,
-        });
-      } else {
-        throw new Error(data.error || "Failed to publish articles");
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n\n");
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          if (line.startsWith("data: ")) {
+            try {
+              const data = JSON.parse(line.slice(6));
+              
+              if (data.type === "total") {
+                setTotalArticles(data.count);
+              } else if (data.type === "progress") {
+                setCurrentArticle(data.article);
+                setProcessedCount(data.count);
+                setProgress(data.progress);
+              } else if (data.type === "error") {
+                setCurrentArticle(data.article);
+                setProgress(data.progress);
+              } else if (data.type === "complete") {
+                setResults(data);
+                toast({
+                  title: "Success!",
+                  description: data.message,
+                });
+              }
+            } catch (e) {
+              console.error("Error parsing SSE:", e);
+            }
+          }
+        }
       }
     } catch (error) {
       console.error("Error publishing articles:", error);
@@ -91,10 +131,25 @@ const PublishAllArticles = () => {
           <CardHeader>
             <CardTitle>Publish All Draft Articles</CardTitle>
             <CardDescription>
-              This will change the status of all draft articles to "published" and make them featured on the homepage. Only articles currently in draft status will be affected.
+              This will change the status of all draft articles to "published". Articles will NOT be automatically featured on the homepage - homepage featuring follows the standard logic based on most recent published articles.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            {isRunning && (
+              <div className="space-y-3 p-4 bg-muted rounded-lg">
+                <div className="flex justify-between text-sm">
+                  <span className="font-medium">Publishing articles...</span>
+                  <span>{processedCount} / {totalArticles}</span>
+                </div>
+                <Progress value={progress} className="h-2" />
+                {currentArticle && (
+                  <p className="text-xs text-muted-foreground">
+                    Current: {currentArticle}
+                  </p>
+                )}
+              </div>
+            )}
+
             <Button 
               onClick={handlePublishAll} 
               disabled={isRunning}
