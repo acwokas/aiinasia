@@ -20,6 +20,7 @@ Deno.serve(async (req) => {
     const { imageUrl, fileName }: DownloadRequest = await req.json();
 
     if (!imageUrl || !fileName) {
+      console.error('Missing required parameters:', { imageUrl: !!imageUrl, fileName: !!fileName });
       return new Response(
         JSON.stringify({ error: 'imageUrl and fileName are required' }),
         { 
@@ -31,28 +32,59 @@ Deno.serve(async (req) => {
 
     console.log(`Downloading image from: ${imageUrl}`);
 
-    // Download the image from the external URL
-    const imageResponse = await fetch(imageUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; ImageMigrationBot/1.0)',
-        'Accept': 'image/*',
-      },
-    });
+    // Download the image from the external URL with timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
 
-    if (!imageResponse.ok) {
-      throw new Error(`Failed to download image: ${imageResponse.status} ${imageResponse.statusText}`);
+    let imageBlob: Blob;
+
+    try {
+      const imageResponse = await fetch(imageUrl, {
+        signal: controller.signal,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (compatible; ImageMigrationBot/1.0)',
+          'Accept': 'image/*',
+        },
+      });
+      clearTimeout(timeoutId);
+
+      if (!imageResponse.ok) {
+        const errorMsg = `Failed to download image: ${imageResponse.status} ${imageResponse.statusText}`;
+        console.error(errorMsg, { url: imageUrl });
+        throw new Error(errorMsg);
+      }
+
+      imageBlob = await imageResponse.blob();
+      console.log(`Downloaded image, size: ${imageBlob.size} bytes, type: ${imageBlob.type}`);
+
+      if (imageBlob.size === 0) {
+        throw new Error('Downloaded image is empty (0 bytes)');
+      }
+    } catch (fetchError) {
+      clearTimeout(timeoutId);
+      if (fetchError instanceof Error && fetchError.name === 'AbortError') {
+        const errorMsg = 'Download timeout - image took too long to fetch';
+        console.error(errorMsg, { url: imageUrl });
+        throw new Error(errorMsg);
+      }
+      throw fetchError;
     }
 
-    const imageBlob = await imageResponse.blob();
-    console.log(`Downloaded image, size: ${imageBlob.size} bytes, type: ${imageBlob.type}`);
-
     // Upload to Supabase Storage
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    
+    if (!supabaseUrl || !supabaseServiceKey) {
+      const errorMsg = 'Missing Supabase environment variables';
+      console.error(errorMsg);
+      throw new Error(errorMsg);
+    }
     
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const filePath = `migrated/${Date.now()}-${fileName}`;
+
+    console.log(`Uploading to storage: ${filePath}`);
 
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('article-images')
@@ -63,7 +95,13 @@ Deno.serve(async (req) => {
       });
 
     if (uploadError) {
-      console.error('Upload error:', uploadError);
+      console.error('Upload error:', { 
+        message: uploadError.message,
+        name: uploadError.name,
+        filePath,
+        blobSize: imageBlob.size,
+        blobType: imageBlob.type
+      });
       throw new Error(`Failed to upload to storage: ${uploadError.message}`);
     }
 
@@ -86,12 +124,18 @@ Deno.serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error in download-and-upload-image:', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      name: error instanceof Error ? error.name : undefined
+    });
+    
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
     return new Response(
       JSON.stringify({ 
         success: false,
-        error: errorMessage 
+        error: errorMessage,
+        details: error instanceof Error ? error.stack : undefined
       }),
       { 
         status: 500,
