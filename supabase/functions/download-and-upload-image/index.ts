@@ -11,43 +11,50 @@ interface DownloadRequest {
 }
 
 function cleanUrl(url: string): string {
-  // Aggressively clean corrupted UTF-8 sequences
-  let cleaned = url
-    // DALL-E corruption patterns
-    .replace(/DALL-[¬ì¨åE]+/g, 'DALL-E')
-    .replace(/¬ì¨åE/g, 'E')
-    .replace(/‚Äö√Ñ√´/g, '-')
-    .replace(/‚Äô/g, "'")
-    .replace(/‚Äù/g, '"')
-    .replace(/‚Äî/g, '-')
-    .replace(/√¢‚Ç¨/g, '')
-    .replace(/‚Ä¶/g, '-')
-    .replace(/Ã¶/g, 'o')
-    .replace(/Ã¤/g, 'a')
-    .replace(/Ã¼/g, 'u')
-    // Remove any remaining non-ASCII characters except in query strings
-    .replace(/[^\x00-\x7F]/g, '-')
-    // Clean up multiple consecutive dashes
-    .replace(/-+/g, '-')
-    // Remove control characters
-    .replace(/[\u0000-\u001F\u007F-\u009F]/g, '');
-  
-  // Try proper URL encoding
   try {
-    const urlObj = new URL(cleaned);
-    // Re-encode the pathname properly
+    const urlObj = new URL(url);
+    // Split path into parts
     const pathParts = urlObj.pathname.split('/');
+    
+    // Encode each part of the path
     const encodedPath = pathParts.map((part, index) => {
       if (index === 0 || !part) return part;
-      return encodeURIComponent(decodeURIComponent(part).replace(/-+/g, '-'));
+      // Keep the part as-is but properly encode it
+      return encodeURIComponent(part);
     }).join('/');
     
     urlObj.pathname = encodedPath;
     return urlObj.toString();
   } catch (e) {
-    console.warn('URL cleaning fallback:', e);
-    return cleaned;
+    console.warn('URL encoding failed:', e);
+    return url;
   }
+}
+
+function createUrlVariants(url: string): string[] {
+  const variants: string[] = [url]; // Original first
+  
+  // Variant 2: Properly encoded version
+  const encoded = cleanUrl(url);
+  if (encoded !== url) {
+    variants.push(encoded);
+  }
+  
+  // Variant 3: Replace corrupted DALL-E patterns
+  const dalleFixed = url
+    .replace(/DALL[^\-E]*E/gi, 'DALLE')
+    .replace(/DALLE/g, 'DALL-E');
+  if (dalleFixed !== url && !variants.includes(dalleFixed)) {
+    variants.push(dalleFixed);
+  }
+  
+  // Variant 4: Encoded DALL-E fix
+  const dalleFixedEncoded = cleanUrl(dalleFixed);
+  if (!variants.includes(dalleFixedEncoded)) {
+    variants.push(dalleFixedEncoded);
+  }
+  
+  return variants;
 }
 
 Deno.serve(async (req) => {
@@ -70,27 +77,21 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Try original URL first (server may have files with corrupted names),
-    // then try cleaned URL as fallback
-    const cleanedUrl = cleanUrl(imageUrl);
+    // Try multiple URL variants to handle corrupted encoding
+    const urlVariants = createUrlVariants(imageUrl);
     console.log(`Original URL: ${imageUrl}`);
-    if (cleanedUrl !== imageUrl) {
-      console.log(`Cleaned URL: ${cleanedUrl}`);
-    }
+    console.log(`Trying ${urlVariants.length} URL variants`);
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 30000);
 
     let imageBlob: Blob | undefined;
     let successfulUrl: string | undefined;
-    const urlsToTry = [imageUrl]; // Try original first
-    if (cleanedUrl !== imageUrl) {
-      urlsToTry.push(cleanedUrl); // Then try cleaned
-    }
 
-    for (const urlToTry of urlsToTry) {
+    for (let i = 0; i < urlVariants.length; i++) {
+      const urlToTry = urlVariants[i];
       try {
-        console.log(`Attempting download from: ${urlToTry}`);
+        console.log(`[${i + 1}/${urlVariants.length}] Trying: ${urlToTry}`);
         const imageResponse = await fetch(urlToTry, {
           signal: controller.signal,
           headers: {
@@ -103,29 +104,30 @@ Deno.serve(async (req) => {
           imageBlob = await imageResponse.blob();
           
           if (imageBlob.size === 0) {
-            console.log(`Downloaded 0 bytes from ${urlToTry}, trying next URL`);
+            console.log(`Downloaded 0 bytes, trying next variant`);
             continue;
           }
           
           successfulUrl = urlToTry;
-          console.log(`Success! Downloaded ${imageBlob.size} bytes from: ${urlToTry}`);
+          console.log(`✓ Success! Downloaded ${imageBlob.size} bytes (variant ${i + 1})`);
           break;
         } else {
-          console.log(`${urlToTry} returned ${imageResponse.status}, trying next URL`);
+          console.log(`✗ HTTP ${imageResponse.status}, trying next variant`);
         }
       } catch (fetchError) {
         if (fetchError instanceof Error && fetchError.name === 'AbortError') {
           clearTimeout(timeoutId);
           throw new Error('Download timeout - image took too long to fetch');
         }
-        console.log(`Error with ${urlToTry}: ${fetchError instanceof Error ? fetchError.message : String(fetchError)}`);
+        console.log(`✗ Error: ${fetchError instanceof Error ? fetchError.message : String(fetchError)}`);
       }
     }
 
     clearTimeout(timeoutId);
 
     if (!imageBlob || !successfulUrl) {
-      throw new Error('Failed to download image from all attempted URLs');
+      console.error('All URL variants failed:', urlVariants);
+      throw new Error(`Failed to download image. Tried ${urlVariants.length} URL variants. Image may not exist on server.`);
     }
 
     // Upload to Supabase Storage
