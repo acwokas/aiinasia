@@ -152,8 +152,22 @@ const Footer = () => {
           <div>
             <h4 className="font-semibold mb-4">AI in ASIA Brief</h4>
             <p className="text-sm text-muted-foreground mb-4">
-              Get weekly insights delivered to your inbox. <Link to="/newsletter" className="text-primary hover:underline">Subscribe here</Link>.
+              Get weekly insights delivered to your inbox.
             </p>
+            <form onSubmit={handleNewsletterSubmit} className="flex gap-2">
+              <Input
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                disabled={isSubmitting}
+                className="flex-1"
+              />
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "..." : "Subscribe"}
+              </Button>
+            </form>
           </div>
         </div>
 
