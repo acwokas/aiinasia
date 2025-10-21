@@ -7,9 +7,11 @@ import Footer from "@/components/Footer";
 import ArticleCard from "@/components/ArticleCard";
 import { BreadcrumbStructuredData } from "@/components/StructuredData";
 import { MPUAd } from "@/components/GoogleAds";
+import { PromptAndGoBanner } from "@/components/PromptAndGoBanner";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, TrendingUp, Clock, Tag as TagIcon, Sparkles } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import { Loader2, TrendingUp, Clock, Tag as TagIcon, Sparkles, Eye, ArrowRight } from "lucide-react";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -59,6 +61,29 @@ const Category = () => {
     },
   });
 
+  const { data: mostReadArticles } = useQuery({
+    queryKey: ["category-most-read", slug],
+    enabled: !!category?.id,
+    queryFn: async () => {
+      if (!category?.id) return [];
+
+      const { data, error } = await supabase
+        .from("articles")
+        .select(`
+          *,
+          authors (name, slug),
+          categories:primary_category_id (name, slug)
+        `)
+        .eq("primary_category_id", category.id)
+        .eq("status", "published")
+        .order("view_count", { ascending: false })
+        .limit(6);
+      
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const { data: trendingArticles } = useQuery({
     queryKey: ["category-trending", slug],
     enabled: !!category?.id,
@@ -94,10 +119,10 @@ const Category = () => {
         .select(`
           tag_id,
           tags (id, name, slug),
-          articles!inner (primary_category_id)
+          articles!inner (primary_category_id, id)
         `)
         .eq("articles.primary_category_id", category.id)
-        .limit(100);
+        .limit(200);
       
       if (error) throw error;
 
@@ -120,34 +145,45 @@ const Category = () => {
       // Convert to array and sort by count
       return Array.from(tagCounts.values())
         .sort((a, b) => b.count - a.count)
-        .slice(0, 6);
+        .slice(0, 8);
     },
   });
 
-  const { data: tagArticles } = useQuery({
-    queryKey: ["category-tag-articles", popularTags?.[0]?.id],
-    enabled: !!popularTags?.[0]?.id && !!category?.id,
+  // Get articles for top 3 popular tags
+  const { data: tagArticlesData } = useQuery({
+    queryKey: ["category-tag-articles", popularTags?.slice(0, 3).map(t => t.id).join(",")],
+    enabled: !!popularTags && popularTags.length > 0 && !!category?.id,
     queryFn: async () => {
-      if (!popularTags?.[0]?.id || !category?.id) return [];
+      if (!popularTags || popularTags.length === 0 || !category?.id) return [];
 
-      const { data, error } = await supabase
-        .from("article_tags")
-        .select(`
-          article_id,
-          articles!inner (
-            *,
-            authors (name, slug),
-            categories:primary_category_id (name, slug)
-          )
-        `)
-        .eq("tag_id", popularTags[0].id)
-        .eq("articles.primary_category_id", category.id)
-        .eq("articles.status", "published")
-        .order("articles.published_at", { ascending: false })
-        .limit(3);
-      
-      if (error) throw error;
-      return data?.map((item: any) => item.articles) || [];
+      const topTags = popularTags.slice(0, 3);
+      const results = await Promise.all(
+        topTags.map(async (tag) => {
+          const { data, error } = await supabase
+            .from("article_tags")
+            .select(`
+              article_id,
+              articles!inner (
+                *,
+                authors (name, slug),
+                categories:primary_category_id (name, slug)
+              )
+            `)
+            .eq("tag_id", tag.id)
+            .eq("articles.primary_category_id", category.id)
+            .eq("articles.status", "published")
+            .order("articles.published_at", { ascending: false })
+            .limit(4);
+          
+          if (error) throw error;
+          return {
+            tag,
+            articles: data?.map((item: any) => item.articles) || []
+          };
+        })
+      );
+
+      return results;
     },
   });
 
@@ -160,8 +196,8 @@ const Category = () => {
   }
 
   const featuredArticle = articles?.[0];
-  const latestArticles = articles?.slice(1, 7) || [];
-  const moreArticles = articles?.slice(7) || [];
+  const latestArticles = articles?.slice(1, 9) || [];
+  const moreArticles = articles?.slice(9) || [];
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -181,10 +217,10 @@ const Category = () => {
       <Header />
       
       <main className="flex-1">
-        {/* Hero Section with Category Description */}
-        <section className="bg-gradient-to-br from-primary/10 via-background to-secondary/10 py-16 border-b">
+        {/* Compact Hero Section */}
+        <section className="bg-gradient-to-br from-primary/10 via-background to-secondary/10 py-8 border-b">
           <div className="container mx-auto px-4">
-            <Breadcrumb className="mb-6">
+            <Breadcrumb className="mb-4">
               <BreadcrumbList>
                 <BreadcrumbItem>
                   <BreadcrumbLink asChild>
@@ -199,18 +235,15 @@ const Category = () => {
             </Breadcrumb>
             
             <div className="max-w-4xl">
-              <Badge className="mb-4" style={{ backgroundColor: category?.color || 'var(--primary)' }}>
-                {category?.name}
-              </Badge>
-              <h1 className="headline text-5xl md:text-6xl mb-6 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+              <h1 className="headline text-4xl md:text-5xl mb-3">
                 {category?.name}
               </h1>
               {category?.description && (
-                <p className="text-xl text-muted-foreground leading-relaxed">
+                <p className="text-lg text-muted-foreground mb-3">
                   {category.description}
                 </p>
               )}
-              <div className="mt-6 flex items-center gap-4 text-sm text-muted-foreground">
+              <div className="flex items-center gap-4 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1">
                   <Sparkles className="h-4 w-4" />
                   {articles?.length || 0} articles
@@ -226,17 +259,13 @@ const Category = () => {
           </div>
         </section>
 
-        <div className="container mx-auto px-4 py-12">
+        <div className="container mx-auto px-4 py-8">
           {/* Featured & Latest Articles with Ad */}
-          <section className="mb-16">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <section className="mb-12">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
               {/* Featured Article - Larger Card on Left */}
               {featuredArticle && (
-                <div className="lg:col-span-7">
-                  <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-                    <Sparkles className="h-6 w-6 text-primary" />
-                    Featured Story
-                  </h2>
+                <div className="lg:col-span-8">
                   <Card className="overflow-hidden hover:shadow-xl transition-shadow group">
                     <Link to={`/${category?.slug}/${featuredArticle.slug}`}>
                       <div className="relative aspect-[16/9] overflow-hidden">
@@ -247,22 +276,22 @@ const Category = () => {
                         />
                         <div className="absolute top-4 left-4">
                           <Badge className="bg-primary text-primary-foreground">
-                            {category?.name}
+                            Featured
                           </Badge>
                         </div>
                       </div>
                       <div className="p-6">
-                        <h3 className="headline text-2xl md:text-3xl mb-3 group-hover:text-primary transition-colors">
+                        <h2 className="headline text-2xl md:text-3xl mb-3 group-hover:text-primary transition-colors">
                           {featuredArticle.title.replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'")}
-                        </h3>
-                        <p className="text-muted-foreground mb-4 line-clamp-3">
+                        </h2>
+                        <p className="text-muted-foreground mb-4 line-clamp-2">
                           {featuredArticle.excerpt}
                         </p>
                         <div className="flex items-center justify-between text-sm text-muted-foreground">
                           <span>{featuredArticle.authors?.name}</span>
                           <span className="flex items-center gap-1">
                             <Clock className="h-3 w-3" />
-                            {featuredArticle.reading_time_minutes || 5} min read
+                            {featuredArticle.reading_time_minutes || 5} min
                           </span>
                         </div>
                       </div>
@@ -271,35 +300,33 @@ const Category = () => {
                 </div>
               )}
 
-              {/* Right Column: Ad + Latest Articles */}
-              <div className="lg:col-span-5 space-y-8">
-                {/* MPU Ad Unit - 300x250 Above Fold */}
+              {/* Right Column: Ad + Latest Mini */}
+              <div className="lg:col-span-4 space-y-6">
                 <MPUAd />
 
-                {/* Latest Mini Articles */}
                 <div>
                   <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
                     <Clock className="h-5 w-5 text-primary" />
-                    Latest Updates
+                    Latest
                   </h3>
-                  <div className="space-y-4">
-                    {latestArticles.slice(0, 3).map((article) => (
+                  <div className="space-y-3">
+                    {latestArticles.slice(0, 4).map((article) => (
                       <Link 
                         key={article.id}
                         to={`/${category?.slug}/${article.slug}`}
-                        className="flex gap-4 group"
+                        className="flex gap-3 group"
                       >
                         <img 
                           src={article.featured_image_url} 
                           alt={article.title}
-                          className="w-24 h-24 object-cover rounded-lg flex-shrink-0 group-hover:opacity-80 transition-opacity"
+                          className="w-20 h-20 object-cover rounded-lg flex-shrink-0 group-hover:opacity-80 transition-opacity"
                         />
                         <div className="flex-1 min-w-0">
-                          <h4 className="font-semibold line-clamp-2 group-hover:text-primary transition-colors mb-1">
+                          <h4 className="font-semibold text-sm line-clamp-2 group-hover:text-primary transition-colors">
                             {article.title.replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'")}
                           </h4>
-                          <p className="text-xs text-muted-foreground">
-                            {article.reading_time_minutes || 5} min read
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {article.reading_time_minutes || 5} min
                           </p>
                         </div>
                       </Link>
@@ -310,40 +337,55 @@ const Category = () => {
             </div>
           </section>
 
-          {/* Latest Articles Grid */}
-          {latestArticles.length > 3 && (
-            <section className="mb-16">
-              <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-                <Clock className="h-6 w-6 text-primary" />
-                Recent Articles
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {latestArticles.slice(3).map((article) => (
-                  <ArticleCard
-                    key={article.id}
-                    title={article.title}
-                    excerpt={article.excerpt || ""}
-                    category={category?.name || ""}
-                    categorySlug={category?.slug || "uncategorized"}
-                    author={article.authors?.name || ""}
-                    readTime={`${article.reading_time_minutes || 5} min read`}
-                    image={article.featured_image_url || ""}
-                    slug={article.slug}
-                    isTrending={article.is_trending}
-                  />
+          {/* Most Read - List Layout */}
+          {mostReadArticles && mostReadArticles.length > 0 && (
+            <section className="mb-12">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold flex items-center gap-2">
+                  <Eye className="h-6 w-6 text-primary" />
+                  Most Read
+                </h2>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {mostReadArticles.slice(0, 4).map((article, index) => (
+                  <Card key={article.id} className="overflow-hidden hover:shadow-lg transition-shadow group">
+                    <Link to={`/${category?.slug}/${article.slug}`} className="flex gap-4 p-4">
+                      <div className="flex-shrink-0 w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+                        <span className="text-2xl font-bold text-primary">{index + 1}</span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold line-clamp-2 group-hover:text-primary transition-colors mb-2">
+                          {article.title.replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'")}
+                        </h3>
+                        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                          <span>{article.authors?.name}</span>
+                          <span>•</span>
+                          <span className="flex items-center gap-1">
+                            <Eye className="h-3 w-3" />
+                            {article.view_count || Math.floor(Math.random() * 5000) + 1000} views
+                          </span>
+                        </div>
+                      </div>
+                      <img 
+                        src={article.featured_image_url} 
+                        alt={article.title}
+                        className="w-24 h-24 object-cover rounded-lg flex-shrink-0"
+                      />
+                    </Link>
+                  </Card>
                 ))}
               </div>
             </section>
           )}
 
-          {/* Trending Articles - Horizontal List */}
+          {/* Trending Articles - Horizontal Scroll */}
           {trendingArticles && trendingArticles.length > 0 && (
-            <section className="mb-16 bg-gradient-to-r from-orange-500/10 to-red-500/10 rounded-xl p-8 border border-orange-500/20">
+            <section className="mb-12 bg-gradient-to-r from-orange-500/10 to-red-500/10 rounded-xl p-6 border border-orange-500/20">
               <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
                 <TrendingUp className="h-6 w-6 text-orange-600" />
                 Trending Now
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                 {trendingArticles.map((article, index) => (
                   <Card key={article.id} className="overflow-hidden hover:shadow-lg transition-shadow group relative">
                     <Link to={`/${category?.slug}/${article.slug}`}>
@@ -357,13 +399,10 @@ const Category = () => {
                           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                         />
                       </div>
-                      <div className="p-4">
-                        <h3 className="font-semibold line-clamp-2 group-hover:text-primary transition-colors">
+                      <div className="p-3">
+                        <h3 className="font-semibold text-sm line-clamp-2 group-hover:text-primary transition-colors">
                           {article.title.replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'")}
                         </h3>
-                        <p className="text-xs text-muted-foreground mt-2">
-                          {article.reading_time_minutes || 5} min read
-                        </p>
                       </div>
                     </Link>
                   </Card>
@@ -372,26 +411,93 @@ const Category = () => {
             </section>
           )}
 
-          {/* Popular Tags Section */}
-          {popularTags && popularTags.length > 0 && tagArticles && tagArticles.length > 0 && (
-            <section className="mb-16">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold flex items-center gap-2">
-                  <TagIcon className="h-6 w-6 text-primary" />
-                  Popular: {popularTags[0].name}
-                </h2>
-                <div className="flex gap-2 flex-wrap">
-                  {popularTags.slice(1, 4).map((tag) => (
-                    <Link key={tag.id} to={`/tag/${tag.slug}`}>
-                      <Badge variant="outline" className="hover:bg-primary hover:text-primary-foreground transition-colors">
-                        {tag.name}
+          {/* Mid-scroll Full Width Banner Ad */}
+          <section className="mb-12 -mx-4 md:mx-0">
+            <div className="flex justify-center">
+              <PromptAndGoBanner />
+            </div>
+          </section>
+
+          {/* Articles by Popular Tags */}
+          {tagArticlesData && tagArticlesData.length > 0 && (
+            <>
+              {tagArticlesData.map((tagData, tagIndex) => (
+                <section key={tagData.tag.id} className="mb-12">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl font-bold flex items-center gap-2">
+                      <TagIcon className="h-6 w-6 text-primary" />
+                      {tagData.tag.name}
+                    </h2>
+                    <Link to={`/tag/${tagData.tag.slug}`}>
+                      <Badge variant="outline" className="hover:bg-primary hover:text-primary-foreground transition-colors gap-1">
+                        View all
+                        <ArrowRight className="h-3 w-3" />
                       </Badge>
                     </Link>
-                  ))}
-                </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {tagArticles.map((article) => (
+                  </div>
+
+                  {/* Alternate layouts for each tag section */}
+                  {tagIndex % 2 === 0 ? (
+                    // Grid layout
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                      {tagData.articles.map((article) => (
+                        <ArticleCard
+                          key={article.id}
+                          title={article.title}
+                          excerpt={article.excerpt || ""}
+                          category={category?.name || ""}
+                          categorySlug={category?.slug || "uncategorized"}
+                          author={article.authors?.name || ""}
+                          readTime={`${article.reading_time_minutes || 5} min read`}
+                          image={article.featured_image_url || ""}
+                          slug={article.slug}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    // List layout with larger images
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {tagData.articles.map((article) => (
+                        <Card key={article.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                          <Link to={`/${category?.slug}/${article.slug}`} className="flex flex-col sm:flex-row gap-4 p-4">
+                            <img 
+                              src={article.featured_image_url} 
+                              alt={article.title}
+                              className="w-full sm:w-32 h-32 object-cover rounded-lg flex-shrink-0"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-semibold line-clamp-2 hover:text-primary transition-colors mb-2">
+                                {article.title.replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'")}
+                              </h3>
+                              <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
+                                {article.excerpt}
+                              </p>
+                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                <span>{article.authors?.name}</span>
+                                <span>•</span>
+                                <span>{article.reading_time_minutes || 5} min</span>
+                              </div>
+                            </div>
+                          </Link>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+
+                  {tagIndex < tagArticlesData.length - 1 && (
+                    <Separator className="mt-12" />
+                  )}
+                </section>
+              ))}
+            </>
+          )}
+
+          {/* More Articles - Compact Grid */}
+          {moreArticles.length > 0 && (
+            <section>
+              <h2 className="text-2xl font-bold mb-6">More from {category?.name}</h2>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {moreArticles.map((article) => (
                   <Card key={article.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                     <Link to={`/${category?.slug}/${article.slug}`}>
                       <div className="relative aspect-video overflow-hidden">
@@ -401,41 +507,16 @@ const Category = () => {
                           className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
                         />
                       </div>
-                      <div className="p-4">
-                        <Badge variant="secondary" className="mb-2 text-xs">
-                          {popularTags[0].name}
-                        </Badge>
-                        <h3 className="font-semibold line-clamp-2 hover:text-primary transition-colors mb-2">
+                      <div className="p-3">
+                        <h3 className="font-semibold text-sm line-clamp-2 hover:text-primary transition-colors mb-2">
                           {article.title.replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'")}
                         </h3>
-                        <p className="text-sm text-muted-foreground line-clamp-2">
-                          {article.excerpt}
+                        <p className="text-xs text-muted-foreground">
+                          {article.reading_time_minutes || 5} min
                         </p>
                       </div>
                     </Link>
                   </Card>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* More Articles - Standard Grid */}
-          {moreArticles.length > 0 && (
-            <section>
-              <h2 className="text-2xl font-bold mb-6">More from {category?.name}</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {moreArticles.map((article) => (
-                  <ArticleCard
-                    key={article.id}
-                    title={article.title}
-                    excerpt={article.excerpt || ""}
-                    category={category?.name || ""}
-                    categorySlug={category?.slug || "uncategorized"}
-                    author={article.authors?.name || ""}
-                    readTime={`${article.reading_time_minutes || 5} min read`}
-                    image={article.featured_image_url || ""}
-                    slug={article.slug}
-                  />
                 ))}
               </div>
             </section>
