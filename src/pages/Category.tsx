@@ -195,9 +195,45 @@ const Category = () => {
     );
   }
 
+  // Fetch featured voices (authors) for Voices category
+  const { data: featuredVoices } = useQuery({
+    queryKey: ["featured-voices", category?.slug],
+    enabled: category?.slug === "voices" && !!category?.id,
+    queryFn: async () => {
+      if (!category?.id) return [];
+
+      // Get all articles in the Voices category with authors
+      const { data, error } = await supabase
+        .from("articles")
+        .select(`
+          author_id,
+          authors (id, name, slug, bio, avatar_url, job_title, article_count)
+        `)
+        .eq("primary_category_id", category.id)
+        .eq("status", "published")
+        .not("author_id", "is", null);
+
+      if (error) throw error;
+
+      // Get unique authors
+      const uniqueAuthors = new Map();
+      data?.forEach((article: any) => {
+        if (article.authors && !uniqueAuthors.has(article.authors.id)) {
+          uniqueAuthors.set(article.authors.id, article.authors);
+        }
+      });
+
+      // Sort by article count
+      return Array.from(uniqueAuthors.values())
+        .sort((a, b) => (b.article_count || 0) - (a.article_count || 0))
+        .slice(0, 8);
+    },
+  });
+
   const featuredArticle = articles?.[0];
-  const latestArticles = articles?.slice(1, 9) || [];
-  const moreArticles = articles?.slice(9) || [];
+  const secondFeaturedArticle = articles?.[1];
+  const latestArticles = articles?.slice(2, 10) || [];
+  const moreArticles = articles?.slice(10) || [];
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -260,6 +296,48 @@ const Category = () => {
         </section>
 
         <div className="container mx-auto px-4 py-8">
+          {/* Voices Category - Featured Authors Section */}
+          {category?.slug === "voices" && featuredVoices && featuredVoices.length > 0 && (
+            <section className="mb-12">
+              <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+                <Sparkles className="h-6 w-6 text-primary" />
+                Featured Voices
+              </h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+                {featuredVoices.map((author) => (
+                  <Link
+                    key={author.id}
+                    to={`/author/${author.slug}`}
+                    className="group"
+                  >
+                    <div className="flex flex-col items-center text-center">
+                      {author.avatar_url ? (
+                        <img
+                          src={author.avatar_url}
+                          alt={author.name}
+                          className="w-20 h-20 rounded-full object-cover mb-3 ring-2 ring-border group-hover:ring-primary transition-all"
+                        />
+                      ) : (
+                        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-secondary mb-3 ring-2 ring-border group-hover:ring-primary transition-all" />
+                      )}
+                      <h3 className="font-semibold text-sm group-hover:text-primary transition-colors line-clamp-2">
+                        {author.name}
+                      </h3>
+                      {author.job_title && (
+                        <p className="text-xs text-muted-foreground line-clamp-1 mt-1">
+                          {author.job_title}
+                        </p>
+                      )}
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {author.article_count || 0} articles
+                      </p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
+
           {/* Featured & Latest Articles with Ad */}
           <section className="mb-12">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -336,6 +414,56 @@ const Category = () => {
               </div>
             </div>
           </section>
+
+          {/* Second Featured Article - Horizontal Layout */}
+          {secondFeaturedArticle && (
+            <section className="mb-12">
+              <Card className="overflow-hidden hover:shadow-xl transition-shadow group">
+                <Link to={`/${category?.slug}/${secondFeaturedArticle.slug}`} className="flex flex-col md:flex-row gap-0">
+                  <div className="md:w-2/5 relative aspect-video md:aspect-auto overflow-hidden">
+                    <img 
+                      src={secondFeaturedArticle.featured_image_url} 
+                      alt={secondFeaturedArticle.title}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  </div>
+                  <div className="md:w-3/5 p-6 md:p-8 flex flex-col justify-center">
+                    <Badge className="w-fit mb-3 bg-secondary text-secondary-foreground">
+                      Editor's Pick
+                    </Badge>
+                    <h2 className="headline text-2xl md:text-3xl mb-4 group-hover:text-primary transition-colors">
+                      {secondFeaturedArticle.title.replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'")}
+                    </h2>
+                    <p className="text-muted-foreground mb-4 line-clamp-3">
+                      {secondFeaturedArticle.excerpt}
+                    </p>
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                      <span className="flex items-center gap-2">
+                        {secondFeaturedArticle.authors?.name}
+                      </span>
+                      <span>•</span>
+                      <span className="flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        {secondFeaturedArticle.reading_time_minutes || 5} min read
+                      </span>
+                      {secondFeaturedArticle.published_at && (
+                        <>
+                          <span>•</span>
+                          <span>
+                            {new Date(secondFeaturedArticle.published_at).toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            })}
+                          </span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </Link>
+              </Card>
+            </section>
+          )}
 
           {/* Most Read - List Layout */}
           {mostReadArticles && mostReadArticles.length > 0 && (
