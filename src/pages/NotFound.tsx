@@ -114,8 +114,8 @@ const NotFound = () => {
               <Link to="/category/create" className="block text-muted-foreground hover:text-primary transition-colors py-2">
                 AI Tools & Create
               </Link>
-              <Link to="/category/live" className="block text-muted-foreground hover:text-primary transition-colors py-2">
-                Live Events
+              <Link to="/category/life" className="block text-muted-foreground hover:text-primary transition-colors py-2">
+                Life Events
               </Link>
             </div>
           </div>

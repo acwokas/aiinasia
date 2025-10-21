@@ -29,7 +29,7 @@ const CategoryMapper = () => {
   // Category mapping rules
   const categoryMap: Record<string, string> = {
     'News': 'News',
-    'Life': 'Live',
+    'Life': 'Life',
     'Business': 'Business',
     'Opinion': 'Voices',
     'Tools': 'Create',
@@ -198,7 +198,7 @@ const CategoryMapper = () => {
                   <h3 className="font-semibold mb-2">Category Mappings:</h3>
                   <ul className="space-y-1">
                     <li>News &rarr; News</li>
-                    <li>Life &rarr; Live</li>
+                    <li>Life &rarr; Life</li>
                     <li>Business &rarr; Business</li>
                     <li>Opinion &rarr; Voices</li>
                     <li>Tools &rarr; Create</li>
