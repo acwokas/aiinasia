@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -53,7 +54,23 @@ serve(async (req) => {
       );
     }
 
-    const { articleId, batchMode } = await req.json();
+    // Validate input
+    const requestSchema = z.object({
+      articleId: z.string().uuid(),
+      batchMode: z.boolean().optional().default(false)
+    });
+
+    const body = await req.json();
+    const validationResult = requestSchema.safeParse(body);
+    
+    if (!validationResult.success) {
+      return new Response(
+        JSON.stringify({ error: "Invalid input", details: validationResult.error.errors }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const { articleId, batchMode } = validationResult.data;
 
     // Get article details
     const { data: article, error: articleError } = await supabase
