@@ -215,18 +215,19 @@ const Category = () => {
 
       if (error) throw error;
 
-      // Get unique authors
+      // Get unique authors, excluding Intelligence Desk
       const uniqueAuthors = new Map();
       data?.forEach((article: any) => {
-        if (article.authors && !uniqueAuthors.has(article.authors.id)) {
+        if (article.authors && 
+            !uniqueAuthors.has(article.authors.id) &&
+            article.authors.name !== "Intelligence Desk") {
           uniqueAuthors.set(article.authors.id, article.authors);
         }
       });
 
-      // Sort by article count
+      // Sort by article count and show all authors (no limit)
       return Array.from(uniqueAuthors.values())
-        .sort((a, b) => (b.article_count || 0) - (a.article_count || 0))
-        .slice(0, 8);
+        .sort((a, b) => (b.article_count || 0) - (a.article_count || 0));
     },
   });
 
