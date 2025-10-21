@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -141,7 +142,7 @@ const NewsletterPopup = () => {
             Join <span className="text-primary">10,000+</span> AI Builders
           </h2>
           <p className="text-muted-foreground">
-            Get the AI in Asia Brief - weekly insights on AI innovation across Asia.
+            Get the AI in Asia Brief - weekly insights on AI innovation across Asia. <Link to="/newsletter" className="text-primary hover:underline">Subscribe here</Link>.
           </p>
         </div>
 
@@ -159,7 +160,7 @@ const NewsletterPopup = () => {
             {isSubmitting ? "Subscribing..." : "Subscribe Now"}
           </Button>
           <p className="text-xs text-center text-muted-foreground">
-            No spam. Unsubscribe anytime. We respect your privacy.
+            No spam. <Link to="/newsletter" className="text-primary hover:underline">Unsubscribe</Link> anytime. We respect your privacy.
           </p>
         </form>
       </div>

@@ -633,19 +633,9 @@ const Index = () => {
             <p className="text-lg mb-8 opacity-90">
               Join 10,000+ professionals getting the AI in ASIA Brief every week.
             </p>
-            <form onSubmit={handleNewsletterSignup} className="flex gap-4 max-w-md mx-auto">
-              <Input
-                type="email"
-                placeholder="Your email address"
-                value={newsletterEmail}
-                onChange={(e) => setNewsletterEmail(e.target.value)}
-                required
-                className="flex-1 bg-white text-foreground"
-              />
-              <Button type="submit" variant="secondary" size="lg" disabled={isSubmitting}>
-                {isSubmitting ? "Subscribing..." : "Subscribe"}
-              </Button>
-            </form>
+            <Button asChild variant="secondary" size="lg">
+              <Link to="/newsletter">Subscribe Now</Link>
+            </Button>
           </div>
         </section>
       </main>

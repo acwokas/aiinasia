@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import Header from '@/components/Header';
@@ -907,7 +907,7 @@ const Profile = () => {
                     htmlFor="edit-newsletter"
                     className="text-sm cursor-pointer"
                   >
-                    Subscribe to weekly newsletter
+                    <Link to="/newsletter" className="text-primary hover:underline">Subscribe</Link> to weekly newsletter
                   </label>
                 </div>
               </div>

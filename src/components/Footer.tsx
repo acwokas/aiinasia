@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
@@ -151,22 +152,8 @@ const Footer = () => {
           <div>
             <h4 className="font-semibold mb-4">AI in ASIA Brief</h4>
             <p className="text-sm text-muted-foreground mb-4">
-              Get weekly insights delivered to your inbox.
+              Get weekly insights delivered to your inbox. <Link to="/newsletter" className="text-primary hover:underline">Subscribe here</Link>.
             </p>
-            <form onSubmit={handleNewsletterSubmit} className="flex gap-2">
-              <Input
-                type="email"
-                placeholder="Your email"
-                className="flex-1"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                maxLength={255}
-                required
-              />
-              <Button variant="default" disabled={isSubmitting}>
-                {isSubmitting ? "..." : "Join"}
-              </Button>
-            </form>
           </div>
         </div>
 

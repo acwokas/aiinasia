@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -325,7 +325,7 @@ const Auth = () => {
                         htmlFor="newsletter"
                         className="text-sm text-muted-foreground leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
                       >
-                        Subscribe to our newsletter for weekly AI insights
+                        <Link to="/newsletter" className="text-primary hover:underline">Subscribe</Link> to our newsletter for weekly AI insights
                       </label>
                     </div>
                     <div className="flex gap-2">

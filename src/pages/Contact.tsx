@@ -5,6 +5,7 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Mail, MapPin, Phone } from "lucide-react";
@@ -40,6 +41,7 @@ const contactSchema = z.object({
 const Contact = () => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [subscribeNewsletter, setSubscribeNewsletter] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -68,12 +70,30 @@ const Contact = () => {
 
       if (error) throw error;
 
+      // Handle newsletter subscription if checked
+      if (subscribeNewsletter) {
+        const { data: existing } = await supabase
+          .from("newsletter_subscribers")
+          .select("id")
+          .eq("email", validatedData.email)
+          .maybeSingle();
+
+        if (!existing) {
+          await supabase
+            .from("newsletter_subscribers")
+            .insert({ email: validatedData.email });
+        }
+      }
+
       toast({
         title: "Message sent",
-        description: "We'll get back to you within 48 hours.",
+        description: subscribeNewsletter 
+          ? "We'll get back to you within 48 hours. You've also been subscribed to our newsletter!"
+          : "We'll get back to you within 48 hours.",
       });
       
       (e.target as HTMLFormElement).reset();
+      setSubscribeNewsletter(false);
     } catch (error) {
       if (error instanceof z.ZodError) {
         toast({
@@ -209,6 +229,20 @@ const Contact = () => {
                   placeholder="Tell us more..."
                   className="min-h-[150px]"
                 />
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="newsletter" 
+                  checked={subscribeNewsletter}
+                  onCheckedChange={(checked) => setSubscribeNewsletter(checked as boolean)}
+                />
+                <label
+                  htmlFor="newsletter"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                  Subscribe to our newsletter for weekly AI insights
+                </label>
               </div>
               
               <Button type="submit" className="w-full" disabled={isSubmitting}>

@@ -37,6 +37,7 @@ import AssignCategories from "./pages/AssignCategories";
 import FixBrokenImage from "./pages/FixBrokenImage";
 import NotFound from "./pages/NotFound";
 import Events from "./pages/Events";
+import Newsletter from "./pages/Newsletter";
 import NewsletterPopup from "./components/NewsletterPopup";
 import ScoutChatbot from "./components/ScoutChatbot";
 import GoogleAnalytics from "./components/GoogleAnalytics";
@@ -75,6 +76,7 @@ const App = () => (
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/events" element={<Events />} />
+            <Route path="/newsletter" element={<Newsletter />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/cookie-policy" element={<CookiePolicy />} />

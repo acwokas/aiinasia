@@ -71,7 +71,7 @@ const About = () => {
           <ul className="space-y-2">
             <li><strong>Sign Up (20-50+ points)</strong> – Create your account and complete your profile to earn bonus points</li>
             <li><strong>Read Articles (5 points)</strong> – Stay informed and earn points for every article you read</li>
-            <li><strong>Subscribe to Newsletter (25 points)</strong> – Never miss important AI news and earn the Newsletter Insider badge</li>
+            <li><strong><Link to="/newsletter" className="text-primary hover:underline">Subscribe</Link> to Newsletter (25 points)</strong> – Never miss important AI news and earn the Newsletter Insider badge</li>
             <li><strong>Complete Your Profile</strong> – Add your interests, company details, and profile picture for extra points</li>
             <li><strong>Engage with Content</strong> – Comment, share, and participate in the community</li>
           </ul>
