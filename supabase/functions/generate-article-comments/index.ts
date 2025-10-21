@@ -26,7 +26,7 @@ serve(async (req) => {
     // Get article details
     const { data: article, error: articleError } = await supabase
       .from("articles")
-      .select("id, title, excerpt, content")
+      .select("id, title, excerpt, content, published_at")
       .eq("id", articleId)
       .single();
 
@@ -130,14 +130,41 @@ ${article.excerpt || ""}`;
     const parsedArgs = JSON.parse(toolCall.function.arguments);
     const comments = parsedArgs.comments;
 
+    // Calculate realistic comment timestamps based on article publication date
+    const publishedAt = new Date(article.published_at || Date.now());
+    const now = new Date();
+    const daysSincePublished = Math.floor((now.getTime() - publishedAt.getTime()) / (1000 * 60 * 60 * 24));
+    
     // Insert comments
-    const commentsToInsert = comments.map((content: string, index: number) => ({
-      article_id: articleId,
-      content: content,
-      author_name: shuffledNames[index],
-      approved: true, // Auto-approve
-      created_at: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString() // Random time within last 7 days
-    }));
+    const commentsToInsert = comments.map((content: string, index: number) => {
+      // Spread comments over time: 
+      // - First few days: 40% of comments
+      // - First month: 30% of comments  
+      // - Rest spread over remaining time: 30% of comments
+      let daysAfterPublish: number;
+      const rand = Math.random();
+      
+      if (rand < 0.4) {
+        // 40% in first 3 days
+        daysAfterPublish = Math.random() * Math.min(3, daysSincePublished);
+      } else if (rand < 0.7) {
+        // 30% in first 30 days
+        daysAfterPublish = 3 + (Math.random() * Math.min(27, Math.max(0, daysSincePublished - 3)));
+      } else {
+        // 30% spread over remaining time
+        daysAfterPublish = 30 + (Math.random() * Math.max(0, daysSincePublished - 30));
+      }
+      
+      const commentDate = new Date(publishedAt.getTime() + daysAfterPublish * 24 * 60 * 60 * 1000);
+      
+      return {
+        article_id: articleId,
+        content: content,
+        author_name: shuffledNames[index],
+        approved: true, // Auto-approve
+        created_at: commentDate.toISOString()
+      };
+    });
 
     const { error: insertError } = await supabase
       .from("comments")
