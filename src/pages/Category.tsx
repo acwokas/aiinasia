@@ -187,14 +187,6 @@ const Category = () => {
     },
   });
 
-  if (categoryLoading || articlesLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
   // Fetch featured voices (authors) for Voices category
   const { data: featuredVoices } = useQuery({
     queryKey: ["featured-voices", category?.slug],
@@ -230,6 +222,14 @@ const Category = () => {
         .sort((a, b) => (b.article_count || 0) - (a.article_count || 0));
     },
   });
+
+  if (categoryLoading || articlesLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   const featuredArticle = articles?.[0];
   const secondFeaturedArticle = articles?.[1];
