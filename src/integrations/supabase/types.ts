@@ -74,6 +74,74 @@ export type Database = {
           },
         ]
       }
+      article_recommendations: {
+        Row: {
+          article_id: string
+          created_at: string
+          id: string
+          reason: string | null
+          score: number
+          user_id: string
+        }
+        Insert: {
+          article_id: string
+          created_at?: string
+          id?: string
+          reason?: string | null
+          score?: number
+          user_id: string
+        }
+        Update: {
+          article_id?: string
+          created_at?: string
+          id?: string
+          reason?: string | null
+          score?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "article_recommendations_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      article_series: {
+        Row: {
+          cover_image_url: string | null
+          created_at: string
+          description: string | null
+          display_order: number | null
+          id: string
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       article_tags: {
         Row: {
           article_id: string
@@ -133,6 +201,7 @@ export type Database = {
           focus_keyphrase: string | null
           id: string
           is_launch_article: boolean | null
+          is_trending: boolean | null
           keyphrase_synonyms: string | null
           like_count: number | null
           meta_description: string | null
@@ -147,6 +216,9 @@ export type Database = {
           review_rating: number | null
           scheduled_for: string | null
           seo_title: string | null
+          series_id: string | null
+          series_part: number | null
+          series_total: number | null
           slug: string
           status: Database["public"]["Enums"]["article_status"]
           sticky: boolean | null
@@ -185,6 +257,7 @@ export type Database = {
           focus_keyphrase?: string | null
           id?: string
           is_launch_article?: boolean | null
+          is_trending?: boolean | null
           keyphrase_synonyms?: string | null
           like_count?: number | null
           meta_description?: string | null
@@ -199,6 +272,9 @@ export type Database = {
           review_rating?: number | null
           scheduled_for?: string | null
           seo_title?: string | null
+          series_id?: string | null
+          series_part?: number | null
+          series_total?: number | null
           slug: string
           status?: Database["public"]["Enums"]["article_status"]
           sticky?: boolean | null
@@ -237,6 +313,7 @@ export type Database = {
           focus_keyphrase?: string | null
           id?: string
           is_launch_article?: boolean | null
+          is_trending?: boolean | null
           keyphrase_synonyms?: string | null
           like_count?: number | null
           meta_description?: string | null
@@ -251,6 +328,9 @@ export type Database = {
           review_rating?: number | null
           scheduled_for?: string | null
           seo_title?: string | null
+          series_id?: string | null
+          series_part?: number | null
+          series_total?: number | null
           slug?: string
           status?: Database["public"]["Enums"]["article_status"]
           sticky?: boolean | null
@@ -274,6 +354,13 @@ export type Database = {
             columns: ["primary_category_id"]
             isOneToOne: false
             referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "articles_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "article_series"
             referencedColumns: ["id"]
           },
         ]
@@ -961,6 +1048,10 @@ export type Database = {
       }
       update_streak: {
         Args: { _user_id: string }
+        Returns: undefined
+      }
+      update_trending_articles: {
+        Args: Record<PropertyKey, never>
         Returns: undefined
       }
     }

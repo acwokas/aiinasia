@@ -15,6 +15,7 @@ import { TrendingUp, Users, Calendar, Loader2, ExternalLink } from "lucide-react
 import { useToast } from "@/hooks/use-toast";
 import { PromptAndGoBanner } from "@/components/PromptAndGoBanner";
 import { BusinessInAByteAd } from "@/components/BusinessInAByteAd";
+import RecommendedArticles from "@/components/RecommendedArticles";
 
 const Index = () => {
   const [newsletterEmail, setNewsletterEmail] = useState("");
@@ -641,6 +642,9 @@ const Index = () => {
             )}
           </div>
         </section>
+
+        {/* Recommended Articles */}
+        <RecommendedArticles />
 
         {/* Newsletter CTA */}
         <section id="newsletter" className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground py-16">

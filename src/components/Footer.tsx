@@ -146,6 +146,7 @@ const Footer = () => {
               <li><a href="/about" className="hover:text-primary transition-colors">About Us</a></li>
               <li><a href="/contact" className="hover:text-primary transition-colors">Contact</a></li>
               <li><a href="/contact" className="hover:text-primary transition-colors">Advertise</a></li>
+              <li><a href="https://ppvifagplcdjpdpqknzt.supabase.co/functions/v1/generate-rss" className="hover:text-primary transition-colors" target="_blank" rel="noopener noreferrer">RSS Feed</a></li>
             </ul>
           </div>
 
