@@ -105,10 +105,10 @@ const MigrateCategoryUrls = () => {
         }
       }
 
-      // Update url_mappings table
+      // Update url_mappings table and old WordPress redirects
       const { data: urlMappings } = await supabase
         .from("url_mappings")
-        .select("id, article_id, old_slug, new_slug");
+        .select("id, article_id, old_slug, new_slug, old_url");
 
       if (urlMappings && urlMappings.length > 0) {
         for (const mapping of urlMappings) {
@@ -118,10 +118,40 @@ const MigrateCategoryUrls = () => {
               const categorySlug = (article.categories as any)?.slug || "uncategorized";
               const newUrl = `/${categorySlug}/${mapping.new_slug}`;
 
+              // Update url_mapping
               await supabase
                 .from("url_mappings")
-                .update({ new_url: newUrl })
+                .update({ 
+                  new_url: newUrl,
+                  redirect_created: true 
+                })
                 .eq("id", mapping.id);
+
+              // Update existing redirect from old WordPress URL to point to new category URL
+              if (mapping.old_slug) {
+                const { data: existingRedirect } = await supabase
+                  .from("redirects")
+                  .select("id")
+                  .eq("from_path", `/${mapping.old_slug}`)
+                  .maybeSingle();
+
+                if (existingRedirect) {
+                  // Update existing redirect to new category URL
+                  await supabase
+                    .from("redirects")
+                    .update({ to_path: newUrl })
+                    .eq("id", existingRedirect.id);
+                } else {
+                  // Create new redirect from old WordPress URL if it doesn't exist
+                  await supabase
+                    .from("redirects")
+                    .insert({
+                      from_path: `/${mapping.old_slug}`,
+                      to_path: newUrl,
+                      status_code: 301,
+                    });
+                }
+              }
 
               setStats((prev) => ({
                 ...prev,
