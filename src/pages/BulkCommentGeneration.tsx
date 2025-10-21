@@ -6,8 +6,18 @@ import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Home, MessageSquare, CheckCircle } from "lucide-react";
+import { Loader2, Home, MessageSquare, CheckCircle, RotateCcw } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const BulkCommentGeneration = () => {
   const navigate = useNavigate();
@@ -17,6 +27,7 @@ const BulkCommentGeneration = () => {
   const [processedCount, setProcessedCount] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
   const [results, setResults] = useState<any[]>([]);
+  const [showRegenerateDialog, setShowRegenerateDialog] = useState(false);
 
   // Check admin access
   const { data: isAdmin, isLoading: checkingAdmin } = useQuery({
@@ -129,6 +140,86 @@ const BulkCommentGeneration = () => {
     });
   };
 
+  const regenerateAllComments = async () => {
+    setShowRegenerateDialog(false);
+
+    // Get all published articles
+    const { data: allArticles, error } = await supabase
+      .from("articles")
+      .select("id, title")
+      .eq("status", "published");
+
+    if (error || !allArticles || allArticles.length === 0) {
+      toast({
+        title: "Error",
+        description: "Could not fetch articles",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsGenerating(true);
+    setProgress(0);
+    setProcessedCount(0);
+    setTotalCount(allArticles.length);
+    setResults([]);
+
+    const newResults = [];
+
+    for (let i = 0; i < allArticles.length; i++) {
+      const article = allArticles[i];
+      
+      try {
+        // Delete existing comments for this article
+        await supabase
+          .from("comments")
+          .delete()
+          .eq("article_id", article.id);
+
+        // Generate new comments
+        const { data, error } = await supabase.functions.invoke("generate-article-comments", {
+          body: { articleId: article.id, batchMode: true },
+        });
+
+        if (error) throw error;
+
+        newResults.push({
+          articleId: article.id,
+          title: article.title,
+          success: true,
+          commentsAdded: data.commentsAdded,
+        });
+
+        toast({
+          title: `Regenerated comments: ${article.title}`,
+          description: `${data.commentsAdded} comments generated`,
+        });
+
+      } catch (error) {
+        console.error("Error regenerating comments:", error);
+        newResults.push({
+          articleId: article.id,
+          title: article.title,
+          success: false,
+          error: error instanceof Error ? error.message : "Unknown error",
+        });
+      }
+
+      setProcessedCount(i + 1);
+      setProgress(((i + 1) / allArticles.length) * 100);
+      setResults(newResults);
+
+      // Small delay to avoid rate limiting
+      await new Promise(resolve => setTimeout(resolve, 2000));
+    }
+
+    setIsGenerating(false);
+    toast({
+      title: "Regeneration complete",
+      description: `Processed ${allArticles.length} articles`,
+    });
+  };
+
   if (checkingAdmin || loadingArticles) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -187,23 +278,35 @@ const BulkCommentGeneration = () => {
                 </div>
               )}
 
-              <Button 
-                onClick={generateComments}
-                disabled={isGenerating || !eligibleArticles || eligibleArticles.length === 0}
-                size="lg"
-              >
-                {isGenerating ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Generating Comments...
-                  </>
-                ) : (
-                  <>
-                    <MessageSquare className="h-4 w-4 mr-2" />
-                    Generate Comments for All Articles
-                  </>
-                )}
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Button 
+                  onClick={generateComments}
+                  disabled={isGenerating || !eligibleArticles || eligibleArticles.length === 0}
+                  size="lg"
+                >
+                  {isGenerating ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Generating Comments...
+                    </>
+                  ) : (
+                    <>
+                      <MessageSquare className="h-4 w-4 mr-2" />
+                      Generate Comments for All Articles
+                    </>
+                  )}
+                </Button>
+
+                <Button 
+                  onClick={() => setShowRegenerateDialog(true)}
+                  disabled={isGenerating}
+                  size="lg"
+                  variant="destructive"
+                >
+                  <RotateCcw className="h-4 w-4 mr-2" />
+                  Regenerate ALL Comments
+                </Button>
+              </div>
 
               {results.length > 0 && (
                 <div className="mt-6 space-y-2">
@@ -244,6 +347,24 @@ const BulkCommentGeneration = () => {
           </CardContent>
         </Card>
       </main>
+
+      <AlertDialog open={showRegenerateDialog} onOpenChange={setShowRegenerateDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Regenerate ALL Comments?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will delete ALL existing comments on ALL published articles and generate new ones. 
+              This action cannot be undone. Are you sure you want to proceed?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={regenerateAllComments} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Yes, Regenerate All
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
