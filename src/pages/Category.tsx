@@ -1,9 +1,11 @@
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Helmet } from "react-helmet";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ArticleCard from "@/components/ArticleCard";
+import { BreadcrumbStructuredData } from "@/components/StructuredData";
 import { Loader2 } from "lucide-react";
 import {
   Breadcrumb,
@@ -64,6 +66,19 @@ const Category = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <Helmet>
+        <title>{category?.name} - AI News & Insights | AI in ASIA</title>
+        <meta name="description" content={category?.description || `Explore the latest ${category?.name} articles, news, and insights on AI in ASIA. Expert coverage of artificial intelligence developments across Asia.`} />
+        <link rel="canonical" href={`https://aiinasia.com/category/${category?.slug}`} />
+      </Helmet>
+
+      <BreadcrumbStructuredData
+        items={[
+          { name: 'Home', url: 'https://aiinasia.com' },
+          { name: category?.name || '', url: `https://aiinasia.com/category/${category?.slug}` }
+        ]}
+      />
+
       <Header />
       
       <main className="flex-1">

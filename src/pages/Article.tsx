@@ -7,6 +7,7 @@ import Footer from "@/components/Footer";
 import Comments from "@/components/Comments";
 import ArticleCard from "@/components/ArticleCard";
 import TldrSnapshot from "@/components/TldrSnapshot";
+import { ArticleStructuredData, BreadcrumbStructuredData } from "@/components/StructuredData";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Clock, User, Share2, Bookmark, Twitter, Linkedin, Facebook, Instagram, Loader2, ExternalLink, Edit, Eye, EyeOff, Send } from "lucide-react";
@@ -438,12 +439,44 @@ const Article = () => {
       <Helmet>
         <title>{(article.meta_title || article.title).replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'")} | AI in ASIA</title>
         <meta name="description" content={article.meta_description || article.excerpt || ''} />
+        <meta name="author" content={article.authors?.name || 'AI in ASIA'} />
+        <meta property="article:published_time" content={article.published_at || ''} />
+        <meta property="article:modified_time" content={article.updated_at || ''} />
+        <meta property="article:author" content={article.authors?.name || ''} />
+        <meta property="article:section" content={article.categories?.name || ''} />
+        <meta property="og:title" content={(article.meta_title || article.title).replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'")} />
+        <meta property="og:description" content={article.meta_description || article.excerpt || ''} />
+        <meta property="og:image" content={article.featured_image_url || '/og-image.png'} />
+        <meta property="og:type" content="article" />
+        <meta property="og:url" content={window.location.href} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={(article.meta_title || article.title).replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'")} />
+        <meta name="twitter:description" content={article.meta_description || article.excerpt || ''} />
+        <meta name="twitter:image" content={article.featured_image_url || '/og-image.png'} />
         {isPreview ? (
           <meta name="robots" content="noindex, nofollow" />
         ) : (
           <link rel="canonical" href={article.canonical_url || window.location.href} />
         )}
       </Helmet>
+
+      <ArticleStructuredData
+        title={article.title}
+        description={article.excerpt || ''}
+        imageUrl={article.featured_image_url || ''}
+        datePublished={article.published_at || ''}
+        dateModified={article.updated_at || ''}
+        authorName={article.authors?.name || 'AI in ASIA'}
+        categoryName={article.categories?.name || ''}
+      />
+
+      <BreadcrumbStructuredData
+        items={[
+          { name: 'Home', url: 'https://aiinasia.com' },
+          { name: article.categories?.name || 'Uncategorized', url: `https://aiinasia.com/category/${article.categories?.slug || 'uncategorized'}` },
+          { name: article.title, url: window.location.href }
+        ]}
+      />
 
       <div className="min-h-screen flex flex-col">
         <Header />

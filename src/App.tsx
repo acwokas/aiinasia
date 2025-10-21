@@ -9,6 +9,7 @@ import Article from "./pages/Article";
 import Category from "./pages/Category";
 import Tag from "./pages/Tag";
 import AuthorProfile from "./pages/AuthorProfile";
+import SitemapRedirect from "./pages/SitemapRedirect";
 import Search from "./pages/Search";
 import Auth from "./pages/Auth";
 import Admin from "./pages/Admin";
@@ -66,7 +67,8 @@ const App = () => (
             <Route path="/:category/:slug" element={<Article />} />
             <Route path="/category/:slug" element={<Category />} />
             <Route path="/tag/:slug" element={<Tag />} />
-            <Route path="/author/:slug" element={<AuthorProfile />} />
+          <Route path="/author/:slug" element={<AuthorProfile />} />
+          <Route path="/sitemap.xml" element={<SitemapRedirect />} />
             <Route path="/search" element={<Search />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/profile" element={<Profile />} />

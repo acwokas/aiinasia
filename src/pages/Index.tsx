@@ -3,9 +3,11 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
+import { Helmet } from "react-helmet";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import StockTicker from "@/components/StockTicker";
+import { OrganizationStructuredData } from "@/components/StructuredData";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -285,6 +287,13 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <Helmet>
+        <title>AI in ASIA - Leading AI News, Insights & Innovation Across Asia</title>
+        <meta name="description" content="Your trusted source for AI news, insights, and education across Asia. Breaking news, expert analysis, and practical guides on artificial intelligence. Powered by you.withthepowerof.ai." />
+      </Helmet>
+      
+      <OrganizationStructuredData />
+      
       <Header />
       <StockTicker />
       
@@ -363,9 +372,9 @@ const Index = () => {
                       <Badge className="bg-primary text-primary-foreground mb-3">
                         {featuredArticle.categories?.name || "Uncategorized"}
                       </Badge>
-                      <h2 className="text-white font-bold text-3xl md:text-4xl mb-4 line-clamp-3 group-hover:text-primary transition-colors">
+                      <h1 className="text-white font-bold text-3xl md:text-4xl mb-4 line-clamp-3 group-hover:text-primary transition-colors">
                         {featuredArticle.title}
-                      </h2>
+                      </h1>
                       <p className="text-white/90 text-base line-clamp-3">
                         {featuredArticle.excerpt}
                       </p>
@@ -386,9 +395,9 @@ const Index = () => {
                         <Badge className="bg-primary text-primary-foreground mb-3">
                           {trendingArticles[0].categories?.name || "Uncategorized"}
                         </Badge>
-                        <h2 className="text-white font-bold text-3xl md:text-4xl mb-4 line-clamp-3 group-hover:text-primary transition-colors">
+                        <h1 className="text-white font-bold text-3xl md:text-4xl mb-4 line-clamp-3 group-hover:text-primary transition-colors">
                           {trendingArticles[0].title}
-                        </h2>
+                        </h1>
                         <p className="text-white/90 text-base line-clamp-3">
                           {trendingArticles[0].excerpt}
                         </p>
