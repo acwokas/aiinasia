@@ -637,10 +637,10 @@ const Admin = () => {
             <div>
               <h3 className="font-semibold mb-3 text-sm text-muted-foreground uppercase">AI & Generation</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                <Button onClick={() => navigate("/admin/generate-tldr-bulk")} variant="outline" className="justify-start">
+                <Button onClick={() => navigate("/admin/generate-tldr")} variant="outline" className="justify-start">
                   Generate TLDR (Bulk)
                 </Button>
-                <Button onClick={() => navigate("/admin/bulk-comment-generation")} variant="outline" className="justify-start">
+                <Button onClick={() => navigate("/admin/bulk-comments")} variant="outline" className="justify-start">
                   Generate Comments (Bulk)
                 </Button>
               </div>
