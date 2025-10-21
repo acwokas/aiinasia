@@ -27,6 +27,7 @@ import ExtractImageUrls from "./pages/ExtractImageUrls";
 import UpdateArticleImages from "./pages/UpdateArticleImages";
 import MigrationDashboard from "./pages/MigrationDashboard";
 import BulkRedirects from "./pages/BulkRedirects";
+import MigrateCategoryUrls from "./pages/MigrateCategoryUrls";
 import ContentProcessor from "./pages/ContentProcessor";
 import CategoryMapper from "./pages/CategoryMapper";
 import CleanArticles from "./pages/CleanArticles";
@@ -87,6 +88,7 @@ const App = () => (
             <Route path="/admin/update-article-images" element={<UpdateArticleImages />} />
             <Route path="/admin/migration-dashboard" element={<MigrationDashboard />} />
             <Route path="/admin/bulk-redirects" element={<BulkRedirects />} />
+            <Route path="/admin/migrate-category-urls" element={<MigrateCategoryUrls />} />
             <Route path="/admin/content-processor" element={<ContentProcessor />} />
             <Route path="/admin/category-mapper" element={<CategoryMapper />} />
             <Route path="/admin/clean-articles" element={<CleanArticles />} />

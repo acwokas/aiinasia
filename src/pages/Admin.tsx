@@ -589,6 +589,9 @@ const Admin = () => {
                 <Button onClick={() => navigate("/admin/bulk-import")} variant="outline" className="justify-start">
                   Bulk Import Articles
                 </Button>
+                <Button onClick={() => navigate("/admin/migrate-category-urls")} variant="outline" className="justify-start bg-primary/10 border-primary text-primary hover:bg-primary/20">
+                  Migrate to Category URLs
+                </Button>
                 <Button onClick={() => navigate("/admin/bulk-redirects")} variant="outline" className="justify-start">
                   Bulk URL Redirects
                 </Button>

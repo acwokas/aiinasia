@@ -758,6 +758,7 @@ export default function BulkImport() {
             if (row.categories && article) {
               const categoryNames = row.categories.split(',').map((c: string) => c.trim()).filter(Boolean);
               let firstCategoryId = null;
+              let firstCategorySlug = 'uncategorized';
               
               for (let idx = 0; idx < categoryNames.length; idx++) {
                 const catName = categoryNames[idx];
@@ -775,6 +776,7 @@ export default function BulkImport() {
                   // Save first category as primary
                   if (idx === 0) {
                     firstCategoryId = category.id;
+                    firstCategorySlug = category.slug;
                   }
                   
                   await supabase.from("article_categories").insert({
@@ -791,6 +793,9 @@ export default function BulkImport() {
                   .update({ primary_category_id: firstCategoryId })
                   .eq("id", article.id);
               }
+              
+              // Store the category slug for URL mapping
+              (article as any).categorySlug = firstCategorySlug;
             }
 
             // Handle tags
@@ -827,9 +832,11 @@ export default function BulkImport() {
 
             // Create URL mapping
             if (row.old_slug && article) {
+              const categorySlug = (article as any).categorySlug || 'uncategorized';
+              
               await supabase.from("url_mappings").insert({
                 old_url: `/${row.old_slug}`,
-                new_url: `/article/${row.slug}`,
+                new_url: `/${categorySlug}/${row.slug}`,
                 old_slug: row.old_slug,
                 new_slug: row.slug,
                 article_id: article.id,
