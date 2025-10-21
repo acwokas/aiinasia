@@ -15,8 +15,6 @@ const Editor = () => {
   const [user, setUser] = useState<any>(null);
   const queryClient = useQueryClient();
 
-  console.log('Editor component loaded', { articleId, user });
-
   useEffect(() => {
     checkAuth();
   }, []);
@@ -51,7 +49,6 @@ const Editor = () => {
     queryKey: ["article-edit", articleId],
     enabled: !!articleId && !!user,
     queryFn: async () => {
-      console.log('Fetching article in editor', { articleId });
       const { data, error } = await supabase
         .from("articles")
         .select("*")

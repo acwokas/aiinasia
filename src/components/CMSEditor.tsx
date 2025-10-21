@@ -25,11 +25,40 @@ interface CMSEditorProps {
   onSave?: (data: any) => void;
 }
 
+// Helper function to convert JSONB content to markdown
+const convertJsonbToMarkdown = (jsonbContent: any): string => {
+  if (!jsonbContent) return "";
+  if (typeof jsonbContent === "string") return jsonbContent;
+  if (!Array.isArray(jsonbContent)) return "";
+  
+  return jsonbContent.map((block: any) => {
+    if (!block || !block.type) return "";
+    
+    switch (block.type) {
+      case "paragraph":
+        return block.content || "";
+      case "heading":
+        const level = block.attrs?.level || 2;
+        const prefix = "#".repeat(level);
+        return `${prefix} ${block.content || ""}`;
+      case "bulletList":
+      case "listItem":
+        return `- ${block.content || ""}`;
+      case "orderedList":
+        return `1. ${block.content || ""}`;
+      case "blockquote":
+        return `> ${block.content || ""}`;
+      default:
+        return block.content || "";
+    }
+  }).join("\n\n");
+};
+
 const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
   const [title, setTitle] = useState(initialData?.title || "");
   const [slug, setSlug] = useState(initialData?.slug || "");
   const [excerpt, setExcerpt] = useState(initialData?.excerpt || "");
-  const [content, setContent] = useState(initialData?.content || "");
+  const [content, setContent] = useState(convertJsonbToMarkdown(initialData?.content) || "");
   const [tldrSnapshot, setTldrSnapshot] = useState<string[]>(
     Array.isArray(initialData?.tldr_snapshot) ? initialData.tldr_snapshot : []
   );
