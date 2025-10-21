@@ -10,25 +10,25 @@ verify_jwt = true
 verify_jwt = false
 
 [functions.publish-scheduled-articles]
-verify_jwt = false
+verify_jwt = true
 
 [functions.map-csv-categories]
-verify_jwt = false
+verify_jwt = true
 
 [functions.notify-new-comment]
-verify_jwt = false
+verify_jwt = true
 
 [functions.generate-article-comments]
-verify_jwt = false
+verify_jwt = true
 
 [functions.auto-comment-new-articles]
-verify_jwt = false
+verify_jwt = true
 
 [functions.generate-tldr-snapshot]
-verify_jwt = false
+verify_jwt = true
 
 [functions.assign-article-category]
-verify_jwt = false
+verify_jwt = true
 
 [functions.download-and-upload-image]
 verify_jwt = true

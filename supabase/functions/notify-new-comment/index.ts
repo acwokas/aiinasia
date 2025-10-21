@@ -23,14 +23,45 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { comment_id, article_id, author_name, author_email, content }: CommentNotification = await req.json();
-    
-    console.log("Processing comment notification:", { comment_id, article_id });
-
-    // Initialize Supabase client
+    // Initialize Supabase client first for auth check
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Check authentication and admin role
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: corsHeaders }
+      );
+    }
+
+    const token = authHeader.replace("Bearer ", "");
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+    
+    if (userError || !user) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: corsHeaders }
+      );
+    }
+
+    const { data: isAdmin } = await supabase.rpc("has_role", {
+      _user_id: user.id,
+      _role: "admin"
+    });
+
+    if (!isAdmin) {
+      return new Response(
+        JSON.stringify({ error: "Forbidden: Admin role required" }),
+        { status: 403, headers: corsHeaders }
+      );
+    }
+
+    const { comment_id, article_id, author_name, author_email, content }: CommentNotification = await req.json();
+    
+    console.log("Processing comment notification:", { comment_id, article_id });
 
     // Fetch article details
     const { data: article, error: articleError } = await supabase
