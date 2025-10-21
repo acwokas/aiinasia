@@ -282,17 +282,17 @@ const SEOTools = () => {
                   <div className="flex-1">
                     <p className="font-medium">Sitemap URL</p>
                     <a 
-                      href="/sitemap.xml" 
+                      href={`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-sitemap`}
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="text-sm text-primary hover:underline"
                     >
-                      {window.location.origin}/sitemap.xml
+                      {import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-sitemap
                     </a>
                   </div>
                   <Button
                     variant="outline"
-                    onClick={() => window.open("/sitemap.xml", "_blank")}
+                    onClick={() => window.open(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-sitemap`, "_blank")}
                   >
                     View Sitemap
                   </Button>
