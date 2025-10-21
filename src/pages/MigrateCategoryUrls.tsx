@@ -192,7 +192,7 @@ const MigrateCategoryUrls = () => {
         <div className="mb-8">
           <h1 className="headline text-4xl mb-4">Migrate to Category URLs</h1>
           <p className="text-muted-foreground text-lg">
-            This tool will create 301 redirects from old <code className="bg-muted px-2 py-1 rounded">/article/slug</code> URLs to new <code className="bg-muted px-2 py-1 rounded">/category/slug</code> URLs for all published articles.
+            This tool will create 301 redirects from old <code className="bg-muted px-2 py-1 rounded">/article/slug</code> URLs to new <code className="bg-muted px-2 py-1 rounded">/category/slug</code> URLs for all published articles, and update existing WordPress URL mappings to point to the new structure.
           </p>
         </div>
 
@@ -205,6 +205,10 @@ const MigrateCategoryUrls = () => {
                   <li className="flex items-start gap-2">
                     <ArrowRight className="h-4 w-4 mt-0.5 text-primary flex-shrink-0" />
                     <span>Create 301 redirects from <code>/article/slug</code> to <code>/category/slug</code></span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <ArrowRight className="h-4 w-4 mt-0.5 text-primary flex-shrink-0" />
+                    <span>Update old WordPress URL redirects to point to new category URLs</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <ArrowRight className="h-4 w-4 mt-0.5 text-primary flex-shrink-0" />
@@ -316,6 +320,7 @@ const MigrateCategoryUrls = () => {
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li>• This operation is safe to run multiple times - it won't create duplicate redirects</li>
             <li>• All redirects use 301 status code (permanent redirect) for SEO preservation</li>
+            <li>• Both new <code>/article/slug</code> and old WordPress URLs will redirect to new structure</li>
             <li>• External links to old URLs will automatically redirect to new structure</li>
             <li>• You can manage redirects manually at <a href="/redirects" className="text-primary hover:underline">/redirects</a></li>
           </ul>
