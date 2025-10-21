@@ -1,8 +1,8 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 
-// GA4 Measurement ID - Replace with your actual GA4 ID
-const GA_MEASUREMENT_ID = "G-XXXXXXXXXX";
+// GA4 Measurement ID
+const GA_MEASUREMENT_ID = "G-M981596ST2";
 
 declare global {
   interface Window {
@@ -16,7 +16,7 @@ const GoogleAnalytics = () => {
 
   useEffect(() => {
     // Only load in production
-    if (import.meta.env.PROD && GA_MEASUREMENT_ID !== "G-XXXXXXXXXX") {
+    if (import.meta.env.PROD) {
       // Load GA4 script
       const script1 = document.createElement("script");
       script1.async = true;
@@ -41,7 +41,7 @@ const GoogleAnalytics = () => {
 
   // Track page views on route change
   useEffect(() => {
-    if (import.meta.env.PROD && window.gtag && GA_MEASUREMENT_ID !== "G-XXXXXXXXXX") {
+    if (import.meta.env.PROD && window.gtag) {
       window.gtag("config", GA_MEASUREMENT_ID, {
         page_path: location.pathname + location.search,
       });
