@@ -513,9 +513,8 @@ const RichTextEditor = ({
         className="hidden"
       />
       
-      <div className="border border-input rounded-md overflow-hidden">
-        {/* Sticky toolbar that follows viewport scroll */}
-        <div className="sticky top-20 z-[100] flex items-center gap-1 p-2 border-b border-input bg-background backdrop-blur-md flex-wrap shadow-sm">
+      {/* Sticky toolbar that follows viewport scroll */}
+      <div className="sticky top-20 z-[100] flex items-center gap-1 p-2 border border-input rounded-t-md bg-background flex-wrap shadow-sm">
         <Button
           type="button"
           variant="ghost"
@@ -636,9 +635,10 @@ const RichTextEditor = ({
         >
           <TableIcon className="h-4 w-4" />
         </Button>
-        </div>
+      </div>
 
-        {/* Scrollable editor content */}
+      {/* Scrollable editor content */}
+      <div className="border border-t-0 border-input rounded-b-md overflow-hidden">
         <div className="max-h-[700px] overflow-y-auto">
           <div className="relative">
           {isEmpty && (
