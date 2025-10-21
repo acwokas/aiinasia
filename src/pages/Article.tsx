@@ -687,6 +687,15 @@ const Article = () => {
               <TldrSnapshot bullets={article.tldr_snapshot as string[]} />
             )}
 
+            {/* Series Navigation */}
+            {article.series_id && article.series_part && (
+              <SeriesNavigation 
+                seriesId={article.series_id}
+                currentPart={article.series_part}
+                currentArticleId={article.id}
+              />
+            )}
+
             {/* Article Content */}
             <div className="prose prose-lg max-w-none">
               {renderContent(article.content)}
