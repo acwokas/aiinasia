@@ -68,7 +68,7 @@ export const SidebarAd = ({ className = "" }: { className?: string }) => (
   <div className={className}>
     <p className="text-xs text-muted-foreground mb-2 text-center">Advertisement</p>
     <GoogleAd
-      slot="XXXXXXXXXX"
+      slot="1044321413"
       format="vertical"
     />
   </div>
@@ -78,7 +78,7 @@ export const InArticleAd = () => (
   <div className="my-8">
     <p className="text-xs text-muted-foreground mb-2 text-center">Advertisement</p>
     <GoogleAd
-      slot="XXXXXXXXXX"
+      slot="3478913062"
       format="rectangle"
     />
   </div>
@@ -88,7 +88,7 @@ export const FooterAd = () => (
   <div className="container mx-auto px-4 py-4">
     <p className="text-xs text-muted-foreground mb-2 text-center">Advertisement</p>
     <GoogleAd
-      slot="XXXXXXXXXX"
+      slot="8539668053"
       format="horizontal"
     />
   </div>
