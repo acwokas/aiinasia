@@ -572,16 +572,89 @@ const Admin = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <BarChart className="h-5 w-5" />
-              Content Migration Tools
+              Content Tools & Utilities
             </CardTitle>
             <CardDescription>
-              Import articles from your old site and manage the migration process
+              Bulk operations, content migration, and AI-powered tools
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <Button onClick={() => navigate("/admin/migration-dashboard")} size="lg" variant="default">
-              Open Migration Dashboard
-            </Button>
+          <CardContent className="space-y-6">
+            {/* Migration & Import Tools */}
+            <div>
+              <h3 className="font-semibold mb-3 text-sm text-muted-foreground uppercase">Migration & Import</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                <Button onClick={() => navigate("/admin/migration-dashboard")} variant="outline" className="justify-start">
+                  Migration Dashboard
+                </Button>
+                <Button onClick={() => navigate("/admin/bulk-import")} variant="outline" className="justify-start">
+                  Bulk Import Articles
+                </Button>
+                <Button onClick={() => navigate("/admin/bulk-redirects")} variant="outline" className="justify-start">
+                  Bulk URL Redirects
+                </Button>
+                <Button onClick={() => navigate("/admin/extract-image-urls")} variant="outline" className="justify-start">
+                  Extract Image URLs
+                </Button>
+                <Button onClick={() => navigate("/admin/category-mapper")} variant="outline" className="justify-start">
+                  Category Mapper
+                </Button>
+              </div>
+            </div>
+
+            {/* Content Processing */}
+            <div>
+              <h3 className="font-semibold mb-3 text-sm text-muted-foreground uppercase">Content Processing</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                <Button onClick={() => navigate("/admin/clean-articles")} variant="outline" className="justify-start">
+                  Clean Article Formatting
+                </Button>
+                <Button onClick={() => navigate("/admin/content-processor")} variant="outline" className="justify-start">
+                  Content Processor
+                </Button>
+                <Button onClick={() => navigate("/admin/assign-categories")} variant="outline" className="justify-start">
+                  Auto-Assign Categories
+                </Button>
+              </div>
+            </div>
+
+            {/* Image Tools */}
+            <div>
+              <h3 className="font-semibold mb-3 text-sm text-muted-foreground uppercase">Image Management</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                <Button onClick={() => navigate("/admin/image-migration")} variant="outline" className="justify-start">
+                  Image Migration
+                </Button>
+                <Button onClick={() => navigate("/admin/update-article-images")} variant="outline" className="justify-start">
+                  Update Article Images
+                </Button>
+                <Button onClick={() => navigate("/admin/fix-broken-image")} variant="outline" className="justify-start">
+                  Fix Broken Images
+                </Button>
+              </div>
+            </div>
+
+            {/* AI & Generation Tools */}
+            <div>
+              <h3 className="font-semibold mb-3 text-sm text-muted-foreground uppercase">AI & Generation</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                <Button onClick={() => navigate("/admin/generate-tldr-bulk")} variant="outline" className="justify-start">
+                  Generate TLDR (Bulk)
+                </Button>
+                <Button onClick={() => navigate("/admin/bulk-comment-generation")} variant="outline" className="justify-start">
+                  Generate Comments (Bulk)
+                </Button>
+              </div>
+            </div>
+
+            {/* Publishing Tools */}
+            <div>
+              <h3 className="font-semibold mb-3 text-sm text-muted-foreground uppercase">Publishing</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                <Button onClick={() => navigate("/admin/publish-all")} variant="outline" className="justify-start">
+                  Publish All Articles
+                </Button>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
