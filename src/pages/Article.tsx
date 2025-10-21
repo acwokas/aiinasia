@@ -434,7 +434,7 @@ const Article = () => {
   return (
     <>
       <Helmet>
-        <title>{article.meta_title || article.title} | AI in ASIA</title>
+        <title>{(article.meta_title || article.title).replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'")} | AI in ASIA</title>
         <meta name="description" content={article.meta_description || article.excerpt || ''} />
         {isPreview ? (
           <meta name="robots" content="noindex, nofollow" />
@@ -460,7 +460,7 @@ const Article = () => {
                   <span className="mx-2">›</span>
                 </>
               )}
-              <span>{article.title}</span>
+              <span>{article.title.replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'")}</span>
             </nav>
 
             {/* Article Header */}
@@ -557,7 +557,7 @@ const Article = () => {
               </Badge>
               
               <h1 className="headline text-4xl md:text-5xl mb-4">
-                {article.title}
+                {article.title.replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'")}
               </h1>
               
               {article.excerpt && (

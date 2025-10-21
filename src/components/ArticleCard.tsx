@@ -28,7 +28,7 @@ const ArticleCard = ({
         <div className="relative aspect-video overflow-hidden">
           <img 
             src={image} 
-            alt={title}
+            alt={title.replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'")}
             className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
             loading="lazy"
           />
@@ -44,7 +44,7 @@ const ArticleCard = ({
           <h3 className={`headline mb-3 hover:text-primary transition-colors ${
             featured ? 'text-3xl md:text-4xl' : 'text-xl'
           }`}>
-            {title}
+            {title.replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'")}
           </h3>
           
           <p className={`text-muted-foreground mb-4 line-clamp-2 ${
