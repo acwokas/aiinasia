@@ -275,22 +275,10 @@ const Category = () => {
                 {category?.name}
               </h1>
               {category?.description && (
-                <p className="text-lg text-muted-foreground mb-3">
+                <p className="text-lg text-muted-foreground">
                   {category.description}
                 </p>
               )}
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <span className="flex items-center gap-1">
-                  <Sparkles className="h-4 w-4" />
-                  {articles?.length || 0} articles
-                </span>
-                {trendingArticles && trendingArticles.length > 0 && (
-                  <span className="flex items-center gap-1">
-                    <TrendingUp className="h-4 w-4" />
-                    {trendingArticles.length} trending
-                  </span>
-                )}
-              </div>
             </div>
           </div>
         </section>
