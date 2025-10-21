@@ -7,8 +7,8 @@ interface GoogleAdProps {
   className?: string;
 }
 
-// Google Ads Publisher ID - Replace with your actual ID
-const GOOGLE_ADS_CLIENT = "ca-pub-XXXXXXXXXXXXXXXX";
+// Google Ads Publisher ID
+const GOOGLE_ADS_CLIENT = "ca-pub-4181437297386228";
 
 const GoogleAd = ({
   slot,
@@ -17,8 +17,8 @@ const GoogleAd = ({
   className = "",
 }: GoogleAdProps) => {
   useEffect(() => {
-    // Only load in production and if client ID is configured
-    if (import.meta.env.PROD && GOOGLE_ADS_CLIENT !== "ca-pub-XXXXXXXXXXXXXXXX") {
+    // Only load in production
+    if (import.meta.env.PROD) {
       try {
         ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
       } catch (err) {
@@ -27,8 +27,8 @@ const GoogleAd = ({
     }
   }, []);
 
-  // Don't render ads in development or if not configured
-  if (import.meta.env.DEV || GOOGLE_ADS_CLIENT === "ca-pub-XXXXXXXXXXXXXXXX") {
+  // Don't render ads in development
+  if (import.meta.env.DEV) {
     return (
       <div
         className={`bg-muted border border-border rounded-lg flex items-center justify-center text-muted-foreground text-sm ${className}`}
@@ -98,7 +98,6 @@ export const FooterAd = () => (
 export const loadGoogleAdsScript = () => {
   if (
     import.meta.env.PROD &&
-    GOOGLE_ADS_CLIENT !== "ca-pub-XXXXXXXXXXXXXXXX" &&
     !document.querySelector('script[src*="adsbygoogle"]')
   ) {
     const script = document.createElement("script");
