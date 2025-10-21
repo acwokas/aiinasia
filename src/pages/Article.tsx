@@ -11,7 +11,7 @@ import SeriesNavigation from "@/components/SeriesNavigation";
 import { ArticleStructuredData, BreadcrumbStructuredData } from "@/components/StructuredData";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Clock, User, Share2, Bookmark, Twitter, Linkedin, Facebook, Instagram, Loader2, ExternalLink, Edit, Eye, EyeOff, Send } from "lucide-react";
+import { Clock, User, Share2, Bookmark, Twitter, Linkedin, Facebook, Instagram, Loader2, ExternalLink, Edit, Eye, EyeOff, Send, Mail, MessageCircle } from "lucide-react";
 import { Helmet } from "react-helmet";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
@@ -230,7 +230,6 @@ const Article = () => {
   };
 
   const handleInstagramShare = async () => {
-    // Instagram doesn't support direct web sharing, so we'll copy the link and show a helpful message
     try {
       await navigator.clipboard.writeText(window.location.href);
       toast({
@@ -243,6 +242,24 @@ const Article = () => {
         description: "Copy the article link and share it on Instagram",
       });
     }
+  };
+
+  const handleRedditShare = () => {
+    const url = encodeURIComponent(window.location.href);
+    const title = encodeURIComponent(article?.title || '');
+    window.open(`https://reddit.com/submit?url=${url}&title=${title}`, '_blank', 'width=600,height=400');
+  };
+
+  const handleWhatsAppShare = () => {
+    const url = encodeURIComponent(window.location.href);
+    const text = encodeURIComponent(`${article?.title}\n\n${window.location.href}`);
+    window.open(`https://wa.me/?text=${text}`, '_blank');
+  };
+
+  const handleEmailShare = () => {
+    const subject = encodeURIComponent(article?.title || '');
+    const body = encodeURIComponent(`Check out this article:\n\n${article?.title}\n${window.location.href}`);
+    window.location.href = `mailto:?subject=${subject}&body=${body}`;
   };
 
   const { data: relatedArticles } = useQuery({
@@ -708,7 +725,7 @@ const Article = () => {
             <footer className="mt-12 pt-8 border-t border-border">
               <div className="flex items-center justify-between mb-8">
                 <h3 className="font-semibold text-lg">Share this article</h3>
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-wrap">
                   <Button variant="outline" size="icon" onClick={handleTwitterShare} title="Share on Twitter">
                     <Twitter className="h-4 w-4" />
                   </Button>
@@ -718,7 +735,16 @@ const Article = () => {
                   <Button variant="outline" size="icon" onClick={handleFacebookShare} title="Share on Facebook">
                     <Facebook className="h-4 w-4" />
                   </Button>
-                  <Button variant="outline" size="icon" onClick={handleInstagramShare} title="Share on Instagram">
+                  <Button variant="outline" size="icon" onClick={handleRedditShare} title="Share on Reddit">
+                    <MessageCircle className="h-4 w-4" />
+                  </Button>
+                  <Button variant="outline" size="icon" onClick={handleWhatsAppShare} title="Share on WhatsApp">
+                    <MessageCircle className="h-4 w-4" />
+                  </Button>
+                  <Button variant="outline" size="icon" onClick={handleEmailShare} title="Share via Email">
+                    <Mail className="h-4 w-4" />
+                  </Button>
+                  <Button variant="outline" size="icon" onClick={handleInstagramShare} title="Copy link for Instagram">
                     <Instagram className="h-4 w-4" />
                   </Button>
                 </div>

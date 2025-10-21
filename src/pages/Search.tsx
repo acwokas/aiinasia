@@ -7,8 +7,11 @@ import Footer from "@/components/Footer";
 import ArticleCard from "@/components/ArticleCard";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search as SearchIcon, Loader2 } from "lucide-react";
+import { Search as SearchIcon, Loader2, Filter } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -22,6 +25,10 @@ const Search = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
   const [categoryFilter, setCategoryFilter] = useState(searchParams.get("category") || "all");
+  const [authorFilter, setAuthorFilter] = useState(searchParams.get("author") || "all");
+  const [tagFilter, setTagFilter] = useState(searchParams.get("tag") || "all");
+  const [dateFilter, setDateFilter] = useState(searchParams.get("date") || "all");
+  const [sortBy, setSortBy] = useState(searchParams.get("sort") || "recent");
 
   const { data: categories } = useQuery({
     queryKey: ["categories"],
@@ -34,8 +41,31 @@ const Search = () => {
     },
   });
 
+  const { data: authors } = useQuery({
+    queryKey: ["authors"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("authors")
+        .select("id, name, slug")
+        .order("name");
+      return data || [];
+    },
+  });
+
+  const { data: tags } = useQuery({
+    queryKey: ["tags"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("tags")
+        .select("id, name, slug")
+        .order("name")
+        .limit(50);
+      return data || [];
+    },
+  });
+
   const { data: results, isLoading } = useQuery({
-    queryKey: ["search", searchQuery, categoryFilter],
+    queryKey: ["search", searchQuery, categoryFilter, authorFilter, tagFilter, dateFilter, sortBy],
     enabled: searchQuery.length > 0,
     queryFn: async () => {
       let query = supabase
@@ -43,15 +73,63 @@ const Search = () => {
         .select(`
           *,
           authors (name, slug),
-          categories:primary_category_id (name, slug)
+          categories:primary_category_id (name, slug),
+          article_tags!inner (tag_id, tags (name, slug))
         `)
         .eq("status", "published")
         .or(`title.ilike.%${searchQuery}%, excerpt.ilike.%${searchQuery}%`)
-        .order("published_at", { ascending: false })
         .limit(50);
 
       if (categoryFilter !== "all") {
         query = query.eq("primary_category_id", categoryFilter);
+      }
+
+      if (authorFilter !== "all") {
+        query = query.eq("author_id", authorFilter);
+      }
+
+      if (tagFilter !== "all") {
+        query = query.eq("article_tags.tag_id", tagFilter);
+      }
+
+      if (dateFilter !== "all") {
+        const now = new Date();
+        let startDate = new Date();
+        
+        switch (dateFilter) {
+          case "today":
+            startDate.setHours(0, 0, 0, 0);
+            break;
+          case "week":
+            startDate.setDate(now.getDate() - 7);
+            break;
+          case "month":
+            startDate.setMonth(now.getMonth() - 1);
+            break;
+          case "year":
+            startDate.setFullYear(now.getFullYear() - 1);
+            break;
+        }
+        
+        if (dateFilter !== "all") {
+          query = query.gte("published_at", startDate.toISOString());
+        }
+      }
+
+      // Apply sorting
+      switch (sortBy) {
+        case "recent":
+          query = query.order("published_at", { ascending: false });
+          break;
+        case "oldest":
+          query = query.order("published_at", { ascending: true });
+          break;
+        case "popular":
+          query = query.order("view_count", { ascending: false });
+          break;
+        case "trending":
+          query = query.eq("is_trending", true).order("published_at", { ascending: false });
+          break;
       }
 
       const { data, error } = await query;
@@ -62,8 +140,24 @@ const Search = () => {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    setSearchParams({ q: searchQuery, category: categoryFilter });
+    const params: any = { q: searchQuery };
+    if (categoryFilter !== "all") params.category = categoryFilter;
+    if (authorFilter !== "all") params.author = authorFilter;
+    if (tagFilter !== "all") params.tag = tagFilter;
+    if (dateFilter !== "all") params.date = dateFilter;
+    if (sortBy !== "recent") params.sort = sortBy;
+    setSearchParams(params);
   };
+
+  const clearFilters = () => {
+    setCategoryFilter("all");
+    setAuthorFilter("all");
+    setTagFilter("all");
+    setDateFilter("all");
+    setSortBy("recent");
+  };
+
+  const activeFiltersCount = [categoryFilter, authorFilter, tagFilter, dateFilter].filter(f => f !== "all").length;
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -88,36 +182,133 @@ const Search = () => {
             
             <h1 className="headline text-4xl md:text-5xl mb-8">Search Articles</h1>
             
-            <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-4 max-w-3xl">
-              <div className="relative flex-1">
-                <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="search"
-                  placeholder="Search for articles..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
+            <form onSubmit={handleSearch} className="space-y-4">
+              <div className="flex flex-col md:flex-row gap-4">
+                <div className="relative flex-1">
+                  <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    type="search"
+                    placeholder="Search for articles..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+                
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" type="button">
+                      <Filter className="h-4 w-4 mr-2" />
+                      Filters
+                      {activeFiltersCount > 0 && (
+                        <Badge variant="secondary" className="ml-2">
+                          {activeFiltersCount}
+                        </Badge>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-80" align="end">
+                    <div className="space-y-4">
+                      <div>
+                        <Label className="text-sm font-medium mb-2 block">Category</Label>
+                        <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="All categories" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">All categories</SelectItem>
+                            {categories?.map((cat) => (
+                              <SelectItem key={cat.id} value={cat.id}>
+                                {cat.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div>
+                        <Label className="text-sm font-medium mb-2 block">Author</Label>
+                        <Select value={authorFilter} onValueChange={setAuthorFilter}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="All authors" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">All authors</SelectItem>
+                            {authors?.map((author) => (
+                              <SelectItem key={author.id} value={author.id}>
+                                {author.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div>
+                        <Label className="text-sm font-medium mb-2 block">Tag</Label>
+                        <Select value={tagFilter} onValueChange={setTagFilter}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="All tags" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">All tags</SelectItem>
+                            {tags?.map((tag) => (
+                              <SelectItem key={tag.id} value={tag.id}>
+                                {tag.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div>
+                        <Label className="text-sm font-medium mb-2 block">Date Range</Label>
+                        <Select value={dateFilter} onValueChange={setDateFilter}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="All time" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">All time</SelectItem>
+                            <SelectItem value="today">Today</SelectItem>
+                            <SelectItem value="week">Past Week</SelectItem>
+                            <SelectItem value="month">Past Month</SelectItem>
+                            <SelectItem value="year">Past Year</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div>
+                        <Label className="text-sm font-medium mb-2 block">Sort By</Label>
+                        <Select value={sortBy} onValueChange={setSortBy}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Most Recent" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="recent">Most Recent</SelectItem>
+                            <SelectItem value="oldest">Oldest First</SelectItem>
+                            <SelectItem value="popular">Most Popular</SelectItem>
+                            <SelectItem value="trending">Trending</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={clearFilters}
+                        className="w-full"
+                        type="button"
+                      >
+                        Clear Filters
+                      </Button>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+                
+                <Button type="submit">
+                  <SearchIcon className="h-4 w-4 mr-2" />
+                  Search
+                </Button>
               </div>
-              
-              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger className="w-full md:w-48">
-                  <SelectValue placeholder="All categories" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All categories</SelectItem>
-                  {categories?.map((cat) => (
-                    <SelectItem key={cat.id} value={cat.id}>
-                      {cat.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              
-              <Button type="submit">
-                <SearchIcon className="h-4 w-4 mr-2" />
-                Search
-              </Button>
             </form>
           </div>
         </section>
