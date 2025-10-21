@@ -85,9 +85,32 @@ const Editor = () => {
         // Refetch article data to get updated preview_code
         await queryClient.invalidateQueries({ queryKey: ["article-edit", articleId] });
 
+        // Get the article slug and preview code for the preview link
+        const { data: savedArticle } = await supabase
+          .from("articles")
+          .select("slug, status, preview_code")
+          .eq("id", articleId)
+          .single();
+
+        // Build the article URL with preview code if not published
+        const articleUrl = savedArticle?.status === 'published' 
+          ? `/article/${savedArticle.slug}`
+          : `/article/${savedArticle.slug}?preview=${savedArticle.preview_code}`;
+
         toast({
           title: "Success!",
           description: "Article updated successfully.",
+          action: savedArticle ? (
+            <button
+              onClick={() => window.open(articleUrl, '_blank')}
+              className="inline-flex items-center gap-1 px-3 py-2 text-sm font-medium text-primary-foreground bg-primary rounded-md hover:bg-primary/90 transition-colors"
+            >
+              {savedArticle.status === 'published' ? 'View Live' : 'Preview'}
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M7 7h10v10"/><path d="M7 17 17 7"/>
+              </svg>
+            </button>
+          ) : undefined,
         });
       } else {
         const { data: newArticle, error } = await supabase
