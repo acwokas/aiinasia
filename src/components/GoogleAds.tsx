@@ -54,16 +54,6 @@ const GoogleAd = ({
 export default GoogleAd;
 
 // Pre-configured ad components for common placements
-export const HeaderAd = () => (
-  <div className="container mx-auto px-4 py-2">
-    <GoogleAd
-      slot="XXXXXXXXXX"
-      format="horizontal"
-      className="w-full"
-    />
-  </div>
-);
-
 export const SidebarAd = ({ className = "" }: { className?: string }) => (
   <div className={className}>
     <p className="text-xs text-muted-foreground mb-2 text-center">Advertisement</p>
