@@ -45,10 +45,13 @@ const Index = () => {
 
   const { data: trendingArticles } = useQuery({
     queryKey: ["trending-articles"],
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 4 * 24 * 60 * 60 * 1000, // 4 days cache
     queryFn: async () => {
-      // Get articles with significant view counts, sorted purely by engagement
-      const { data: topViewed, error: topError } = await supabase
+      // Get articles from past 14 days with engagement metrics
+      const fourteenDaysAgo = new Date();
+      fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
+      
+      const { data: articles, error } = await supabase
         .from("articles")
         .select(`
           *,
@@ -56,53 +59,51 @@ const Index = () => {
           categories:primary_category_id (name)
         `)
         .eq("status", "published")
-        .gte("view_count", 5)
-        .order("view_count", { ascending: false })
-        .limit(7);
+        .gte("published_at", fourteenDaysAgo.toISOString())
+        .limit(30);
       
-      if (topError) throw topError;
+      if (error) throw error;
+      if (!articles || articles.length === 0) return [];
       
-      const minArticles = 5;
+      // Calculate popularity score: views * 1 + likes * 3 + comments * 5
+      const articlesWithScore = articles.map(article => ({
+        ...article,
+        popularityScore: 
+          (article.view_count || 0) * 1 + 
+          (article.like_count || 0) * 3 + 
+          (article.comment_count || 0) * 5
+      }));
       
-      // If we have enough articles, return them
-      if (topViewed && topViewed.length >= minArticles) {
-        return topViewed.slice(0, 5);
-      }
+      // Sort by popularity score
+      const sorted = articlesWithScore.sort((a, b) => b.popularityScore - a.popularityScore);
       
-      // Otherwise, backfill with random articles from past 10 weeks
-      const tenWeeksAgo = new Date();
-      tenWeeksAgo.setDate(tenWeeksAgo.getDate() - 70);
+      // Take top 8 for subtle shuffling
+      const topArticles = sorted.slice(0, 8);
       
-      const { data: recentArticles, error: recentError } = await supabase
-        .from("articles")
-        .select(`
-          *,
-          authors (name, slug),
-          categories:primary_category_id (name)
-        `)
-        .eq("status", "published")
-        .gte("published_at", tenWeeksAgo.toISOString())
-        .order("published_at", { ascending: false })
-        .limit(20);
+      // Subtle shuffle: group by score tiers and shuffle within tiers
+      const tier1 = topArticles.slice(0, 2); // Top 2 stay in top positions
+      const tier2 = topArticles.slice(2, 5); // Next 3 can shuffle
+      const tier3 = topArticles.slice(5, 8); // Next 3 can shuffle
       
-      if (recentError) throw recentError;
+      // Shuffle within tiers using seeded randomness for consistency during cache
+      const shuffleArray = (arr: any[]) => {
+        const shuffled = [...arr];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+          // Use current day as seed for subtle daily variation
+          const dayOfYear = Math.floor(Date.now() / (1000 * 60 * 60 * 24));
+          const j = Math.floor((Math.sin(dayOfYear * (i + 1)) + 1) * i / 2);
+          [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled;
+      };
       
-      // Combine and deduplicate
-      const combined = [...(topViewed || [])];
-      const existingIds = new Set(combined.map(a => a.id));
+      // Combine with subtle order variation
+      const result = [
+        ...shuffleArray(tier1),
+        ...shuffleArray(tier2),
+      ].slice(0, 5);
       
-      // Shuffle recent articles for randomness
-      const shuffled = (recentArticles || [])
-        .filter(a => !existingIds.has(a.id))
-        .sort(() => Math.random() - 0.5);
-      
-      // Add random articles until we have 5
-      for (const article of shuffled) {
-        if (combined.length >= minArticles) break;
-        combined.push(article);
-      }
-      
-      return combined.slice(0, 5);
+      return result;
     },
   });
 
