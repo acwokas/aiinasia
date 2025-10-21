@@ -223,6 +223,26 @@ const Category = () => {
     },
   });
 
+  // Fetch editor's choice article
+  const { data: editorsChoiceArticle } = useQuery({
+    queryKey: ["editors-choice", "adrians-arena-blink-and-theyre-gone-how-the-fastest-startups-win-with-ai-marketing"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("articles")
+        .select(`
+          *,
+          authors (name, slug),
+          categories:primary_category_id (name, slug)
+        `)
+        .eq("slug", "adrians-arena-blink-and-theyre-gone-how-the-fastest-startups-win-with-ai-marketing")
+        .eq("status", "published")
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+  });
+
   if (categoryLoading || articlesLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -232,7 +252,7 @@ const Category = () => {
   }
 
   const featuredArticle = articles?.[0];
-  const secondFeaturedArticle = articles?.[1];
+  const secondFeaturedArticle = editorsChoiceArticle || articles?.[1];
   const latestArticles = articles?.slice(2, 10) || [];
   const moreArticles = articles?.slice(10) || [];
 
