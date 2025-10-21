@@ -528,7 +528,7 @@ const Article = () => {
                       size="sm"
                       variant="outline"
                     >
-                      <Link to={`/editor?articleId=${article.id}`}>
+                      <Link to={`/editor?id=${article.id}`}>
                         <Edit className="h-4 w-4 mr-2" />
                         Edit Article
                       </Link>
