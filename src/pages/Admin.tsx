@@ -734,7 +734,8 @@ const Admin = () => {
                         onClick={() => {
                           const article = comment.articles as any;
                           if (article?.slug) {
-                            window.open(`/article/${article.slug}#comments`, '_blank');
+                            const categorySlug = article.categories?.slug || 'uncategorized';
+                            window.open(`/${categorySlug}/${article.slug}#comments`, '_blank');
                           }
                         }}
                         className="text-xs text-destructive hover:underline flex items-center gap-1 font-medium"

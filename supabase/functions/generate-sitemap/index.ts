@@ -18,10 +18,10 @@ serve(async (req) => {
 
     const baseUrl = 'https://aiinasia.com'; // Update with your actual domain
 
-    // Fetch all published articles
+    // Fetch all published articles with category info
     const { data: articles } = await supabase
       .from('articles')
-      .select('slug, updated_at, primary_category_id')
+      .select('slug, updated_at, categories:primary_category_id(slug)')
       .eq('status', 'published')
       .order('updated_at', { ascending: false });
 
@@ -71,8 +71,10 @@ serve(async (req) => {
     // Articles
     articles?.forEach(article => {
       const lastmod = new Date(article.updated_at).toISOString().split('T')[0];
+      // categories is a single object when using primary_category_id join
+      const categorySlug = (article.categories as any)?.slug || 'uncategorized';
       sitemap += `  <url>
-    <loc>${baseUrl}/article/${article.slug}</loc>
+    <loc>${baseUrl}/${categorySlug}/${article.slug}</loc>
     <lastmod>${lastmod}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>

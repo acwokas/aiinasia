@@ -62,7 +62,7 @@ const App = () => (
           <ScoutChatbot />
           <Routes>
             <Route path="/" element={<Index />} />
-            <Route path="/article/:slug" element={<Article />} />
+            <Route path="/:category/:slug" element={<Article />} />
             <Route path="/category/:slug" element={<Category />} />
             <Route path="/tag/:slug" element={<Tag />} />
             <Route path="/author/:slug" element={<AuthorProfile />} />

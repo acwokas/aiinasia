@@ -5,6 +5,7 @@ interface ArticleCardProps {
   title: string;
   excerpt: string;
   category: string;
+  categorySlug: string;
   author: string;
   readTime: string;
   image: string;
@@ -15,7 +16,8 @@ interface ArticleCardProps {
 const ArticleCard = ({ 
   title, 
   excerpt, 
-  category, 
+  category,
+  categorySlug,
   author, 
   readTime, 
   image,
@@ -24,7 +26,7 @@ const ArticleCard = ({
 }: ArticleCardProps) => {
   return (
     <article className={`article-card ${featured ? 'md:col-span-2 md:row-span-2' : ''}`}>
-      <a href={`/article/${slug}`} className="block">
+      <a href={`/${categorySlug}/${slug}`} className="block">
         <div className="relative aspect-video overflow-hidden">
           <img 
             src={image} 

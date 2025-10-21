@@ -305,7 +305,7 @@ const Profile = () => {
       // Fetch bookmarks with article details
       const { data: bookmarksData } = await supabase
         .from('bookmarks')
-        .select('*, articles(title, slug, excerpt, featured_image_url)')
+        .select('*, articles(title, slug, excerpt, featured_image_url, categories:primary_category_id(slug))')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
       
@@ -690,9 +690,11 @@ const Profile = () => {
               </Card>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {bookmarks.map((bookmark) => (
+                {bookmarks.map((bookmark) => {
+                  const categorySlug = (bookmark.articles.categories as any)?.slug || 'uncategorized';
+                  return (
                   <Card key={bookmark.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                    <a href={`/article/${bookmark.articles.slug}`}>
+                    <a href={`/${categorySlug}/${bookmark.articles.slug}`}>
                       {bookmark.articles.featured_image_url && (
                         <img 
                           src={bookmark.articles.featured_image_url} 
@@ -706,7 +708,8 @@ const Profile = () => {
                       </div>
                     </a>
                   </Card>
-                ))}
+                );
+                })}
               </div>
             )}
           </TabsContent>

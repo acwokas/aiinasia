@@ -48,7 +48,7 @@ const Tag = () => {
           *,
           authors (name, slug),
           article_tags!inner (tag_id),
-          categories:primary_category_id (name)
+          categories:primary_category_id (name, slug)
         `)
         .eq("article_tags.tag_id", tagData.id)
         .eq("status", "published")
@@ -114,6 +114,7 @@ const Tag = () => {
                 title={article.title}
                 excerpt={article.excerpt || ""}
                 category={article.categories?.name || ""}
+                categorySlug={article.categories?.slug || "uncategorized"}
                 author={article.authors?.name || ""}
                 readTime={`${article.reading_time_minutes || 5} min read`}
                 image={article.featured_image_url || ""}

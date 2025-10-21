@@ -43,7 +43,7 @@ const Search = () => {
         .select(`
           *,
           authors (name, slug),
-          categories:primary_category_id (name)
+          categories:primary_category_id (name, slug)
         `)
         .eq("status", "published")
         .or(`title.ilike.%${searchQuery}%, excerpt.ilike.%${searchQuery}%`)
@@ -144,6 +144,7 @@ const Search = () => {
                 title={article.title}
                 excerpt={article.excerpt || ""}
                 category={article.categories?.name || ""}
+                categorySlug={article.categories?.slug || "uncategorized"}
                 author={article.authors?.name || ""}
                 readTime={`${article.reading_time_minutes || 5} min read`}
                 image={article.featured_image_url || ""}

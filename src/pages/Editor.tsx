@@ -88,14 +88,16 @@ const Editor = () => {
         // Get the article slug and preview code for the preview link
         const { data: savedArticle } = await supabase
           .from("articles")
-          .select("slug, status, preview_code")
+          .select("slug, status, preview_code, categories:primary_category_id(slug)")
           .eq("id", articleId)
           .single();
 
+        const categorySlug = (savedArticle?.categories as any)?.slug || 'uncategorized';
+        
         // Build the article URL with preview code if not published
         const articleUrl = savedArticle?.status === 'published' 
-          ? `/article/${savedArticle.slug}`
-          : `/article/${savedArticle.slug}?preview=${savedArticle.preview_code}`;
+          ? `/${categorySlug}/${savedArticle.slug}`
+          : `/${categorySlug}/${savedArticle.slug}?preview=${savedArticle.preview_code}`;
 
         toast({
           title: "Success!",

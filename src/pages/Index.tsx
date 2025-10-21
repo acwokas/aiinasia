@@ -29,7 +29,7 @@ const Index = () => {
         .select(`
           *,
           authors (name, slug),
-          categories:primary_category_id (name)
+          categories:primary_category_id (name, slug)
         `)
         .eq("status", "published")
         .eq("featured_on_homepage", true)
@@ -56,7 +56,7 @@ const Index = () => {
         .select(`
           *,
           authors (name, slug),
-          categories:primary_category_id (name)
+          categories:primary_category_id (name, slug)
         `)
         .eq("status", "published")
         .gte("published_at", fourteenDaysAgo.toISOString())
@@ -117,7 +117,7 @@ const Index = () => {
         .select(`
           *,
           authors (name, slug),
-          categories:primary_category_id (name)
+          categories:primary_category_id (name, slug)
         `)
         .eq("status", "published")
         .eq("sticky", true)
@@ -137,7 +137,7 @@ const Index = () => {
           .select(`
             *,
             authors (name, slug),
-            categories:primary_category_id (name)
+            categories:primary_category_id (name, slug)
           `)
           .eq("status", "published")
           .eq("featured_on_homepage", true)
@@ -302,10 +302,12 @@ const Index = () => {
                 const filteredTrending = trendingArticles?.filter((article: any) => article.slug) || [];
                 const leftColumnCount = Math.min(5, filteredTrending.length);
                 
-                return filteredTrending.slice(0, leftColumnCount).map((article: any, index: number) => (
+                return filteredTrending.slice(0, leftColumnCount).map((article: any, index: number) => {
+                  const categorySlug = article.categories?.slug || 'uncategorized';
+                  return (
                 <Link 
                   key={article.id}
-                  to={`/article/${article.slug}`}
+                  to={`/${categorySlug}/${article.slug}`}
                   className="block group"
                 >
                   <div className={`relative ${index === 0 ? 'aspect-video' : 'aspect-[16/9]'} overflow-hidden rounded-lg mb-2`}>
@@ -338,7 +340,8 @@ const Index = () => {
                     </>
                   )}
                 </Link>
-                ));
+                );
+                });
               })()}
               </div>
             </div>
@@ -347,7 +350,7 @@ const Index = () => {
             <div className="lg:col-span-6 space-y-6 order-1 lg:order-2">
               {/* Large Featured Article */}
               {featuredArticle && featuredArticle.slug ? (
-                <Link to={`/article/${featuredArticle.slug}`} className="block group">
+                <Link to={`/${featuredArticle.categories?.slug || 'uncategorized'}/${featuredArticle.slug}`} className="block group">
                   <div className="relative h-[600px] overflow-hidden rounded-lg">
                     <img 
                       src={featuredArticle.featured_image_url || "/placeholder.svg"} 
@@ -371,7 +374,7 @@ const Index = () => {
                 </Link>
               ) : (
                 trendingArticles?.[0]?.slug && (
-                  <Link to={`/article/${trendingArticles[0].slug}`} className="block group">
+                  <Link to={`/${trendingArticles[0].categories?.slug || 'uncategorized'}/${trendingArticles[0].slug}`} className="block group">
                     <div className="relative h-[600px] overflow-hidden rounded-lg">
                       <img 
                         src={trendingArticles[0].featured_image_url || "/placeholder.svg"} 
@@ -399,10 +402,12 @@ const Index = () => {
               <div className="space-y-6">
                 {latestArticles?.filter((article: any) => 
                   article.slug && article.id !== featuredArticle?.id
-                ).slice(0, 2).map((article: any) => (
+                ).slice(0, 2).map((article: any) => {
+                  const categorySlug = article.categories?.slug || 'uncategorized';
+                  return (
                   <Link 
                     key={article.id}
-                    to={`/article/${article.slug}`}
+                    to={`/${categorySlug}/${article.slug}`}
                     className="block group"
                   >
                     <div className="relative h-[280px] overflow-hidden rounded-lg">
@@ -426,7 +431,8 @@ const Index = () => {
                       </div>
                     </div>
                   </Link>
-                ))}
+                );
+                })}
               </div>
             </div>
 
@@ -448,10 +454,12 @@ const Index = () => {
                 const filteredLatest = latestArticles?.filter((article: any) => article.slug) || [];
                 const rightColumnCount = Math.min(8, filteredLatest.length);
                 
-                return filteredLatest.slice(0, rightColumnCount).map((article: any, index: number) => (
+                return filteredLatest.slice(0, rightColumnCount).map((article: any, index: number) => {
+                  const categorySlug = article.categories?.slug || 'uncategorized';
+                  return (
                   <Link 
                     key={article.id}
-                    to={`/article/${article.slug}`}
+                    to={`/${categorySlug}/${article.slug}`}
                     className="block group"
                   >
                     {index < 2 ? (
@@ -497,7 +505,8 @@ const Index = () => {
                       </div>
                     )}
                   </Link>
-                ));
+                );
+                });
               })()}
               </div>
             </div>

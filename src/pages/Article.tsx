@@ -16,7 +16,7 @@ import { useState, useEffect } from "react";
 import { useAdminRole } from "@/hooks/useAdminRole";
 
 const Article = () => {
-  const { slug } = useParams();
+  const { category, slug } = useParams();
   const { toast } = useToast();
   const { user } = useAuth();
   const { isAdmin } = useAdminRole();
@@ -254,7 +254,7 @@ const Article = () => {
           .select(`
             *,
             authors (name, slug),
-            categories:primary_category_id (name)
+            categories:primary_category_id (name, slug)
           `)
           .eq("primary_category_id", article.primary_category_id)
           .neq("id", article.id)
@@ -273,7 +273,7 @@ const Article = () => {
         .select(`
           *,
           authors (name, slug),
-          categories:primary_category_id (name)
+          categories:primary_category_id (name, slug)
         `)
         .neq("id", article.id)
         .eq("status", "published")
@@ -745,6 +745,7 @@ const Article = () => {
                       title={relatedArticle.title}
                       excerpt={relatedArticle.excerpt || ""}
                       category={relatedArticle.categories?.name || ""}
+                      categorySlug={relatedArticle.categories?.slug || "uncategorized"}
                       author={relatedArticle.authors?.name || ""}
                       readTime={`${relatedArticle.reading_time_minutes || 5} min read`}
                       image={relatedArticle.featured_image_url || ""}

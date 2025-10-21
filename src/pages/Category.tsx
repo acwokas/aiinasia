@@ -102,6 +102,7 @@ const Category = () => {
                 title={article.title}
                 excerpt={article.excerpt || ""}
                 category={category?.name || ""}
+                categorySlug={category?.slug || "uncategorized"}
                 author={article.authors?.name || ""}
                 readTime={`${article.reading_time_minutes || 5} min read`}
                 image={article.featured_image_url || ""}

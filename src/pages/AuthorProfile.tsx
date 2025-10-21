@@ -50,7 +50,7 @@ const AuthorProfile = () => {
         .from("articles")
         .select(`
           *,
-          categories:primary_category_id (name)
+          categories:primary_category_id (name, slug)
         `)
         .eq("author_id", authorData.id)
         .eq("status", "published")
@@ -191,6 +191,7 @@ const AuthorProfile = () => {
                 title={article.title}
                 excerpt={article.excerpt || ""}
                 category={article.categories?.name || ""}
+                categorySlug={article.categories?.slug || "uncategorized"}
                 author={author?.name || ""}
                 readTime={`${article.reading_time_minutes || 5} min read`}
                 image={article.featured_image_url || ""}
