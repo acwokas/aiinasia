@@ -6,6 +6,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ArticleCard from "@/components/ArticleCard";
 import { BreadcrumbStructuredData } from "@/components/StructuredData";
+import { MPUAd } from "@/components/GoogleAds";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, TrendingUp, Clock, Tag as TagIcon, Sparkles } from "lucide-react";
@@ -273,12 +274,7 @@ const Category = () => {
               {/* Right Column: Ad + Latest Articles */}
               <div className="lg:col-span-5 space-y-8">
                 {/* MPU Ad Unit - 300x250 Above Fold */}
-                <div className="bg-muted/30 border-2 border-dashed border-muted-foreground/20 rounded-lg p-4">
-                  <p className="text-xs text-muted-foreground text-center mb-2">Advertisement</p>
-                  <div className="w-[300px] h-[250px] mx-auto bg-muted flex items-center justify-center text-muted-foreground">
-                    MPU 300x250
-                  </div>
-                </div>
+                <MPUAd />
 
                 {/* Latest Mini Articles */}
                 <div>
