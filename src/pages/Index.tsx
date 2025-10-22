@@ -6,6 +6,7 @@ import { format } from "date-fns";
 import { Helmet } from "react-helmet";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import StockTicker from "@/components/StockTicker";
 import { OrganizationStructuredData } from "@/components/StructuredData";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -352,6 +353,7 @@ const Index = () => {
       <OrganizationStructuredData />
       
       <Header />
+      <StockTicker />
       
       <main className="flex-1">
         {/* Hero Grid Section */}
