@@ -6,6 +6,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ArticleCard from "@/components/ArticleCard";
 import { BreadcrumbStructuredData } from "@/components/StructuredData";
+import { Button } from "@/components/ui/button";
 import { Loader2, Tag as TagIcon } from "lucide-react";
 import {
   Breadcrumb,
@@ -26,7 +27,7 @@ const Tag = () => {
         .from("tags")
         .select("*")
         .eq("slug", slug)
-        .single();
+        .maybeSingle();
       
       if (error) throw error;
       return data;
@@ -35,14 +36,9 @@ const Tag = () => {
 
   const { data: articles, isLoading: articlesLoading } = useQuery({
     queryKey: ["tag-articles", slug],
+    enabled: !!tag,
     queryFn: async () => {
-      const { data: tagData } = await supabase
-        .from("tags")
-        .select("id")
-        .eq("slug", slug)
-        .single();
-
-      if (!tagData) return [];
+      if (!tag?.id) return [];
 
       const { data, error } = await supabase
         .from("articles")
@@ -52,20 +48,40 @@ const Tag = () => {
           article_tags!inner (tag_id),
           categories:primary_category_id (name, slug)
         `)
-        .eq("article_tags.tag_id", tagData.id)
+        .eq("article_tags.tag_id", tag.id)
         .eq("status", "published")
         .order("published_at", { ascending: false })
         .limit(20);
       
       if (error) throw error;
-      return data;
+      return data || [];
     },
   });
 
-  if (tagLoading || articlesLoading) {
+  if (tagLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!tag) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <main className="flex-1 container mx-auto px-4 py-16">
+          <div className="max-w-2xl mx-auto text-center">
+            <h1 className="headline text-4xl mb-4">Tag Not Found</h1>
+            <p className="text-muted-foreground mb-8">
+              We couldn't find a tag with the slug "{slug}".
+            </p>
+            <Button asChild>
+              <Link to="/">Back to Home</Link>
+            </Button>
+          </div>
+        </main>
+        <Footer />
       </div>
     );
   }
