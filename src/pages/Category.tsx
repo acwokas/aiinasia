@@ -318,42 +318,22 @@ const Category = () => {
     },
   });
 
-  // Fetch featured voices (authors) for Voices category
+  // Fetch featured voices (specific authors) for Voices category
   const { data: featuredVoices } = useQuery({
     queryKey: ["featured-voices", category?.slug],
-    enabled: category?.slug === "voices" && !!category?.id,
+    enabled: category?.slug === "voices",
     queryFn: async () => {
-      if (!category?.id) return [];
-
-      // Get all articles in the Voices category (from article_categories junction) with authors
+      // Fetch specific featured authors: Adrian Watkins, Victoria Watkins, Koo Ping Shung
       const { data, error } = await supabase
-        .from("article_categories")
-        .select(`
-          articles!inner (
-            author_id,
-            authors (id, name, slug, bio, avatar_url, job_title, article_count)
-          )
-        `)
-        .eq("category_id", category.id)
-        .eq("articles.status", "published")
-        .not("articles.author_id", "is", null);
+        .from("authors")
+        .select("id, name, slug, bio, avatar_url, job_title, article_count")
+        .in("name", ["Adrian Watkins", "Victoria Watkins", "Koo Ping Shung"]);
 
       if (error) throw error;
 
-      // Get unique authors, excluding Intelligence Desk
-      const uniqueAuthors = new Map();
-      data?.forEach((item: any) => {
-        const article = item.articles;
-        if (article?.authors && 
-            !uniqueAuthors.has(article.authors.id) &&
-            article.authors.name !== "Intelligence Desk") {
-          uniqueAuthors.set(article.authors.id, article.authors);
-        }
-      });
-
-      // Sort by article count and show all authors (no limit)
-      return Array.from(uniqueAuthors.values())
-        .sort((a, b) => (b.article_count || 0) - (a.article_count || 0));
+      // Sort in specific order: Adrian, Victoria, Koo
+      const order = ["Adrian Watkins", "Victoria Watkins", "Koo Ping Shung"];
+      return data?.sort((a, b) => order.indexOf(a.name) - order.indexOf(b.name)) || [];
     },
   });
 
@@ -449,39 +429,38 @@ const Category = () => {
           {/* Voices Category - Featured Authors Section */}
           {category?.slug === "voices" && featuredVoices && featuredVoices.length > 0 && (
             <section className="mb-12">
-              <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-                <Sparkles className="h-6 w-6 text-primary" />
-                Featured Voices
-              </h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+              <h2 className="text-2xl font-bold mb-6">Featured Voices</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {featuredVoices.map((author) => (
                   <Link
                     key={author.id}
                     to={`/author/${author.slug}`}
                     className="group"
                   >
-                    <div className="flex flex-col items-center text-center">
-                      {author.avatar_url ? (
-                        <img
-                          src={author.avatar_url}
-                          alt={author.name}
-                          className="w-20 h-20 rounded-full object-cover mb-3 ring-2 ring-border group-hover:ring-primary transition-all"
-                        />
-                      ) : (
-                        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-secondary mb-3 ring-2 ring-border group-hover:ring-primary transition-all" />
-                      )}
-                      <h3 className="font-semibold text-sm group-hover:text-primary transition-colors line-clamp-2">
-                        {author.name}
-                      </h3>
-                      {author.job_title && (
-                        <p className="text-xs text-muted-foreground line-clamp-1 mt-1">
-                          {author.job_title}
+                    <Card className="p-6 hover:shadow-lg transition-shadow">
+                      <div className="flex flex-col items-center text-center">
+                        {author.avatar_url ? (
+                          <img
+                            src={author.avatar_url}
+                            alt={author.name}
+                            className="w-24 h-24 rounded-full object-cover mb-4 ring-2 ring-border group-hover:ring-primary transition-all"
+                          />
+                        ) : (
+                          <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-secondary mb-4 ring-2 ring-border group-hover:ring-primary transition-all" />
+                        )}
+                        <h3 className="font-bold text-lg group-hover:text-primary transition-colors mb-1">
+                          {author.name}
+                        </h3>
+                        {author.job_title && (
+                          <p className="text-sm text-muted-foreground mb-2">
+                            {author.job_title}
+                          </p>
+                        )}
+                        <p className="text-sm font-medium text-muted-foreground">
+                          {author.article_count || 0} articles
                         </p>
-                      )}
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {author.article_count || 0} articles
-                      </p>
-                    </div>
+                      </div>
+                    </Card>
                   </Link>
                 ))}
               </div>
@@ -495,10 +474,7 @@ const Category = () => {
                 {/* The View From Koo - Larger Featured Card on Left */}
                 {kooArticles && kooArticles.length > 0 && (
                   <div className="lg:col-span-8">
-                    <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-                      <Sparkles className="h-6 w-6 text-primary" />
-                      The View From Koo
-                    </h2>
+                    <h2 className="text-2xl font-bold mb-6">The View From Koo</h2>
                     <Card className="overflow-hidden hover:shadow-xl transition-shadow group">
                       <Link to={`/${category?.slug}/${kooArticles[0].slug}`}>
                         <div className="relative aspect-video overflow-hidden">
@@ -646,10 +622,7 @@ const Category = () => {
           {/* Adrian's Arena - Only for Voices Category */}
           {category?.slug === 'voices' && adrianArticles && adrianArticles.length > 0 && (
             <section className="mb-12">
-              <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-                <Sparkles className="h-6 w-6 text-primary" />
-                Adrian's Arena
-              </h2>
+              <h2 className="text-2xl font-bold mb-6">Adrian's Arena</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {adrianArticles.slice(0, 2).map((article) => (
                   <Card key={article.id} className="overflow-hidden hover:shadow-lg transition-shadow group">
@@ -682,10 +655,7 @@ const Category = () => {
           {/* Editor's Pick - Horizontal Layout (show for Voices) */}
           {category?.slug === 'voices' && secondFeaturedArticle && (
             <section className="mb-12">
-              <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-                <Sparkles className="h-6 w-6 text-primary" />
-                Editor's Pick
-              </h2>
+              <h2 className="text-2xl font-bold mb-6">Editor's Pick</h2>
               <Card className="overflow-hidden hover:shadow-xl transition-shadow group">
                 <Link to={`/${category?.slug}/${secondFeaturedArticle.slug}`} className="flex flex-col md:flex-row gap-0">
                   <div className="md:w-2/5 relative aspect-video md:aspect-auto overflow-hidden">
@@ -696,6 +666,9 @@ const Category = () => {
                     />
                   </div>
                   <div className="md:w-3/5 p-6 md:p-8 flex flex-col justify-center">
+                    <Badge className="w-fit mb-3 bg-primary/10 text-primary hover:bg-primary/20">
+                      Editor's Pick
+                    </Badge>
                     <h2 className="headline text-2xl md:text-3xl mb-4 group-hover:text-primary transition-colors">
                       {secondFeaturedArticle.title.replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'")}
                     </h2>
@@ -784,8 +757,7 @@ const Category = () => {
           {mostReadArticles && mostReadArticles.length > 0 && (
             <section className="mb-12">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold flex items-center gap-2">
-                  <Eye className="h-6 w-6 text-primary" />
+                <h2 className="text-2xl font-bold">
                   {category?.slug === 'voices' ? 'Talk of the Town' : 'Most Read'}
                 </h2>
               </div>
