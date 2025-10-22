@@ -379,9 +379,13 @@ const Index = () => {
                 >
                   <div className={`relative ${index === 0 ? 'aspect-video' : 'aspect-[16/9]'} overflow-hidden rounded-lg mb-2`}>
                     <img 
-                      src={article.featured_image_url || "/placeholder.svg"} 
+                      src={getOptimizedThumbnail(article.featured_image_url || "/placeholder.svg", index === 0 ? 400 : 200, index === 0 ? 300 : 150)} 
+                      srcSet={article.featured_image_url?.includes('supabase.co/storage') ? generateResponsiveSrcSet(article.featured_image_url, index === 0 ? [400, 600, 800] : [200, 300, 400]) : undefined}
+                      sizes={index === 0 ? "(max-width: 768px) 100vw, 400px" : "(max-width: 768px) 100vw, 200px"}
                       alt={article.title}
                       loading="lazy"
+                      width={index === 0 ? 400 : 200}
+                      height={index === 0 ? 300 : 150}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                     <Badge className="absolute top-2 left-2 bg-primary text-primary-foreground text-xs">
@@ -552,9 +556,13 @@ const Index = () => {
                       <div>
                         <div className="relative aspect-video overflow-hidden rounded-lg mb-2">
                           <img 
-                            src={article.featured_image_url || "/placeholder.svg"} 
+                            src={getOptimizedThumbnail(article.featured_image_url || "/placeholder.svg", 320, 180)} 
+                            srcSet={article.featured_image_url?.includes('supabase.co/storage') ? generateResponsiveSrcSet(article.featured_image_url, [160, 320, 480]) : undefined}
+                            sizes="(max-width: 768px) 100vw, 320px"
                             alt={article.title}
                             loading="lazy"
+                            width={320}
+                            height={180}
                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                           />
                           <Badge className="absolute top-2 left-2 bg-secondary text-secondary-foreground text-xs">
@@ -573,9 +581,13 @@ const Index = () => {
                       <div className="flex gap-3">
                         <div className="relative w-20 h-20 flex-shrink-0 overflow-hidden rounded">
                           <img 
-                            src={article.featured_image_url || "/placeholder.svg"} 
+                            src={getOptimizedThumbnail(article.featured_image_url || "/placeholder.svg", 160, 160)} 
+                            srcSet={article.featured_image_url?.includes('supabase.co/storage') ? generateResponsiveSrcSet(article.featured_image_url, [80, 160, 240]) : undefined}
+                            sizes="80px"
                             alt={article.title}
                             loading="lazy"
+                            width={80}
+                            height={80}
                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                           />
                         </div>
