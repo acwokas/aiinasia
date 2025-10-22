@@ -277,7 +277,8 @@ const Index = () => {
     }
   };
 
-  const isLoading = isFeaturedLoading || isTrendingLoading || isLatestLoading || isAuthorsLoading || isEditorsPickLoading;
+  // Only wait for critical content to load
+  const isLoading = isLatestLoading;
 
   if (isLoading) {
     return (
