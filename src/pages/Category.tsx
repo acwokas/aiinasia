@@ -78,19 +78,19 @@ const Category = () => {
             new Date(b.published_at).getTime() - new Date(a.published_at).getTime()
           );
         
-        // Mix articles with 60% Adrian, 40% others
-        // Pattern: Adrian, Adrian, Adrian, Other, Other (repeat)
+        // Mix articles with 50% Adrian, 50% others
+        // Pattern: Adrian, Other, Adrian, Other (repeat)
         const mixedArticles: any[] = [];
         let adrianIndex = 0;
         let otherIndex = 0;
         
         while (adrianIndex < adrianArticles.length || otherIndex < otherArticles.length) {
-          // Add 3 Adrian articles
-          for (let i = 0; i < 3 && adrianIndex < adrianArticles.length; i++) {
+          // Add 1 Adrian article
+          if (adrianIndex < adrianArticles.length) {
             mixedArticles.push(adrianArticles[adrianIndex++]);
           }
-          // Add 2 other articles
-          for (let i = 0; i < 2 && otherIndex < otherArticles.length; i++) {
+          // Add 1 other article
+          if (otherIndex < otherArticles.length) {
             mixedArticles.push(otherArticles[otherIndex++]);
           }
         }
