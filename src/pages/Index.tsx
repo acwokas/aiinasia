@@ -436,7 +436,7 @@ const Index = () => {
                       srcSet={featuredArticle.featured_image_url?.includes('supabase.co/storage') ? generateResponsiveSrcSet(featuredArticle.featured_image_url, [640, 960, 1280]) : undefined}
                       sizes="(max-width: 768px) 100vw, 1280px"
                       alt={featuredArticle.title}
-                      fetchPriority="high"
+                      loading="eager"
                       decoding="async"
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       width={1280}
