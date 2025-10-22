@@ -110,7 +110,7 @@ const Footer = () => {
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
           <div>
-            <img src={logo} alt="AI in ASIA" className="h-24 mb-0 -ml-6" />
+            <img src={logo} alt="AI in ASIA" className="h-24 mb-0 -ml-6" width={171} height={96} />
             <p className="text-sm text-muted-foreground mb-4 -mt-4">
               Your trusted source for AI news, insights and innovation across Asia.
             </p>

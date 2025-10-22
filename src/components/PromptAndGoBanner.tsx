@@ -43,6 +43,8 @@ export const PromptAndGoBanner = () => {
               src={promptAndGoLogo}
               alt="Prompt and Go AI"
               className="h-full w-auto object-contain max-h-[60px] max-w-[150px] md:max-h-[100px] md:max-w-[350px]"
+              width={350}
+              height={100}
             />
           </div>
 

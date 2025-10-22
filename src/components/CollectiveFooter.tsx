@@ -97,6 +97,8 @@ export const CollectiveFooter = () => {
                               : ""
                           }`}
                           loading="lazy"
+                          width={136}
+                          height={76}
                         />
                       </div>
                       <div className="flex items-center gap-1 text-[hsl(198,100%,50%)] text-sm font-medium">

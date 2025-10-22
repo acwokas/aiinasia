@@ -18,6 +18,8 @@ export const BusinessInAByteAd = () => {
               src={businessInAByteLogo}
               alt="Business in a Byte"
               className="w-full h-auto"
+              width={220}
+              height={107}
             />
           </div>
 

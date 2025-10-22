@@ -18,6 +18,7 @@ import { BusinessInAByteAd } from "@/components/BusinessInAByteAd";
 import RecommendedArticles from "@/components/RecommendedArticles";
 import { EditorsPick } from "@/components/EditorsPick";
 import { z } from "zod";
+import { getOptimizedAvatar, getOptimizedHeroImage, getOptimizedThumbnail, generateResponsiveSrcSet } from "@/lib/imageOptimization";
 
 const newsletterSchema = z.object({
   email: z.string()
@@ -440,10 +441,15 @@ const Index = () => {
                 <Link to={`/${featuredArticle.categories?.slug || 'uncategorized'}/${featuredArticle.slug}`} className="block group">
                   <div className="relative h-[600px] overflow-hidden rounded-lg">
                     <img 
-                      src={featuredArticle.featured_image_url || "/placeholder.svg"} 
+                      src={getOptimizedHeroImage(featuredArticle.featured_image_url || "/placeholder.svg", 1280)} 
+                      srcSet={featuredArticle.featured_image_url?.includes('supabase.co/storage') ? generateResponsiveSrcSet(featuredArticle.featured_image_url, [640, 960, 1280]) : undefined}
+                      sizes="(max-width: 768px) 100vw, 640px"
                       alt={featuredArticle.title}
                       loading="eager"
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      width={640}
+                      height={600}
+                      fetchPriority="high"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
                     <div className="absolute bottom-0 left-0 right-0 p-8">
@@ -464,9 +470,14 @@ const Index = () => {
                   <Link to={`/${trendingArticles[0].categories?.slug || 'uncategorized'}/${trendingArticles[0].slug}`} className="block group">
                     <div className="relative h-[600px] overflow-hidden rounded-lg">
                       <img 
-                        src={trendingArticles[0].featured_image_url || "/placeholder.svg"} 
+                        src={getOptimizedHeroImage(trendingArticles[0].featured_image_url || "/placeholder.svg", 1280)} 
+                        srcSet={trendingArticles[0].featured_image_url?.includes('supabase.co/storage') ? generateResponsiveSrcSet(trendingArticles[0].featured_image_url, [640, 960, 1280]) : undefined}
+                        sizes="(max-width: 768px) 100vw, 640px"
                         alt={trendingArticles[0].title}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        width={640}
+                        height={600}
+                        fetchPriority="high"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
                       <div className="absolute bottom-0 left-0 right-0 p-8">
@@ -499,10 +510,14 @@ const Index = () => {
                   >
                     <div className="relative h-[280px] overflow-hidden rounded-lg">
                       <img 
-                        src={article.featured_image_url || "/placeholder.svg"} 
+                        src={getOptimizedThumbnail(article.featured_image_url || "/placeholder.svg", 640, 280)} 
+                        srcSet={article.featured_image_url?.includes('supabase.co/storage') ? generateResponsiveSrcSet(article.featured_image_url, [320, 640, 960]) : undefined}
+                        sizes="(max-width: 768px) 100vw, 640px"
                         alt={article.title}
                         loading="lazy"
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        width={640}
+                        height={280}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
                       <div className="absolute bottom-0 left-0 right-0 p-6">
@@ -636,9 +651,14 @@ const Index = () => {
                 >
                   {author.avatar_url ? (
                     <img 
-                      src={author.avatar_url} 
+                      src={getOptimizedAvatar(author.avatar_url, 160)} 
+                      srcSet={author.avatar_url.includes('supabase.co/storage') ? generateResponsiveSrcSet(author.avatar_url, [80, 160, 240]) : undefined}
+                      sizes="(max-width: 768px) 80px, 160px"
                       alt={author.name}
                       className="w-20 h-20 rounded-full object-cover mx-auto mb-4 ring-2 ring-primary"
+                      loading="lazy"
+                      width={80}
+                      height={80}
                     />
                   ) : (
                     <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-secondary mx-auto mb-4" />

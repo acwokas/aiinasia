@@ -1,5 +1,6 @@
 import { Clock, User, TrendingUp, BookOpen } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { getOptimizedThumbnail, generateResponsiveSrcSet } from "@/lib/imageOptimization";
 
 interface ArticleCardProps {
   title: string;
@@ -35,10 +36,14 @@ const ArticleCard = ({
       <a href={`/${categorySlug}/${slug}`} className="block">
         <div className="relative aspect-video overflow-hidden">
           <img 
-            src={image} 
+            src={getOptimizedThumbnail(image, featured ? 800 : 400, featured ? 600 : 300)} 
+            srcSet={image.includes('supabase.co/storage') ? generateResponsiveSrcSet(image, featured ? [400, 800, 1200] : [200, 400, 600]) : undefined}
+            sizes={featured ? "(max-width: 768px) 100vw, 800px" : "(max-width: 768px) 100vw, 400px"}
             alt={title.replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'")}
             className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
             loading="lazy"
+            width={featured ? 800 : 400}
+            height={featured ? 600 : 300}
           />
           <div className="absolute top-4 left-4 flex gap-2 flex-wrap">
             <Badge className="bg-primary text-primary-foreground">

@@ -31,7 +31,7 @@ const Header = () => {
         <div className="flex h-24 items-center justify-between">
           <div className="flex items-center gap-8">
             <a href="/" className="flex items-center -ml-8">
-              <img src={logo} alt="AI in ASIA" className="h-32 md:h-24 w-auto" />
+              <img src={logo} alt="AI in ASIA" className="h-32 md:h-24 w-auto" width={171} height={96} />
             </a>
             
             <nav className="hidden md:flex items-center space-x-6">

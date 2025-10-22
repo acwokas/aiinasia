@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Star } from "lucide-react";
+import { getOptimizedHeroImage, generateResponsiveSrcSet } from "@/lib/imageOptimization";
 
 interface EditorsPickProps {
   article: {
@@ -32,9 +33,14 @@ export const EditorsPick = ({ article }: EditorsPickProps) => {
           </div>
           <div className="aspect-[21/9] overflow-hidden">
             <img 
-              src={article.featured_image_url || "/placeholder.svg"} 
+              src={getOptimizedHeroImage(article.featured_image_url || "/placeholder.svg", 1280)} 
+              srcSet={article.featured_image_url?.includes('supabase.co/storage') ? generateResponsiveSrcSet(article.featured_image_url, [640, 960, 1280]) : undefined}
+              sizes="(max-width: 768px) 100vw, 1280px"
               alt={article.title}
               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              loading="eager"
+              width={1280}
+              height={549}
             />
           </div>
         </div>
