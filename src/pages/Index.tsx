@@ -471,7 +471,9 @@ const Index = () => {
               </div>
               <div className="space-y-4">
               {(() => {
-                const filteredLatest = latestArticles?.filter((article: any) => article.slug) || [];
+                const filteredLatest = latestArticles?.filter((article: any) => 
+                  article.slug && article.id !== featuredArticle?.id
+                ) || [];
                 const rightColumnCount = Math.min(8, filteredLatest.length);
                 
                 return filteredLatest.slice(0, rightColumnCount).map((article: any, index: number) => {
