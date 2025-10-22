@@ -22,14 +22,14 @@ const AuthorProfile = () => {
   const { slug } = useParams();
   const [isBioExpanded, setIsBioExpanded] = useState(false);
 
-  const { data: author, isLoading: authorLoading } = useQuery({
+  const { data: author, isLoading: authorLoading, error: authorError } = useQuery({
     queryKey: ["author", slug],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("authors")
         .select("*")
         .eq("slug", slug)
-        .single();
+        .maybeSingle();
       
       if (error) throw error;
       return data;
@@ -38,14 +38,9 @@ const AuthorProfile = () => {
 
   const { data: articles, isLoading: articlesLoading } = useQuery({
     queryKey: ["author-articles", slug],
+    enabled: !!author,
     queryFn: async () => {
-      const { data: authorData } = await supabase
-        .from("authors")
-        .select("id")
-        .eq("slug", slug)
-        .single();
-
-      if (!authorData) return [];
+      if (!author?.id) return [];
 
       const { data, error } = await supabase
         .from("articles")
@@ -53,20 +48,40 @@ const AuthorProfile = () => {
           *,
           categories:primary_category_id (name, slug)
         `)
-        .eq("author_id", authorData.id)
+        .eq("author_id", author.id)
         .eq("status", "published")
         .order("published_at", { ascending: false })
         .limit(20);
       
       if (error) throw error;
-      return data;
+      return data || [];
     },
   });
 
-  if (authorLoading || articlesLoading) {
+  if (authorLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!author) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <main className="flex-1 container mx-auto px-4 py-16">
+          <div className="max-w-2xl mx-auto text-center">
+            <h1 className="headline text-4xl mb-4">Author Not Found</h1>
+            <p className="text-muted-foreground mb-8">
+              We couldn't find an author profile with the slug "{slug}".
+            </p>
+            <Button asChild>
+              <Link to="/category/voices">View All Authors</Link>
+            </Button>
+          </div>
+        </main>
+        <Footer />
       </div>
     );
   }
