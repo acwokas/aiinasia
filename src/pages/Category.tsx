@@ -429,8 +429,8 @@ const Category = () => {
   }
 
   const featuredArticle = articles?.[0];
-  const latestArticles = category?.slug === 'voices' ? articles?.slice(1, 3) || [] : articles?.slice(2, 10) || [];
-  const moreArticles = category?.slug === 'voices' ? articles?.slice(3) || [] : articles?.slice(10) || [];
+  const latestArticles = category?.slug === 'voices' ? articles?.slice(1, 5) || [] : articles?.slice(2, 10) || [];
+  const moreArticles = category?.slug === 'voices' ? articles?.slice(5) || [] : articles?.slice(10) || [];
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -574,7 +574,7 @@ const Category = () => {
                       Latest
                     </h3>
                     <div className="space-y-3">
-                      {latestArticles.slice(0, 2).map((article) => (
+                      {latestArticles.slice(0, 4).map((article) => (
                         <Link 
                           key={article.id}
                           to={`/${category?.slug}/${article.slug}`}
