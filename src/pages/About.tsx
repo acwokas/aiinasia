@@ -100,19 +100,31 @@ const About = () => {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <Card className="p-6 hover:shadow-lg transition-shadow">
-                  <Target className="h-10 w-10 text-primary mb-3" />
+                  <div className="flex items-center gap-3 mb-3">
+                    <Target className="h-10 w-10 text-primary" />
+                    <strong className="text-2xl font-bold">2022</strong>
+                  </div>
                   <p className="text-sm text-muted-foreground leading-relaxed">Covering Asia's AI evolution since 2022</p>
                 </Card>
                 <Card className="p-6 hover:shadow-lg transition-shadow">
-                  <Globe className="h-10 w-10 text-primary mb-3" />
+                  <div className="flex items-center gap-3 mb-3">
+                    <Globe className="h-10 w-10 text-primary" />
+                    <strong className="text-2xl font-bold">20+</strong>
+                  </div>
                   <p className="text-sm text-muted-foreground leading-relaxed">Read by professionals in 20+ countries across Asia-Pacific</p>
                 </Card>
                 <Card className="p-6 hover:shadow-lg transition-shadow">
-                  <Users className="h-10 w-10 text-primary mb-3" />
+                  <div className="flex items-center gap-3 mb-3">
+                    <Users className="h-10 w-10 text-primary" />
+                    <strong className="text-2xl font-bold">4000+</strong>
+                  </div>
                   <p className="text-sm text-muted-foreground leading-relaxed">Home to 4,000+ reader insights and discussions</p>
                 </Card>
                 <Card className="p-6 hover:shadow-lg transition-shadow">
-                  <TrendingUp className="h-10 w-10 text-primary mb-3" />
+                  <div className="flex items-center gap-3 mb-3">
+                    <TrendingUp className="h-10 w-10 text-primary" />
+                    <strong className="text-2xl font-bold">Daily</strong>
+                  </div>
                   <p className="text-sm text-muted-foreground leading-relaxed">Updated daily with AI news, analysis, and research across the region</p>
                 </Card>
               </div>
