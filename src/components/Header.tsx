@@ -37,8 +37,8 @@ const Header = () => {
             <nav className="hidden md:flex items-center space-x-6">
               <a href="/category/news" className="text-sm font-medium hover:text-primary transition-colors">News</a>
               <a href="/category/business" className="text-sm font-medium hover:text-primary transition-colors">Business</a>
-              <a href="/category/learn" className="text-sm font-medium hover:text-primary transition-colors">Learn</a>
               <a href="/category/life" className="text-sm font-medium hover:text-primary transition-colors">Life</a>
+              <a href="/category/learn" className="text-sm font-medium hover:text-primary transition-colors">Learn</a>
               <a href="/category/create" className="text-sm font-medium hover:text-primary transition-colors">Create</a>
               <a href="/category/voices" className="text-sm font-medium hover:text-primary transition-colors">Voices</a>
               <a href="/about" className="text-sm font-medium hover:text-primary transition-colors">About</a>
@@ -97,8 +97,8 @@ const Header = () => {
             <div className="flex flex-col space-y-3">
               <a href="/category/news" className="text-sm font-medium hover:text-primary transition-colors">News</a>
               <a href="/category/business" className="text-sm font-medium hover:text-primary transition-colors">Business</a>
-              <a href="/category/learn" className="text-sm font-medium hover:text-primary transition-colors">Learn</a>
               <a href="/category/life" className="text-sm font-medium hover:text-primary transition-colors">Life</a>
+              <a href="/category/learn" className="text-sm font-medium hover:text-primary transition-colors">Learn</a>
               <a href="/category/create" className="text-sm font-medium hover:text-primary transition-colors">Create</a>
               <a href="/category/voices" className="text-sm font-medium hover:text-primary transition-colors">Voices</a>
               <a href="/about" className="text-sm font-medium hover:text-primary transition-colors">About</a>
