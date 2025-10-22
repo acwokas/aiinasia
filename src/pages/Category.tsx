@@ -108,6 +108,31 @@ const Category = () => {
     queryFn: async () => {
       if (!category?.id) return [];
 
+      // Special handling for Voices - fetch from article_categories and exclude Intelligence Desk
+      if (slug === 'voices') {
+        const { data, error } = await supabase
+          .from("article_categories")
+          .select(`
+            articles (
+              *,
+              authors (name, slug),
+              categories:primary_category_id (name, slug)
+            )
+          `)
+          .eq("category_id", category.id)
+          .eq("articles.status", "published")
+          .order("articles.view_count", { ascending: false })
+          .limit(20);
+        
+        if (error) throw error;
+        
+        // Extract articles and filter out Intelligence Desk
+        return data
+          ?.map(item => item.articles)
+          .filter(article => article && article.authors?.name !== 'Intelligence Desk')
+          .slice(0, 6) || [];
+      }
+
       const { data, error } = await supabase
         .from("articles")
         .select(`
@@ -522,13 +547,13 @@ const Category = () => {
             </section>
           )}
 
-          {/* Most Read - List Layout */}
+          {/* Most Read / Talk of the Town - List Layout */}
           {mostReadArticles && mostReadArticles.length > 0 && (
             <section className="mb-12">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold flex items-center gap-2">
                   <Eye className="h-6 w-6 text-primary" />
-                  Most Read
+                  {category?.slug === 'voices' ? 'Talk of the Town' : 'Most Read'}
                 </h2>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
