@@ -72,6 +72,10 @@ const Editor = () => {
   const handleSave = async (data: any) => {
     try {
       if (articleId) {
+        // Check if status is changing to published
+        const wasPublished = article?.status === 'published';
+        const isNowPublished = data.status === 'published';
+
         const { error } = await supabase
           .from("articles")
           .update({
@@ -81,6 +85,13 @@ const Editor = () => {
           .eq("id", articleId);
 
         if (error) throw error;
+
+        // Generate comments if newly published
+        if (!wasPublished && isNowPublished) {
+          supabase.functions.invoke("generate-article-comments", {
+            body: { articleId, batchMode: false }
+          }).catch(err => console.error('Comment generation error:', err));
+        }
 
         // Refetch article data to get updated preview_code
         await queryClient.invalidateQueries({ queryKey: ["article-edit", articleId] });
@@ -101,7 +112,9 @@ const Editor = () => {
 
         toast({
           title: "Success!",
-          description: "Article updated successfully.",
+          description: isNowPublished && !wasPublished 
+            ? "Article published! AI comments are being generated." 
+            : "Article updated successfully.",
           action: savedArticle ? (
             <button
               onClick={() => window.open(articleUrl, '_blank')}
@@ -127,9 +140,18 @@ const Editor = () => {
 
         if (error) throw error;
 
+        // Generate comments if published
+        if (data.status === 'published') {
+          supabase.functions.invoke("generate-article-comments", {
+            body: { articleId: newArticle.id, batchMode: false }
+          }).catch(err => console.error('Comment generation error:', err));
+        }
+
         toast({
           title: "Success!",
-          description: "Article created successfully. Redirecting to editor...",
+          description: data.status === 'published' 
+            ? "Article published! AI comments are being generated. Redirecting..." 
+            : "Article created successfully. Redirecting to editor...",
         });
         
         // Navigate to edit the newly created article so preview code is available
