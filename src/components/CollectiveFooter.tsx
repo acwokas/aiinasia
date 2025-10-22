@@ -84,7 +84,7 @@ export const CollectiveFooter = () => {
                   <TooltipTrigger asChild>
                     {link.comingSoon ? (
                       <div className="flex flex-col items-center gap-3 cursor-not-allowed">
-                        <div className="w-40 h-28 bg-white rounded-lg p-3 flex items-center justify-center opacity-40">
+                        <div className="w-40 h-28 bg-white rounded-lg p-3 flex items-center justify-center">
                           <img
                             src={link.logo}
                             alt={link.displayName}
