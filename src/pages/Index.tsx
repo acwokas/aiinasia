@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
@@ -6,7 +6,7 @@ import { format } from "date-fns";
 import { Helmet } from "react-helmet";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import StockTicker from "@/components/StockTicker";
+const StockTicker = lazy(() => import("@/components/StockTicker"));
 import { OrganizationStructuredData } from "@/components/StructuredData";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -355,7 +355,9 @@ const Index = () => {
       <OrganizationStructuredData />
       
       <Header />
-      <StockTicker />
+      <Suspense fallback={<div className="h-10" />}>
+        <StockTicker />
+      </Suspense>
       
       <main className="flex-1">
         {/* Hero Grid Section */}
