@@ -101,6 +101,9 @@ const FixMigratedContent = () => {
                       <p><strong>Total Articles:</strong> {results.total}</p>
                       <p><strong>Processed:</strong> {results.processed}</p>
                       <p><strong>TL;DR Fixed:</strong> {results.tldrFixed}</p>
+                      {results.skipped > 0 && (
+                        <p><strong>Skipped:</strong> {results.skipped}</p>
+                      )}
                       {results.errors?.length > 0 && (
                         <p className="text-destructive">
                           <strong>Errors:</strong> {results.errors.length}

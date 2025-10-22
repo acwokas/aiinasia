@@ -28,93 +28,110 @@ Deno.serve(async (req) => {
       total: articles?.length || 0,
       processed: 0,
       tldrFixed: 0,
+      skipped: 0,
       errors: [] as any[],
     };
 
-    for (const article of articles || []) {
-      try {
-        let content = article.content;
-        let tldrSnapshot = article.tldr_snapshot || [];
-        let needsUpdate = false;
+    // Process in batches to avoid timeouts
+    const BATCH_SIZE = 10;
+    const batches = [];
+    
+    for (let i = 0; i < (articles?.length || 0); i += BATCH_SIZE) {
+      batches.push(articles!.slice(i, i + BATCH_SIZE));
+    }
 
-        // Parse content if it's a string
-        if (typeof content === 'string') {
+    for (const batch of batches) {
+      await Promise.all(
+        batch.map(async (article) => {
           try {
-            content = JSON.parse(content);
-          } catch {
-            // Skip if not JSON
-            continue;
-          }
-        }
+            let content = article.content;
+            let tldrSnapshot = article.tldr_snapshot || [];
+            let needsUpdate = false;
 
-        // Check if content is an array of blocks
-        if (!Array.isArray(content)) continue;
-
-        // Find TL;DR heading and extract bullets
-        let newContent = [];
-        let foundTldr = false;
-        let tldrList: string[] = [];
-
-        for (let i = 0; i < content.length; i++) {
-          const block = content[i];
-
-          // Check if this is a TL;DR heading
-          if (block.type === 'heading' && block.content && 
-              (block.content.toLowerCase().includes('tl;dr') || 
-               block.content.toLowerCase().includes('tldr'))) {
-            foundTldr = true;
-            needsUpdate = true;
-            // Skip this heading block
-            continue;
-          }
-
-          // If we just found TL;DR and next block is a list, extract it for tldr_snapshot
-          if (foundTldr && block.type === 'list' && !tldrList.length) {
-            if (Array.isArray(block.content)) {
-              tldrList = block.content.map((item: any) => 
-                typeof item === 'string' ? item : String(item)
-              );
-            } else if (typeof block.content === 'string') {
-              tldrList = [block.content];
+            // Parse content if it's a string
+            if (typeof content === 'string') {
+              try {
+                content = JSON.parse(content);
+              } catch {
+                // Skip if not JSON
+                results.skipped++;
+                return;
+              }
             }
-            tldrSnapshot = tldrList;
-            foundTldr = false;
-            needsUpdate = true;
-            // Skip the list block that follows TL;DR
-            continue;
+
+            // Check if content is an array of blocks
+            if (!Array.isArray(content)) {
+              results.skipped++;
+              return;
+            }
+
+            // Find TL;DR heading and extract bullets
+            let newContent = [];
+            let foundTldr = false;
+            let tldrList: string[] = [];
+
+            for (let i = 0; i < content.length; i++) {
+              const block = content[i];
+
+              // Check if this is a TL;DR heading
+              if (block.type === 'heading' && block.content && 
+                  (block.content.toLowerCase().includes('tl;dr') || 
+                   block.content.toLowerCase().includes('tldr'))) {
+                foundTldr = true;
+                needsUpdate = true;
+                // Skip this heading block
+                continue;
+              }
+
+              // If we just found TL;DR and next block is a list, extract it for tldr_snapshot
+              if (foundTldr && block.type === 'list' && !tldrList.length) {
+                if (Array.isArray(block.content)) {
+                  tldrList = block.content.map((item: any) => 
+                    typeof item === 'string' ? item : String(item)
+                  );
+                } else if (typeof block.content === 'string') {
+                  tldrList = [block.content];
+                }
+                tldrSnapshot = tldrList;
+                foundTldr = false;
+                needsUpdate = true;
+                // Skip the list block that follows TL;DR
+                continue;
+              }
+
+              // Reset foundTldr if we hit another block type
+              if (foundTldr && block.type !== 'list') {
+                foundTldr = false;
+              }
+
+              newContent.push(block);
+            }
+
+            // Update article if changes were made
+            if (needsUpdate) {
+              const { error: updateError } = await supabase
+                .from('articles')
+                .update({
+                  content: newContent,
+                  tldr_snapshot: tldrSnapshot,
+                })
+                .eq('id', article.id);
+
+              if (updateError) throw updateError;
+
+              results.processed++;
+              if (tldrList.length > 0) {
+                results.tldrFixed++;
+              }
+            }
+          } catch (error: any) {
+            results.errors.push({
+              slug: article.slug,
+              error: error.message,
+            });
           }
-
-          // Reset foundTldr if we hit another block type
-          if (foundTldr && block.type !== 'list') {
-            foundTldr = false;
-          }
-
-          newContent.push(block);
-        }
-
-        // Update article if changes were made
-        if (needsUpdate) {
-          const { error: updateError } = await supabase
-            .from('articles')
-            .update({
-              content: newContent,
-              tldr_snapshot: tldrSnapshot,
-            })
-            .eq('id', article.id);
-
-          if (updateError) throw updateError;
-
-          results.processed++;
-          if (tldrList.length > 0) {
-            results.tldrFixed++;
-          }
-        }
-      } catch (error: any) {
-        results.errors.push({
-          slug: article.slug,
-          error: error.message,
-        });
-      }
+        })
+      );
     }
 
     return new Response(
