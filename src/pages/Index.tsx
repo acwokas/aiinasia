@@ -125,8 +125,7 @@ const Index = () => {
 
   const { data: featuredAuthors } = useQuery({
     queryKey: ["featured-authors"],
-    staleTime: 30 * 60 * 1000, // 30 minutes
-    enabled: !isLoading, // Load after main content
+    staleTime: 30 * 60 * 1000,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("authors")
@@ -141,8 +140,7 @@ const Index = () => {
 
   const { data: upcomingEvents } = useQuery({
     queryKey: ["upcoming-events"],
-    staleTime: 30 * 60 * 1000, // 30 minutes
-    enabled: !isLoading, // Load after main content
+    staleTime: 30 * 60 * 1000,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("events")
@@ -158,8 +156,7 @@ const Index = () => {
 
   const { data: editorsPick } = useQuery({
     queryKey: ["editors-pick-homepage"],
-    staleTime: 30 * 60 * 1000, // 30 minutes
-    enabled: !isLoading, // Load after main content
+    staleTime: 30 * 60 * 1000,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("editors_picks")
@@ -269,8 +266,8 @@ const Index = () => {
     }
   };
 
-  // Show skeleton for initial featured content load only
-  if (featuredLoading && !featuredArticle) {
+  // Show skeleton only on initial load
+  if (featuredLoading || isLoading) {
     return (
       <div className="min-h-screen flex flex-col">
         <Header />
