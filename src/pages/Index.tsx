@@ -504,7 +504,6 @@ const Index = () => {
             <div className="lg:col-span-3 order-3">
               {/* Advertisement Slot */}
               <div className="mb-6">
-                <p className="text-xs text-muted-foreground text-center mb-2">Advertisement</p>
                 <BusinessInAByteAd />
               </div>
 
@@ -584,7 +583,6 @@ const Index = () => {
 
         {/* Ad Banner */}
         <section className="container mx-auto px-4 py-8">
-          <p className="text-sm text-muted-foreground text-center mb-2">Advertisement</p>
           <PromptAndGoBanner />
         </section>
 
