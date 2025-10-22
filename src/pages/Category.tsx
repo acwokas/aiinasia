@@ -619,38 +619,6 @@ const Category = () => {
             </section>
           )}
 
-          {/* Adrian's Arena - Only for Voices Category */}
-          {category?.slug === 'voices' && adrianArticles && adrianArticles.length > 0 && (
-            <section className="mb-12">
-              <h2 className="text-2xl font-bold mb-6">Adrian's Arena</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {adrianArticles.slice(0, 2).map((article) => (
-                  <Card key={article.id} className="overflow-hidden hover:shadow-lg transition-shadow group">
-                    <Link to={`/${category?.slug}/${article.slug}`}>
-                      <div className="relative aspect-video overflow-hidden">
-                        <img 
-                          src={article.featured_image_url} 
-                          alt={article.title}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        />
-                      </div>
-                      <div className="p-4">
-                        <h3 className="headline text-lg mb-2 group-hover:text-primary transition-colors line-clamp-2">
-                          {article.title.replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'")}
-                        </h3>
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <span className="flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            {article.reading_time_minutes || 5} min
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-                  </Card>
-                ))}
-              </div>
-            </section>
-          )}
 
           {/* Editor's Pick - Horizontal Layout (show for Voices) */}
           {category?.slug === 'voices' && secondFeaturedArticle && (
