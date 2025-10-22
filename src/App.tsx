@@ -48,6 +48,8 @@ import NotFound from "./pages/NotFound";
 import Events from "./pages/Events";
 import Newsletter from "./pages/Newsletter";
 import NewsletterManager from "./pages/NewsletterManager";
+import NewsletterArchive from "./pages/NewsletterArchive";
+import NewsletterView from "./pages/NewsletterView";
 import WelcomePopup from "./components/WelcomePopup";
 import ScoutChatbot from "./components/ScoutChatbot";
 import GoogleAnalytics from "./components/GoogleAnalytics";
@@ -89,6 +91,8 @@ const App = () => (
             <Route path="/events" element={<Events />} />
           <Route path="/newsletter" element={<Newsletter />} />
           <Route path="/newsletter-manager" element={<NewsletterManager />} />
+          <Route path="/newsletter/archive" element={<NewsletterArchive />} />
+          <Route path="/newsletter/archive/:date" element={<NewsletterView />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/cookie-policy" element={<CookiePolicy />} />

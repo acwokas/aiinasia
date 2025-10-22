@@ -23,6 +23,10 @@ const newsletterSchema = z.object({
     .trim()
     .email({ message: "Invalid email address" })
     .max(255, { message: "Email must be less than 255 characters" }),
+  firstName: z.string()
+    .trim()
+    .min(1, { message: "First name is required" })
+    .max(100, { message: "First name must be less than 100 characters" }),
 });
 
 const Newsletter = () => {
@@ -39,6 +43,7 @@ const Newsletter = () => {
     const formData = new FormData(e.currentTarget);
     const rawData = {
       email: formData.get('email') as string,
+      firstName: formData.get('firstName') as string,
     };
 
     try {
@@ -62,7 +67,10 @@ const Newsletter = () => {
 
       const { error } = await supabase
         .from("newsletter_subscribers")
-        .insert({ email: validatedData.email });
+        .insert({ 
+          email: validatedData.email,
+          first_name: validatedData.firstName,
+        });
 
       if (error) throw error;
 
@@ -142,7 +150,15 @@ const Newsletter = () => {
             {!isSubscribed ? (
               <>
                 <form onSubmit={handleSubmit} className="max-w-md mx-auto mb-12">
-                  <div className="flex gap-2">
+                  <div className="flex flex-col gap-3">
+                    <Input 
+                      id="firstName" 
+                      name="firstName" 
+                      type="text" 
+                      required 
+                      maxLength={100}
+                      placeholder="First Name" 
+                    />
                     <Input 
                       id="email" 
                       name="email" 
@@ -150,9 +166,8 @@ const Newsletter = () => {
                       required 
                       maxLength={255}
                       placeholder="your@email.com" 
-                      className="flex-1"
                     />
-                    <Button type="submit" disabled={isSubmitting}>
+                    <Button type="submit" disabled={isSubmitting} className="w-full">
                       {isSubmitting ? "Subscribing..." : "Subscribe"}
                     </Button>
                   </div>
