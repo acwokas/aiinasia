@@ -123,7 +123,6 @@ export default GoogleAd;
 // Pre-configured ad components for common placements
 export const SidebarAd = ({ className = "" }: { className?: string }) => (
   <div className={className}>
-    <p className="text-xs text-muted-foreground mb-2 text-center">Advertisement</p>
     <GoogleAd
       slot="1044321413"
       format="vertical"
@@ -134,7 +133,6 @@ export const SidebarAd = ({ className = "" }: { className?: string }) => (
 
 export const InArticleAd = () => (
   <div className="my-8">
-    <p className="text-xs text-muted-foreground mb-2 text-center">Advertisement</p>
     <GoogleAd
       slot="3478913062"
       format="rectangle"
@@ -145,7 +143,6 @@ export const InArticleAd = () => (
 
 export const FooterAd = () => (
   <div className="container mx-auto px-4 py-4">
-    <p className="text-xs text-muted-foreground mb-2 text-center">Advertisement</p>
     <GoogleAd
       slot="8539668053"
       format="horizontal"
@@ -157,7 +154,6 @@ export const FooterAd = () => (
 // MPU Ad for Category pages (300x250)
 export const MPUAd = ({ className = "" }: { className?: string }) => (
   <div className={className}>
-    <p className="text-xs text-muted-foreground mb-2 text-center">Advertisement</p>
     <GoogleAd
       slot="1044321413"
       format="rectangle"

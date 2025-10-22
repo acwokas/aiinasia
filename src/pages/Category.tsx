@@ -260,23 +260,26 @@ const Category = () => {
     queryFn: async () => {
       if (!category?.id) return [];
 
-      // Get all articles in the Voices category with authors
+      // Get all articles in the Voices category (from article_categories junction) with authors
       const { data, error } = await supabase
-        .from("articles")
+        .from("article_categories")
         .select(`
-          author_id,
-          authors (id, name, slug, bio, avatar_url, job_title, article_count)
+          articles!inner (
+            author_id,
+            authors (id, name, slug, bio, avatar_url, job_title, article_count)
+          )
         `)
-        .eq("primary_category_id", category.id)
-        .eq("status", "published")
-        .not("author_id", "is", null);
+        .eq("category_id", category.id)
+        .eq("articles.status", "published")
+        .not("articles.author_id", "is", null);
 
       if (error) throw error;
 
       // Get unique authors, excluding Intelligence Desk
       const uniqueAuthors = new Map();
-      data?.forEach((article: any) => {
-        if (article.authors && 
+      data?.forEach((item: any) => {
+        const article = item.articles;
+        if (article?.authors && 
             !uniqueAuthors.has(article.authors.id) &&
             article.authors.name !== "Intelligence Desk") {
           uniqueAuthors.set(article.authors.id, article.authors);
