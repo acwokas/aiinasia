@@ -753,6 +753,27 @@ export type Database = {
         }
         Relationships: []
       }
+      popup_settings: {
+        Row: {
+          active_popup: string
+          created_at: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          active_popup?: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          active_popup?: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null

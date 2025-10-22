@@ -26,6 +26,8 @@ const Admin = () => {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [googleAdsDialogOpen, setGoogleAdsDialogOpen] = useState(false);
   const [newsletterDialogOpen, setNewsletterDialogOpen] = useState(false);
+  const [popupDialogOpen, setPopupDialogOpen] = useState(false);
+  const [activePopup, setActivePopup] = useState<string>("none");
   const [googleAdsSettings, setGoogleAdsSettings] = useState({
     enabled: true,
     client_id: "",
@@ -166,6 +168,18 @@ const Admin = () => {
     },
   });
 
+  const { data: popupSettings, refetch: refetchPopupSettings } = useQuery({
+    queryKey: ["popup-settings"],
+    enabled: isAdmin === true,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("popup_settings")
+        .select("*")
+        .single();
+      return data;
+    },
+  });
+
   useEffect(() => {
     if (settings) {
       const googleAds = settings.find((s: any) => s.setting_key === 'google_ads');
@@ -188,6 +202,12 @@ const Admin = () => {
       }
     }
   }, [settings]);
+
+  useEffect(() => {
+    if (popupSettings) {
+      setActivePopup(popupSettings.active_popup || "none");
+    }
+  }, [popupSettings]);
 
   const approveComment = async (commentId: string) => {
     try {
@@ -457,6 +477,32 @@ const Admin = () => {
       toast({
         title: "Error",
         description: error.message || "Failed to save settings",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSavePopupSettings = async () => {
+    try {
+      const { error } = await supabase
+        .from("popup_settings")
+        .update({ active_popup: activePopup })
+        .eq("id", popupSettings?.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Popup settings saved",
+        description: `Active popup changed to: ${activePopup}`,
+      });
+
+      queryClient.invalidateQueries({ queryKey: ["popup-settings"] });
+      refetchPopupSettings();
+      setPopupDialogOpen(false);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to save popup settings",
         variant: "destructive",
       });
     }
@@ -808,12 +854,14 @@ const Admin = () => {
                 </div>
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 className="font-semibold">Newsletter Popup</h4>
-                    <p className="text-sm text-muted-foreground">Manage newsletter signup popup</p>
+                    <h4 className="font-semibold">Popup Manager</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Choose which popup to display (Current: <strong>{popupSettings?.active_popup || "none"}</strong>)
+                    </p>
                   </div>
                   <Button 
                     variant="outline"
-                    onClick={() => setNewsletterDialogOpen(true)}
+                    onClick={() => setPopupDialogOpen(true)}
                   >
                     Configure
                   </Button>
@@ -969,6 +1017,101 @@ const Admin = () => {
                 Cancel
               </Button>
               <Button onClick={handleSaveNewsletterSettings}>
+                Save Settings
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Popup Manager Configuration Dialog */}
+        <Dialog open={popupDialogOpen} onOpenChange={setPopupDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Popup Manager</DialogTitle>
+              <DialogDescription>
+                Choose which popup to display to your visitors
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4 py-4">
+              <div className="space-y-3">
+                <Label>Active Popup</Label>
+                <div className="space-y-2">
+                  <div 
+                    className={`p-4 border-2 rounded-lg cursor-pointer transition-colors ${
+                      activePopup === "none" ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
+                    }`}
+                    onClick={() => setActivePopup("none")}
+                  >
+                    <div className="flex items-center gap-3">
+                      <input 
+                        type="radio" 
+                        checked={activePopup === "none"} 
+                        onChange={() => setActivePopup("none")}
+                        className="h-4 w-4"
+                      />
+                      <div>
+                        <h4 className="font-semibold">No Popup</h4>
+                        <p className="text-sm text-muted-foreground">Don't show any popup</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div 
+                    className={`p-4 border-2 rounded-lg cursor-pointer transition-colors ${
+                      activePopup === "welcome" ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
+                    }`}
+                    onClick={() => setActivePopup("welcome")}
+                  >
+                    <div className="flex items-center gap-3">
+                      <input 
+                        type="radio" 
+                        checked={activePopup === "welcome"} 
+                        onChange={() => setActivePopup("welcome")}
+                        className="h-4 w-4"
+                      />
+                      <div>
+                        <h4 className="font-semibold">Welcome Popup (Current)</h4>
+                        <p className="text-sm text-muted-foreground">
+                          Welcome message for redesigned AI in Asia
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div 
+                    className={`p-4 border-2 rounded-lg cursor-pointer transition-colors ${
+                      activePopup === "newsletter" ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
+                    }`}
+                    onClick={() => setActivePopup("newsletter")}
+                  >
+                    <div className="flex items-center gap-3">
+                      <input 
+                        type="radio" 
+                        checked={activePopup === "newsletter"} 
+                        onChange={() => setActivePopup("newsletter")}
+                        className="h-4 w-4"
+                      />
+                      <div>
+                        <h4 className="font-semibold">Newsletter Popup</h4>
+                        <p className="text-sm text-muted-foreground">
+                          Newsletter signup form
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  💡 The selected popup will be shown to visitors who haven't seen it yet
+                </p>
+              </div>
+            </div>
+            
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setPopupDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSavePopupSettings}>
                 Save Settings
               </Button>
             </DialogFooter>
