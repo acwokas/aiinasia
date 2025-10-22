@@ -403,13 +403,25 @@ const Article = () => {
           return `<blockquote class="border-l-4 border-primary pl-6 py-2 my-8 italic text-xl">${block.substring(2)}</blockquote>`;
         }
         
-        // Check for lists (multiple lines starting with -)
+        // Check for unordered lists (multiple lines starting with -)
         if (block.includes('\n- ') || block.startsWith('- ')) {
           const items = block.split('\n')
             .filter(line => line.trim().startsWith('- '))
             .map(line => `<li class="leading-relaxed">${line.trim().substring(2)}</li>`)
             .join('');
           return `<ul class="list-disc ml-6 my-6">${items}</ul>`;
+        }
+        
+        // Check for ordered lists (multiple lines starting with number.)
+        if (/^\d+\.\s/.test(block) || /\n\d+\.\s/.test(block)) {
+          const items = block.split('\n')
+            .filter(line => /^\d+\.\s/.test(line.trim()))
+            .map(line => {
+              const content = line.trim().replace(/^\d+\.\s/, '');
+              return `<li class="leading-relaxed">${content}</li>`;
+            })
+            .join('');
+          return `<ol class="list-decimal ml-6 my-6">${items}</ol>`;
         }
         
         // Default to paragraph
