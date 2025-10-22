@@ -34,7 +34,7 @@ const Index = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: featuredArticle } = useQuery({
+  const { data: featuredArticle, isLoading: isFeaturedLoading } = useQuery({
     queryKey: ["featured-article"],
     staleTime: 5 * 60 * 1000, // 5 minutes
     refetchOnMount: false,
@@ -43,7 +43,14 @@ const Index = () => {
       const { data, error } = await supabase
         .from("articles")
         .select(`
-          *,
+          id,
+          title,
+          slug,
+          excerpt,
+          featured_image_url,
+          featured_image_alt,
+          reading_time_minutes,
+          published_at,
           authors (name, slug),
           categories:primary_category_id (name, slug)
         `)
@@ -59,123 +66,84 @@ const Index = () => {
     },
   });
 
-  const { data: trendingArticles } = useQuery({
+  const { data: trendingArticles, isLoading: isTrendingLoading } = useQuery({
     queryKey: ["trending-articles"],
     staleTime: 4 * 24 * 60 * 60 * 1000, // 4 days cache
     queryFn: async () => {
-      // Get articles from past 14 days, limit to 15 to reduce load
+      // Get articles from past 14 days, limit to 5 to reduce load
       const fourteenDaysAgo = new Date();
       fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
       
       const { data: articles, error } = await supabase
         .from("articles")
         .select(`
-          *,
+          id,
+          title,
+          slug,
+          excerpt,
+          featured_image_url,
+          featured_image_alt,
+          reading_time_minutes,
+          view_count,
+          like_count,
+          comment_count,
           authors (name, slug),
           categories:primary_category_id (name, slug)
         `)
         .eq("status", "published")
         .gte("published_at", fourteenDaysAgo.toISOString())
         .order("view_count", { ascending: false, nullsFirst: false })
-        .limit(15);
+        .limit(5);
       
       if (error) throw error;
-      if (!articles || articles.length === 0) return [];
-      
-      // Calculate popularity score: views * 1 + likes * 3 + comments * 5
-      const articlesWithScore = articles.map(article => ({
-        ...article,
-        popularityScore: 
-          (article.view_count || 0) * 1 + 
-          (article.like_count || 0) * 3 + 
-          (article.comment_count || 0) * 5
-      }));
-      
-      // Sort by popularity score
-      const sorted = articlesWithScore.sort((a, b) => b.popularityScore - a.popularityScore);
-      
-      // Take top 5 directly
-      return sorted.slice(0, 5);
+      return articles || [];
     },
   });
 
-  const { data: latestArticles, isLoading } = useQuery({
+  const { data: latestArticles, isLoading: isLatestLoading } = useQuery({
     queryKey: ["latest-articles"],
     staleTime: 5 * 60 * 1000, // 5 minutes
     queryFn: async () => {
-      // Fetch both sticky and regular articles in parallel
-      const [stickyResult, regularResult] = await Promise.all([
-        supabase
-          .from("articles")
-          .select(`
-            *,
-            authors (name, slug),
-            categories:primary_category_id (name, slug)
-          `)
-          .eq("status", "published")
-          .eq("sticky", true)
-          .eq("featured_on_homepage", true)
-          .order("published_at", { ascending: false, nullsFirst: false })
-          .limit(3),
-        supabase
-          .from("articles")
-          .select(`
-            *,
-            authors (name, slug),
-            categories:primary_category_id (name, slug)
-          `)
-          .eq("status", "published")
-          .eq("sticky", false)
-          .eq("featured_on_homepage", true)
-          .order("published_at", { ascending: false, nullsFirst: false })
-          .limit(12)
-      ]);
+      // Single optimized query instead of two parallel queries
+      const { data, error } = await supabase
+        .from("articles")
+        .select(`
+          id,
+          title,
+          slug,
+          excerpt,
+          featured_image_url,
+          featured_image_alt,
+          reading_time_minutes,
+          published_at,
+          sticky,
+          authors (name, slug),
+          categories:primary_category_id (name, slug)
+        `)
+        .eq("status", "published")
+        .eq("featured_on_homepage", true)
+        .order("sticky", { ascending: false })
+        .order("published_at", { ascending: false, nullsFirst: false })
+        .limit(12);
       
-      if (stickyResult.error) throw stickyResult.error;
-      if (regularResult.error) throw regularResult.error;
-      
-      const stickyArticles = stickyResult.data || [];
-      const regularArticles = regularResult.data || [];
-      
-      // Combine: sticky first, then regular, limit to 12 total
-      return [...stickyArticles, ...regularArticles].slice(0, 12);
+      if (error) throw error;
+      return data || [];
     },
   });
 
-  const { data: featuredAuthors } = useQuery({
+  const { data: featuredAuthors, isLoading: isAuthorsLoading } = useQuery({
     queryKey: ["featured-authors"],
     staleTime: 10 * 60 * 1000, // 10 minutes
     queryFn: async () => {
-      // Fetch both Intelligence Desk and top authors in parallel
-      const [intelligenceDeskResult, topAuthorsResult] = await Promise.all([
-        supabase
-          .from("authors")
-          .select("*")
-          .eq("slug", "intelligence-desk")
-          .maybeSingle(),
-        supabase
-          .from("authors")
-          .select("*")
-          .neq("slug", "intelligence-desk")
-          .order("article_count", { ascending: false })
-          .limit(5)
-      ]);
+      // Single optimized query
+      const { data, error } = await supabase
+        .from("authors")
+        .select("id, name, slug, bio, avatar_url, article_count, job_title")
+        .order("article_count", { ascending: false })
+        .limit(4);
       
-      if (topAuthorsResult.error) throw topAuthorsResult.error;
-      
-      const intelligenceDesk = intelligenceDeskResult.data;
-      const otherAuthors = topAuthorsResult.data || [];
-      
-      // Arrange authors: first 3 from top authors, Intelligence Desk as 4th
-      const result = otherAuthors.slice(0, 3);
-      
-      if (intelligenceDesk) {
-        result.push(intelligenceDesk);
-      } else if (otherAuthors[3]) {
-        result.push(otherAuthors[3]);
-      }
-      
-      return result;
+      if (error) throw error;
+      return data || [];
     },
   });
 
@@ -195,7 +163,7 @@ const Index = () => {
     },
   });
 
-  const { data: editorsPick } = useQuery({
+  const { data: editorsPick, isLoading: isEditorsPickLoading } = useQuery({
     queryKey: ["editors-pick-homepage"],
     staleTime: 10 * 60 * 1000, // 10 minutes
     queryFn: async () => {
@@ -204,7 +172,14 @@ const Index = () => {
         .select(`
           article_id,
           articles (
-            *,
+            id,
+            title,
+            slug,
+            excerpt,
+            featured_image_url,
+            featured_image_alt,
+            reading_time_minutes,
+            published_at,
             authors (name, slug),
             categories:primary_category_id (name, slug)
           )
@@ -301,6 +276,8 @@ const Index = () => {
       setIsNewsletterSubmitting(false);
     }
   };
+
+  const isLoading = isFeaturedLoading || isTrendingLoading || isLatestLoading || isAuthorsLoading || isEditorsPickLoading;
 
   if (isLoading) {
     return (
