@@ -102,7 +102,7 @@ serve(async (req) => {
     // Authors
     authors?.forEach(author => {
       sitemap += `  <url>
-    <loc>${baseUrl}/author/${author.slug}</loc>
+    <loc>${baseUrl}/voices/${author.slug}</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>\n`;

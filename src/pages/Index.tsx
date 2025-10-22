@@ -631,7 +631,7 @@ const Index = () => {
               {featuredAuthors?.map((author) => (
                 <Link 
                   key={author.id} 
-                  to={`/author/${author.slug}`}
+                  to={`/voices/${author.slug}`}
                   className="bg-card border border-border rounded-lg p-6 text-center hover:shadow-lg transition-shadow"
                 >
                   {author.avatar_url ? (

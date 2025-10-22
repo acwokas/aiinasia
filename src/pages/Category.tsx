@@ -532,7 +532,7 @@ const Category = () => {
                 {featuredVoices.map((author) => (
                   <Link
                     key={author.id}
-                    to={`/author/${author.slug}`}
+                    to={`/voices/${author.slug}`}
                     className="group"
                   >
                     <Card className="p-6 hover:shadow-lg transition-shadow">
