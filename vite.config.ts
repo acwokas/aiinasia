@@ -47,16 +47,16 @@ export default defineConfig(({ mode }) => ({
     modulePreload: {
       polyfill: true,
     },
-    minify: 'terser',
-    terserOptions: {
+    minify: mode === 'production' ? 'terser' : false,
+    terserOptions: mode === 'production' ? {
       compress: {
-        drop_console: mode === 'production',
-        drop_debugger: mode === 'production',
-        pure_funcs: mode === 'production' ? ['console.log', 'console.info', 'console.debug', 'console.warn'] : [],
+        drop_console: true,
+        drop_debugger: true,
+        pure_funcs: ['console.log', 'console.info', 'console.debug', 'console.warn'],
       },
       mangle: {
         safari10: true,
       },
-    },
+    } : undefined,
   },
 }));
