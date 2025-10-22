@@ -2,12 +2,10 @@ import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 const WelcomePopup = () => {
   const [isVisible, setIsVisible] = useState(false);
   const navigate = useNavigate();
-  const isMobile = useIsMobile();
 
   useEffect(() => {
     const hasSeenWelcome = localStorage.getItem("welcome-popup-seen");
@@ -48,42 +46,26 @@ const WelcomePopup = () => {
         <div className="space-y-6">
           <div className="space-y-3">
             <h2 className="headline text-3xl text-primary">
-              Welcome to the New AI in Asia{isMobile ? "!" : ""}
+              Welcome to the New AI in Asia!
             </h2>
             <div className="prose prose-sm max-w-none text-muted-foreground space-y-3">
-              {isMobile ? (
-                <>
-                  <p>
-                    We've had a glow up and joined the <strong>You.WithThePowerOf.AI Collective</strong> to 
-                    bring you more stories, ideas, inspiration, and an active community.
-                  </p>
-                  <p>
-                    🎁 <strong>New:</strong> Sign up for a free account to earn rewards across all projects.
-                  </p>
-                  <p>
-                    Thanks for being part of the journey. Your support keeps this amazing community thriving!
-                  </p>
-                </>
-              ) : (
-                <>
-                  <p>
-                    We've had a glow up! Our redesigned home is now part of the <strong>You.WithThePowerOf.AI Collective</strong>, 
-                    bringing you even more stories, ideas, and inspiration from across the region.
-                  </p>
-                  <p>
-                    Thanks for being here, whether you've been with us from the start or just found us, 
-                    you're what makes this community special.
-                  </p>
-                  <p>
-                    🎁 <strong>New:</strong> Create a free account to earn rewards you can use across all 
-                    You.WithThePowerOf.AI projects.
-                  </p>
-                  <p className="text-sm italic">
-                    Have thoughts or ideas? Tell us! This space is built for curious minds like yours, 
-                    and we want to keep shaping it together.
-                  </p>
-                </>
-              )}
+              <p>
+                We're thrilled to welcome you to our completely redesigned and upgraded website! 
+                AI in Asia is now proudly part of the <strong>You.WithThePowerOf.AI Collective</strong>, 
+                bringing you even more insights, resources, and community.
+              </p>
+              <p>
+                <strong>Thank you</strong> for being part of our journey and coming back to explore 
+                what's new. Your support means everything to us!
+              </p>
+              <p>
+                🎁 <strong>New feature:</strong> Sign up for an account to earn awards that can be 
+                used across the entire You.WithThePowerOf.AI ecosystem!
+              </p>
+              <p className="text-sm italic">
+                Have ideas or feedback? We'd love to hear from you – this is your community, 
+                and we want to make it the best it can be!
+              </p>
             </div>
           </div>
 
