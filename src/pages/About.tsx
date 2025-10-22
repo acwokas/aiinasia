@@ -102,28 +102,28 @@ const About = () => {
                 <Card className="p-6 hover:shadow-lg transition-shadow">
                   <div className="flex items-center gap-3 mb-3">
                     <Target className="h-10 w-10 text-primary" />
-                    <strong className="text-2xl font-bold">2022</strong>
+                    <strong className="text-2xl font-bold text-primary">2022</strong>
                   </div>
                   <p className="text-sm text-muted-foreground leading-relaxed">Covering Asia's AI evolution since 2022</p>
                 </Card>
                 <Card className="p-6 hover:shadow-lg transition-shadow">
                   <div className="flex items-center gap-3 mb-3">
                     <Globe className="h-10 w-10 text-primary" />
-                    <strong className="text-2xl font-bold">20+</strong>
+                    <strong className="text-2xl font-bold text-primary">20+</strong>
                   </div>
                   <p className="text-sm text-muted-foreground leading-relaxed">Read by professionals in 20+ countries across Asia-Pacific</p>
                 </Card>
                 <Card className="p-6 hover:shadow-lg transition-shadow">
                   <div className="flex items-center gap-3 mb-3">
                     <Users className="h-10 w-10 text-primary" />
-                    <strong className="text-2xl font-bold">4000+</strong>
+                    <strong className="text-2xl font-bold text-primary">4000+</strong>
                   </div>
                   <p className="text-sm text-muted-foreground leading-relaxed">Home to 4,000+ reader insights and discussions</p>
                 </Card>
                 <Card className="p-6 hover:shadow-lg transition-shadow">
                   <div className="flex items-center gap-3 mb-3">
                     <TrendingUp className="h-10 w-10 text-primary" />
-                    <strong className="text-2xl font-bold">Daily</strong>
+                    <strong className="text-2xl font-bold text-primary">Daily</strong>
                   </div>
                   <p className="text-sm text-muted-foreground leading-relaxed">Updated daily with AI news, analysis, and research across the region</p>
                 </Card>
