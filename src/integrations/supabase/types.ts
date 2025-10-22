@@ -350,6 +350,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "articles_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "authors_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "articles_primary_category_id_fkey"
             columns: ["primary_category_id"]
             isOneToOne: false
@@ -1063,7 +1070,45 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      authors_public: {
+        Row: {
+          article_count: number | null
+          avatar_url: string | null
+          bio: string | null
+          created_at: string | null
+          id: string | null
+          job_title: string | null
+          name: string | null
+          slug: string | null
+          twitter_handle: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          article_count?: number | null
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          id?: string | null
+          job_title?: string | null
+          name?: string | null
+          slug?: string | null
+          twitter_handle?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          article_count?: number | null
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          id?: string | null
+          job_title?: string | null
+          name?: string | null
+          slug?: string | null
+          twitter_handle?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       award_points: {
@@ -1081,14 +1126,8 @@ export type Database = {
         }
         Returns: boolean
       }
-      update_streak: {
-        Args: { _user_id: string }
-        Returns: undefined
-      }
-      update_trending_articles: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      update_streak: { Args: { _user_id: string }; Returns: undefined }
+      update_trending_articles: { Args: never; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "editor" | "contributor" | "user"

@@ -1,5 +1,3 @@
-import { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
-
 /**
  * Reusable auth helper to verify admin role
  * Throws an error if the user is not an admin
@@ -8,7 +6,7 @@ import { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
  * @param userId - User ID to check
  * @throws Error if user is not an admin
  */
-export async function requireAdmin(supabase: SupabaseClient, userId: string): Promise<void> {
+export async function requireAdmin(supabase: any, userId: string): Promise<void> {
   const { data: isAdmin } = await supabase.rpc('has_role', {
     _user_id: userId,
     _role: 'admin'
@@ -26,7 +24,7 @@ export async function requireAdmin(supabase: SupabaseClient, userId: string): Pr
  * @param authHeader - Authorization header value
  * @returns User object if valid, null otherwise
  */
-export async function getUserFromAuth(supabase: SupabaseClient, authHeader: string | null) {
+export async function getUserFromAuth(supabase: any, authHeader: string | null) {
   if (!authHeader) {
     return null;
   }

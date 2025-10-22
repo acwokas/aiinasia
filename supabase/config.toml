@@ -41,3 +41,12 @@ verify_jwt = true
 
 [functions.download-and-upload-image]
 verify_jwt = true
+
+[functions.clean-article-formatting]
+verify_jwt = true
+
+[functions.publish-all-articles]
+verify_jwt = true
+
+[functions.scrape-ai-events]
+verify_jwt = true

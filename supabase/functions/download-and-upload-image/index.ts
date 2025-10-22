@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { requireAdmin, getUserFromAuth } from '../_shared/requireAdmin.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -64,6 +65,31 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Initialize Supabase client for authentication
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    
+    if (!supabaseUrl || !supabaseServiceKey) {
+      const errorMsg = 'Missing Supabase environment variables';
+      console.error(errorMsg);
+      throw new Error(errorMsg);
+    }
+    
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Verify admin authentication
+    const authHeader = req.headers.get('Authorization');
+    const user = await getUserFromAuth(supabase, authHeader);
+    
+    if (!user) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    await requireAdmin(supabase, user.id);
+
     const { imageUrl, fileName }: DownloadRequest = await req.json();
 
     if (!imageUrl || !fileName) {
@@ -130,18 +156,7 @@ Deno.serve(async (req) => {
       throw new Error(`Failed to download image. Tried ${urlVariants.length} URL variants. Image may not exist on server.`);
     }
 
-    // Upload to Supabase Storage
-    const supabaseUrl = Deno.env.get('SUPABASE_URL');
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-    
-    if (!supabaseUrl || !supabaseServiceKey) {
-      const errorMsg = 'Missing Supabase environment variables';
-      console.error(errorMsg);
-      throw new Error(errorMsg);
-    }
-    
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
+    // Upload to Supabase Storage (using existing client)
     const filePath = `migrated/${Date.now()}-${fileName}`;
 
     console.log(`Uploading to storage: ${filePath}`);
