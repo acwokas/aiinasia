@@ -123,7 +123,7 @@ const About = () => {
                 <Card className="p-6 hover:shadow-lg transition-shadow">
                   <div className="flex items-center gap-3 mb-3">
                     <TrendingUp className="h-10 w-10 text-primary" />
-                    <strong className="text-2xl font-bold text-primary">Daily</strong>
+                    <strong className="text-2xl font-bold text-primary">24/7</strong>
                   </div>
                   <p className="text-sm text-muted-foreground leading-relaxed">Updated daily with AI news, analysis, and research across the region</p>
                 </Card>
