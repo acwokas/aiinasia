@@ -434,31 +434,118 @@ const Article = () => {
     // Otherwise try to parse as JSON blocks (legacy format)
     try {
       const blocks = typeof content === 'string' ? JSON.parse(content) : content;
+      
+      // Helper function to process inline formatting in text
+      const processInlineFormatting = (text: string) => {
+        if (!text || typeof text !== 'string') return text;
+        
+        // Process inline formatting
+        let processed = text
+          // Convert links
+          .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-primary underline hover:no-underline" target="_blank" rel="noopener noreferrer">$1</a>')
+          // Convert bold text
+          .replace(/\*\*([^\*]+?)\*\*/g, '<strong>$1</strong>')
+          // Convert italic text (single asterisks)
+          .replace(/(?<!\*)\*([^\*]+?)\*(?!\*)/g, '<em>$1</em>');
+        
+        return processed;
+      };
+      
       return blocks.map((block: any, index: number) => {
+        // Skip TL;DR headings (they should be in tldr_snapshot field instead)
+        if (block.type === 'heading' && block.content && 
+            (block.content.toLowerCase().includes('tl;dr') || block.content.toLowerCase().includes('tldr'))) {
+          return null;
+        }
+        
         switch (block.type) {
           case 'paragraph':
-            return <p key={index} className="leading-relaxed mb-6">{block.content}</p>;
+            if (!block.content) return null;
+            
+            // Check if this is an image caption (standalone text that looks like a caption)
+            const isLikelyImageCaption = block.content.length < 200 && 
+              !block.content.includes('.') && 
+              !block.content.includes('?') &&
+              !block.content.includes('[');
+            
+            // Check if paragraph is a quote (italic text in quotes)
+            const isQuote = block.content.startsWith('*"') && block.content.endsWith('"*');
+            
+            if (isQuote) {
+              const quoteText = block.content.replace(/^\*"|"\*$/g, '');
+              return (
+                <blockquote key={index} className="border-l-4 border-primary pl-6 py-2 my-8 italic text-xl">
+                  {quoteText}
+                </blockquote>
+              );
+            }
+            
+            const processedContent = processInlineFormatting(block.content);
+            return (
+              <p 
+                key={index} 
+                className={`leading-relaxed mb-6 ${isLikelyImageCaption ? 'text-sm text-muted-foreground text-center -mt-4' : ''}`}
+                dangerouslySetInnerHTML={{ __html: processedContent }}
+              />
+            );
+            
           case 'heading':
-            return <h2 key={index} className="headline text-3xl mt-8 mb-4">{block.content}</h2>;
+            const level = block.attrs?.level || 2;
+            const HeadingTag = `h${level}` as keyof JSX.IntrinsicElements;
+            const headingClasses = level === 1 ? "text-4xl font-bold mt-8 mb-4" :
+                                 level === 2 ? "text-3xl font-bold mt-8 mb-4" :
+                                 "text-2xl font-semibold mt-8 mb-4";
+            return (
+              <HeadingTag key={index} className={headingClasses}>
+                {block.content}
+              </HeadingTag>
+            );
+            
           case 'quote':
             return (
               <blockquote key={index} className="border-l-4 border-primary pl-6 py-2 my-8 italic text-xl">
                 {block.content}
               </blockquote>
             );
+            
+          case 'list':
+            const listItems = Array.isArray(block.content) ? block.content : [block.content];
+            const isOrdered = block.attrs?.listType === 'ordered';
+            const ListTag = isOrdered ? 'ol' : 'ul';
+            const listClass = isOrdered ? 'list-decimal ml-6 my-6' : 'list-disc ml-6 my-6';
+            
+            return (
+              <ListTag key={index} className={listClass}>
+                {listItems.map((item: string, i: number) => (
+                  <li 
+                    key={i} 
+                    className="leading-relaxed"
+                    dangerouslySetInnerHTML={{ __html: processInlineFormatting(item) }}
+                  />
+                ))}
+              </ListTag>
+            );
+            
           case 'image':
             return (
               <div key={index} className="my-8">
-                <img src={block.url} alt={block.alt || ''} className="w-full rounded-lg" />
-                {block.caption && (
-                  <p className="text-sm text-muted-foreground text-center mt-2">{block.caption}</p>
+                <img 
+                  src={block.attrs?.src || block.url} 
+                  alt={block.attrs?.alt || block.alt || ''} 
+                  className="w-full rounded-lg" 
+                />
+                {(block.attrs?.caption || block.caption) && (
+                  <p className="text-sm text-muted-foreground text-center mt-2">
+                    {block.attrs?.caption || block.caption}
+                  </p>
                 )}
               </div>
             );
+            
           default:
             return null;
         }
-      });
+      }).filter(Boolean);
     } catch (error) {
       return <p className="leading-relaxed mb-6">{content}</p>;
     }
