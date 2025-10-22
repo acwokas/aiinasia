@@ -62,8 +62,10 @@ const Category = () => {
         
         if (error) throw error;
         
-        // Extract articles from the nested structure
-        const voicesArticles = data?.map(item => item.articles).filter(Boolean) || [];
+        // Extract articles from the nested structure and filter out Intelligence Desk
+        const voicesArticles = data
+          ?.map(item => item.articles)
+          .filter(article => article && article.authors?.name !== 'Intelligence Desk') || [];
         
         // Sort: Latest first, then prioritize Adrian Watkins
         return voicesArticles.sort((a: any, b: any) => {
@@ -99,6 +101,60 @@ const Category = () => {
       
       if (error) throw error;
       return data;
+    },
+  });
+
+  // Fetch Koo Ping Shung's articles for "The View From Koo" section
+  const { data: kooArticles } = useQuery({
+    queryKey: ["koo-articles", category?.id],
+    enabled: category?.slug === "voices" && !!category?.id,
+    queryFn: async () => {
+      if (!category?.id) return [];
+
+      const { data, error } = await supabase
+        .from("article_categories")
+        .select(`
+          articles (
+            *,
+            authors!inner (name, slug),
+            categories:primary_category_id (name, slug)
+          )
+        `)
+        .eq("category_id", category.id)
+        .eq("articles.status", "published")
+        .eq("articles.authors.name", "Koo Ping Shung")
+        .order("articles.published_at", { ascending: false })
+        .limit(3);
+      
+      if (error) throw error;
+      return data?.map(item => item.articles).filter(Boolean) || [];
+    },
+  });
+
+  // Fetch Adrian Watkins's articles for "Adrian's Arena" section
+  const { data: adrianArticles } = useQuery({
+    queryKey: ["adrian-articles", category?.id],
+    enabled: category?.slug === "voices" && !!category?.id,
+    queryFn: async () => {
+      if (!category?.id) return [];
+
+      const { data, error } = await supabase
+        .from("article_categories")
+        .select(`
+          articles (
+            *,
+            authors!inner (name, slug),
+            categories:primary_category_id (name, slug)
+          )
+        `)
+        .eq("category_id", category.id)
+        .eq("articles.status", "published")
+        .eq("articles.authors.name", "Adrian Watkins")
+        .order("articles.published_at", { ascending: false })
+        .limit(3);
+      
+      if (error) throw error;
+      return data?.map(item => item.articles).filter(Boolean) || [];
     },
   });
 
@@ -322,8 +378,8 @@ const Category = () => {
 
   const featuredArticle = articles?.[0];
   const secondFeaturedArticle = editorsChoiceArticle || articles?.[1];
-  const latestArticles = articles?.slice(2, 10) || [];
-  const moreArticles = articles?.slice(10) || [];
+  const latestArticles = category?.slug === 'voices' ? articles?.slice(1, 3) || [] : articles?.slice(2, 10) || [];
+  const moreArticles = category?.slug === 'voices' ? articles?.slice(3) || [] : articles?.slice(10) || [];
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -423,82 +479,197 @@ const Category = () => {
             </section>
           )}
 
-          {/* Featured & Latest Articles with Ad */}
-          <section className="mb-12">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-              {/* Featured Article - Larger Card on Left */}
-              {featuredArticle && (
-                <div className="lg:col-span-8">
-                  <Card className="overflow-hidden hover:shadow-xl transition-shadow group">
-                    <Link to={`/${category?.slug}/${featuredArticle.slug}`}>
-                      <div className="relative aspect-[16/9] overflow-hidden">
+          {/* Latest Articles Section - Full Width for Voices */}
+          {category?.slug === 'voices' ? (
+            <section className="mb-12">
+              <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+                <Clock className="h-6 w-6 text-primary" />
+                Latest
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {latestArticles.map((article) => (
+                  <Card key={article.id} className="overflow-hidden hover:shadow-xl transition-shadow group">
+                    <Link to={`/${category?.slug}/${article.slug}`}>
+                      <div className="relative aspect-video overflow-hidden">
                         <img 
-                          src={featuredArticle.featured_image_url} 
-                          alt={featuredArticle.title}
+                          src={article.featured_image_url} 
+                          alt={article.title}
                           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                         />
-                        <div className="absolute top-4 left-4">
-                          <Badge className="bg-primary text-primary-foreground">
-                            Featured
-                          </Badge>
-                        </div>
                       </div>
                       <div className="p-6">
-                        <h2 className="headline text-2xl md:text-3xl mb-3 group-hover:text-primary transition-colors">
-                          {featuredArticle.title.replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'")}
-                        </h2>
-                        <p className="text-muted-foreground mb-4 line-clamp-2">
-                          {featuredArticle.excerpt}
-                        </p>
+                        <h3 className="headline text-xl mb-2 group-hover:text-primary transition-colors">
+                          {article.title.replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'")}
+                        </h3>
                         <div className="flex items-center justify-between text-sm text-muted-foreground">
-                          <span>{featuredArticle.authors?.name}</span>
+                          <span>{article.authors?.name}</span>
                           <span className="flex items-center gap-1">
                             <Clock className="h-3 w-3" />
-                            {featuredArticle.reading_time_minutes || 5} min
+                            {article.reading_time_minutes || 5} min
                           </span>
                         </div>
                       </div>
                     </Link>
                   </Card>
-                </div>
-              )}
-
-              {/* Right Column: Ad + Latest Mini */}
-              <div className="lg:col-span-4 space-y-6">
-                <MPUAd />
-
-                <div>
-                  <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-                    <Clock className="h-5 w-5 text-primary" />
-                    Latest
-                  </h3>
-                  <div className="space-y-3">
-                    {latestArticles.slice(0, 4).map((article) => (
-                      <Link 
-                        key={article.id}
-                        to={`/${category?.slug}/${article.slug}`}
-                        className="flex gap-3 group"
-                      >
-                        <img 
-                          src={article.featured_image_url} 
-                          alt={article.title}
-                          className="w-20 h-20 object-cover rounded-lg flex-shrink-0 group-hover:opacity-80 transition-opacity"
-                        />
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-semibold text-sm line-clamp-2 group-hover:text-primary transition-colors">
-                            {article.title.replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'")}
-                          </h4>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {article.reading_time_minutes || 5} min
+                ))}
+              </div>
+            </section>
+          ) : (
+            // Standard Layout for Other Categories
+            <section className="mb-12">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                {/* Featured Article - Larger Card on Left */}
+                {featuredArticle && (
+                  <div className="lg:col-span-8">
+                    <Card className="overflow-hidden hover:shadow-xl transition-shadow group">
+                      <Link to={`/${category?.slug}/${featuredArticle.slug}`}>
+                        <div className="relative aspect-[16/9] overflow-hidden">
+                          <img 
+                            src={featuredArticle.featured_image_url} 
+                            alt={featuredArticle.title}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          />
+                          <div className="absolute top-4 left-4">
+                            <Badge className="bg-primary text-primary-foreground">
+                              Featured
+                            </Badge>
+                          </div>
+                        </div>
+                        <div className="p-6">
+                          <h2 className="headline text-2xl md:text-3xl mb-3 group-hover:text-primary transition-colors">
+                            {featuredArticle.title.replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'")}
+                          </h2>
+                          <p className="text-muted-foreground mb-4 line-clamp-2">
+                            {featuredArticle.excerpt}
                           </p>
+                          <div className="flex items-center justify-between text-sm text-muted-foreground">
+                            <span>{featuredArticle.authors?.name}</span>
+                            <span className="flex items-center gap-1">
+                              <Clock className="h-3 w-3" />
+                              {featuredArticle.reading_time_minutes || 5} min
+                            </span>
+                          </div>
                         </div>
                       </Link>
-                    ))}
+                    </Card>
+                  </div>
+                )}
+
+                {/* Right Column: Ad + Latest Mini */}
+                <div className="lg:col-span-4 space-y-6">
+                  <MPUAd />
+
+                  <div>
+                    <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+                      <Clock className="h-5 w-5 text-primary" />
+                      Latest
+                    </h3>
+                    <div className="space-y-3">
+                      {latestArticles.slice(0, 4).map((article) => (
+                        <Link 
+                          key={article.id}
+                          to={`/${category?.slug}/${article.slug}`}
+                          className="flex gap-3 group"
+                        >
+                          <img 
+                            src={article.featured_image_url} 
+                            alt={article.title}
+                            className="w-20 h-20 object-cover rounded-lg flex-shrink-0 group-hover:opacity-80 transition-opacity"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-semibold text-sm line-clamp-2 group-hover:text-primary transition-colors">
+                              {article.title.replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'")}
+                            </h4>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {article.reading_time_minutes || 5} min
+                            </p>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </section>
+            </section>
+          )}
+
+          {/* The View From Koo - Only for Voices Category */}
+          {category?.slug === 'voices' && kooArticles && kooArticles.length > 0 && (
+            <section className="mb-12 bg-gradient-to-br from-secondary/5 to-accent/5 rounded-xl p-6 border">
+              <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+                <Sparkles className="h-6 w-6 text-primary" />
+                The View From Koo
+              </h2>
+              <div className="space-y-4">
+                {kooArticles.map((article, index) => (
+                  <div key={article.id}>
+                    <Card className="overflow-hidden hover:shadow-lg transition-shadow group">
+                      <Link to={`/${category?.slug}/${article.slug}`} className="flex flex-col sm:flex-row gap-4 p-4">
+                        <img 
+                          src={article.featured_image_url} 
+                          alt={article.title}
+                          className="w-full sm:w-40 h-40 object-cover rounded-lg flex-shrink-0"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <h3 className="headline text-xl mb-2 group-hover:text-primary transition-colors">
+                            {article.title.replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'")}
+                          </h3>
+                          <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+                            {article.excerpt}
+                          </p>
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <span>{article.authors?.name}</span>
+                            <span>•</span>
+                            <span>{article.reading_time_minutes || 5} min</span>
+                          </div>
+                        </div>
+                      </Link>
+                    </Card>
+                    {index < kooArticles.length - 1 && <Separator className="my-4" />}
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Adrian's Arena - Only for Voices Category */}
+          {category?.slug === 'voices' && adrianArticles && adrianArticles.length > 0 && (
+            <section className="mb-12 bg-gradient-to-br from-primary/5 to-secondary/5 rounded-xl p-6 border">
+              <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+                <Sparkles className="h-6 w-6 text-primary" />
+                Adrian's Arena
+              </h2>
+              <div className="space-y-4">
+                {adrianArticles.map((article, index) => (
+                  <div key={article.id}>
+                    <Card className="overflow-hidden hover:shadow-lg transition-shadow group">
+                      <Link to={`/${category?.slug}/${article.slug}`} className="flex flex-col sm:flex-row gap-4 p-4">
+                        <img 
+                          src={article.featured_image_url} 
+                          alt={article.title}
+                          className="w-full sm:w-40 h-40 object-cover rounded-lg flex-shrink-0"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <h3 className="headline text-xl mb-2 group-hover:text-primary transition-colors">
+                            {article.title.replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'")}
+                          </h3>
+                          <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+                            {article.excerpt}
+                          </p>
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <span>{article.authors?.name}</span>
+                            <span>•</span>
+                            <span>{article.reading_time_minutes || 5} min</span>
+                          </div>
+                        </div>
+                      </Link>
+                    </Card>
+                    {index < adrianArticles.length - 1 && <Separator className="my-4" />}
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
 
           {/* Second Featured Article - Horizontal Layout */}
           {secondFeaturedArticle && (
