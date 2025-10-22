@@ -11,7 +11,26 @@ import { PromptAndGoBanner } from "@/components/PromptAndGoBanner";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, TrendingUp, Clock, Tag as TagIcon, Sparkles, Eye, ArrowRight } from "lucide-react";
+import { 
+  Loader2, 
+  TrendingUp, 
+  Clock, 
+  Tag as TagIcon, 
+  Sparkles, 
+  Eye, 
+  ArrowRight,
+  MessageSquare,
+  Newspaper,
+  BarChart3,
+  Cpu,
+  Briefcase,
+  GraduationCap,
+  Globe,
+  Lightbulb,
+  Building2,
+  Rocket,
+  type LucideIcon
+} from "lucide-react";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -20,6 +39,20 @@ import {
   BreadcrumbSeparator,
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
+
+// Category icon mapping
+const categoryIcons: Record<string, LucideIcon> = {
+  'voices': MessageSquare,
+  'news': Newspaper,
+  'analysis': BarChart3,
+  'technology': Cpu,
+  'business': Briefcase,
+  'education': GraduationCap,
+  'research': Lightbulb,
+  'industry': Building2,
+  'innovation': Rocket,
+  'global': Globe,
+};
 
 const Category = () => {
   const { slug } = useParams();
@@ -511,7 +544,13 @@ const Category = () => {
             </Breadcrumb>
             
             <div className="max-w-4xl">
-              <h1 className="headline text-4xl md:text-5xl mb-3">
+              <h1 className="headline text-4xl md:text-5xl mb-3 flex items-center gap-4">
+                {category?.slug && categoryIcons[category.slug] && 
+                  (() => {
+                    const Icon = categoryIcons[category.slug];
+                    return <Icon className="h-10 w-10 md:h-12 md:w-12 text-primary" />;
+                  })()
+                }
                 {category?.name}
               </h1>
               {category?.description && (
