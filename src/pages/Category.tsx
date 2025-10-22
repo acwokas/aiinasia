@@ -919,8 +919,8 @@ const Category = () => {
                           key={article.id}
                           title={article.title}
                           excerpt={article.excerpt || ""}
-                          category={category?.name || ""}
-                          categorySlug={category?.slug || "uncategorized"}
+                          category={article.categories?.name || category?.name || ""}
+                          categorySlug={article.categories?.slug || category?.slug || "uncategorized"}
                           author={article.authors?.name || ""}
                           readTime={`${article.reading_time_minutes || 5} min read`}
                           image={article.featured_image_url || ""}
