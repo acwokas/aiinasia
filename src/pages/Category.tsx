@@ -166,6 +166,69 @@ const Category = () => {
     },
   });
 
+  // Fetch Editor's Pick - Most popular article excluding featured and latest
+  const { data: editorsPick } = useQuery({
+    queryKey: ["editors-pick", category?.id, articles],
+    enabled: !!category?.id && !!articles,
+    queryFn: async () => {
+      if (!category?.id || !articles) return null;
+
+      // Get IDs to exclude (featured article + latest articles shown)
+      const excludeIds = [
+        articles[0]?.id, // Featured article
+        ...(articles.slice(0, 4).map(a => a.id)) // Latest articles shown in sidebar
+      ].filter(Boolean);
+
+      // Special handling for Voices category
+      if (slug === 'voices') {
+        const { data, error } = await supabase
+          .from("article_categories")
+          .select(`
+            articles (
+              *,
+              authors (name, slug),
+              categories:primary_category_id (name, slug)
+            )
+          `)
+          .eq("category_id", category.id)
+          .eq("articles.status", "published");
+        
+        if (error) throw error;
+        
+        // Extract articles, filter out Intelligence Desk and excluded IDs
+        const voicesArticles = data
+          ?.map(item => item.articles)
+          .filter(article => 
+            article && 
+            article.authors?.name !== 'Intelligence Desk' &&
+            !excludeIds.includes(article.id)
+          ) || [];
+        
+        // Sort by view count and get the top one
+        return voicesArticles
+          .sort((a: any, b: any) => (b.view_count || 0) - (a.view_count || 0))[0] || null;
+      }
+
+      // Regular categories
+      const { data, error } = await supabase
+        .from("articles")
+        .select(`
+          *,
+          authors (name, slug),
+          categories:primary_category_id (name, slug)
+        `)
+        .eq("primary_category_id", category.id)
+        .eq("status", "published")
+        .not("id", "in", `(${excludeIds.join(",")})`)
+        .order("view_count", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const { data: mostReadArticles } = useQuery({
     queryKey: ["category-most-read", slug],
     enabled: !!category?.id,
@@ -366,7 +429,6 @@ const Category = () => {
   }
 
   const featuredArticle = articles?.[0];
-  const secondFeaturedArticle = editorsChoiceArticle || articles?.[1];
   const latestArticles = category?.slug === 'voices' ? articles?.slice(1, 3) || [] : articles?.slice(2, 10) || [];
   const moreArticles = category?.slug === 'voices' ? articles?.slice(3) || [] : articles?.slice(10) || [];
 
@@ -620,16 +682,16 @@ const Category = () => {
           )}
 
 
-          {/* Editor's Pick - Horizontal Layout (show for Voices) */}
-          {category?.slug === 'voices' && secondFeaturedArticle && (
+          {/* Editor's Pick - Horizontal Layout (shown for all categories) */}
+          {editorsPick && (
             <section className="mb-12">
               <h2 className="text-2xl font-bold mb-6">Editor's Pick</h2>
               <Card className="overflow-hidden hover:shadow-xl transition-shadow group">
-                <Link to={`/${category?.slug}/${secondFeaturedArticle.slug}`} className="flex flex-col md:flex-row gap-0">
+                <Link to={`/${category?.slug}/${editorsPick.slug}`} className="flex flex-col md:flex-row gap-0">
                   <div className="md:w-2/5 relative aspect-video md:aspect-auto overflow-hidden">
                     <img 
-                      src={secondFeaturedArticle.featured_image_url} 
-                      alt={secondFeaturedArticle.title}
+                      src={editorsPick.featured_image_url} 
+                      alt={editorsPick.title}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                   </div>
@@ -638,75 +700,25 @@ const Category = () => {
                       Editor's Pick
                     </Badge>
                     <h2 className="headline text-2xl md:text-3xl mb-4 group-hover:text-primary transition-colors">
-                      {secondFeaturedArticle.title.replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'")}
+                      {editorsPick.title.replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'")}
                     </h2>
                     <p className="text-muted-foreground mb-4 line-clamp-3">
-                      {secondFeaturedArticle.excerpt}
+                      {editorsPick.excerpt}
                     </p>
                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
                       <span className="flex items-center gap-2">
-                        {secondFeaturedArticle.authors?.name}
+                        {editorsPick.authors?.name}
                       </span>
                       <span>•</span>
                       <span className="flex items-center gap-1">
                         <Clock className="h-3 w-3" />
-                        {secondFeaturedArticle.reading_time_minutes || 5} min read
+                        {editorsPick.reading_time_minutes || 5} min read
                       </span>
-                      {secondFeaturedArticle.published_at && (
+                      {editorsPick.published_at && (
                         <>
                           <span>•</span>
                           <span>
-                            {new Date(secondFeaturedArticle.published_at).toLocaleDateString("en-US", {
-                              month: "short",
-                              day: "numeric",
-                              year: "numeric",
-                            })}
-                          </span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </Link>
-              </Card>
-            </section>
-          )}
-
-          {/* Second Featured Article for Other Categories */}
-          {category?.slug !== 'voices' && secondFeaturedArticle && (
-            <section className="mb-12">
-              <Card className="overflow-hidden hover:shadow-xl transition-shadow group">
-                <Link to={`/${category?.slug}/${secondFeaturedArticle.slug}`} className="flex flex-col md:flex-row gap-0">
-                  <div className="md:w-2/5 relative aspect-video md:aspect-auto overflow-hidden">
-                    <img 
-                      src={secondFeaturedArticle.featured_image_url} 
-                      alt={secondFeaturedArticle.title}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                  </div>
-                  <div className="md:w-3/5 p-6 md:p-8 flex flex-col justify-center">
-                    <Badge className="w-fit mb-3 bg-secondary text-secondary-foreground">
-                      Editor's Pick
-                    </Badge>
-                    <h2 className="headline text-2xl md:text-3xl mb-4 group-hover:text-primary transition-colors">
-                      {secondFeaturedArticle.title.replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'")}
-                    </h2>
-                    <p className="text-muted-foreground mb-4 line-clamp-3">
-                      {secondFeaturedArticle.excerpt}
-                    </p>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <span className="flex items-center gap-2">
-                        {secondFeaturedArticle.authors?.name}
-                      </span>
-                      <span>•</span>
-                      <span className="flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
-                        {secondFeaturedArticle.reading_time_minutes || 5} min read
-                      </span>
-                      {secondFeaturedArticle.published_at && (
-                        <>
-                          <span>•</span>
-                          <span>
-                            {new Date(secondFeaturedArticle.published_at).toLocaleDateString("en-US", {
+                            {new Date(editorsPick.published_at).toLocaleDateString("en-US", {
                               month: "short",
                               day: "numeric",
                               year: "numeric",
