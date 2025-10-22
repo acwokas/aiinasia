@@ -18,7 +18,7 @@ import { BusinessInAByteAd } from "@/components/BusinessInAByteAd";
 import RecommendedArticles from "@/components/RecommendedArticles";
 import { EditorsPick } from "@/components/EditorsPick";
 import { z } from "zod";
-import { getOptimizedAvatar, getOptimizedHeroImage, getOptimizedThumbnail, generateResponsiveSrcSet } from "@/lib/imageOptimization";
+import { getOptimizedAvatar, getOptimizedHeroImage, getOptimizedThumbnail, getOptimizedSmallThumbnail, generateResponsiveSrcSet } from "@/lib/imageOptimization";
 
 const newsletterSchema = z.object({
   email: z.string()
@@ -382,7 +382,7 @@ const Index = () => {
                   <div className={`relative ${index === 0 ? 'aspect-video' : 'aspect-[16/9]'} overflow-hidden rounded-lg mb-2`}>
                     <img 
                       src={getOptimizedThumbnail(article.featured_image_url || "/placeholder.svg", index === 0 ? 400 : 200, index === 0 ? 300 : 150)} 
-                      srcSet={article.featured_image_url?.includes('supabase.co/storage') ? generateResponsiveSrcSet(article.featured_image_url, index === 0 ? [400, 600, 800] : [200, 300, 400]) : undefined}
+                      srcSet={article.featured_image_url?.includes('supabase.co/storage') ? generateResponsiveSrcSet(article.featured_image_url, index === 0 ? [320, 480, 640] : [200, 320, 480]) : undefined}
                       sizes={index === 0 ? "(max-width: 768px) 100vw, 400px" : "(max-width: 768px) 100vw, 200px"}
                       alt={article.title}
                       loading="lazy"
@@ -560,7 +560,7 @@ const Index = () => {
                         <div className="relative aspect-video overflow-hidden rounded-lg mb-2">
                           <img 
                             src={getOptimizedThumbnail(article.featured_image_url || "/placeholder.svg", 320, 180)} 
-                            srcSet={article.featured_image_url?.includes('supabase.co/storage') ? generateResponsiveSrcSet(article.featured_image_url, [160, 320, 480]) : undefined}
+                            srcSet={article.featured_image_url?.includes('supabase.co/storage') ? generateResponsiveSrcSet(article.featured_image_url, [240, 320, 480]) : undefined}
                             sizes="(max-width: 768px) 100vw, 320px"
                             alt={article.title}
                             loading="lazy"
@@ -584,8 +584,8 @@ const Index = () => {
                       <div className="flex gap-3">
                         <div className="relative w-20 h-20 flex-shrink-0 overflow-hidden rounded">
                           <img 
-                            src={getOptimizedThumbnail(article.featured_image_url || "/placeholder.svg", 160, 160)} 
-                            srcSet={article.featured_image_url?.includes('supabase.co/storage') ? generateResponsiveSrcSet(article.featured_image_url, [80, 160, 240]) : undefined}
+                            src={getOptimizedSmallThumbnail(article.featured_image_url || "/placeholder.svg", 80, 80)} 
+                            srcSet={article.featured_image_url?.includes('supabase.co/storage') ? generateResponsiveSrcSet(article.featured_image_url, [80, 120, 160]) : undefined}
                             sizes="80px"
                             alt={article.title}
                             loading="lazy"
@@ -645,9 +645,9 @@ const Index = () => {
                 >
                   {author.avatar_url ? (
                     <img 
-                      src={getOptimizedAvatar(author.avatar_url, 160)} 
-                      srcSet={author.avatar_url.includes('supabase.co/storage') ? generateResponsiveSrcSet(author.avatar_url, [80, 160, 240]) : undefined}
-                      sizes="(max-width: 768px) 80px, 160px"
+                      src={getOptimizedAvatar(author.avatar_url, 80)} 
+                      srcSet={author.avatar_url.includes('supabase.co/storage') ? generateResponsiveSrcSet(author.avatar_url, [80, 120, 160]) : undefined}
+                      sizes="80px"
                       alt={author.name}
                       className="w-20 h-20 rounded-full object-cover mx-auto mb-4 ring-2 ring-primary"
                       loading="lazy"

@@ -49,7 +49,7 @@ export function getOptimizedSupabaseImage(
  */
 export function generateResponsiveSrcSet(
   url: string,
-  widths: number[] = [320, 640, 960, 1280, 1920]
+  widths: number[] = [320, 480, 640, 960, 1280]
 ): string {
   if (!url.includes('supabase.co/storage')) {
     return '';
@@ -59,7 +59,7 @@ export function generateResponsiveSrcSet(
     .map((width) => {
       const optimizedUrl = getOptimizedSupabaseImage(url, { 
         width,
-        quality: 85 // Slightly higher quality for better compression
+        quality: 80 // Balanced quality for responsive images
       });
       return `${optimizedUrl} ${width}w`;
     })
@@ -70,12 +70,12 @@ export function generateResponsiveSrcSet(
  * Get optimized avatar image with DPR support
  */
 export function getOptimizedAvatar(url: string, size: number = 160): string {
-  // Request 2x size for Retina displays
-  const actualSize = size * 2;
+  // Match display size more precisely (1.5x for balance between quality and size)
+  const actualSize = Math.ceil(size * 1.5);
   return getOptimizedSupabaseImage(url, {
     width: actualSize,
     height: actualSize,
-    quality: 85,
+    quality: 75, // Lower quality for small avatars - still looks good
     format: 'webp',
     resize: 'cover',
   });
@@ -89,11 +89,11 @@ export function getOptimizedThumbnail(
   width: number = 400,
   height: number = 300
 ): string {
-  // Request 2x size for Retina displays
+  // Use 1.5x for balance (not full 2x to reduce file size)
   return getOptimizedSupabaseImage(url, {
-    width: width * 2,
-    height: height * 2,
-    quality: 85,
+    width: Math.ceil(width * 1.5),
+    height: Math.ceil(height * 1.5),
+    quality: 78, // Good balance for thumbnails
     format: 'webp',
     resize: 'cover',
   });
@@ -108,7 +108,26 @@ export function getOptimizedHeroImage(
 ): string {
   return getOptimizedSupabaseImage(url, {
     width,
-    quality: 85,
+    quality: 82,
     format: 'webp',
+  });
+}
+
+/**
+ * Get optimized small thumbnail (for sidebar, list items)
+ * Uses lower quality since small size makes it less noticeable
+ */
+export function getOptimizedSmallThumbnail(
+  url: string,
+  width: number = 160,
+  height: number = 160
+): string {
+  // Use exact requested size (no DPR multiplication for tiny thumbs)
+  return getOptimizedSupabaseImage(url, {
+    width,
+    height,
+    quality: 70, // Lower quality fine for small thumbnails
+    format: 'webp',
+    resize: 'cover',
   });
 }
