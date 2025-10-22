@@ -45,7 +45,7 @@ export function getOptimizedSupabaseImage(
 }
 
 /**
- * Generates srcset for responsive images
+ * Generates srcset for responsive images with proper DPR support
  */
 export function generateResponsiveSrcSet(
   url: string,
@@ -57,19 +57,24 @@ export function generateResponsiveSrcSet(
 
   return widths
     .map((width) => {
-      const optimizedUrl = getOptimizedSupabaseImage(url, { width });
+      const optimizedUrl = getOptimizedSupabaseImage(url, { 
+        width,
+        quality: 85 // Slightly higher quality for better compression
+      });
       return `${optimizedUrl} ${width}w`;
     })
     .join(', ');
 }
 
 /**
- * Get optimized avatar image
+ * Get optimized avatar image with DPR support
  */
 export function getOptimizedAvatar(url: string, size: number = 160): string {
+  // Request 2x size for Retina displays
+  const actualSize = size * 2;
   return getOptimizedSupabaseImage(url, {
-    width: size,
-    height: size,
+    width: actualSize,
+    height: actualSize,
     quality: 85,
     format: 'webp',
     resize: 'cover',
@@ -77,17 +82,18 @@ export function getOptimizedAvatar(url: string, size: number = 160): string {
 }
 
 /**
- * Get optimized article thumbnail
+ * Get optimized article thumbnail with DPR support
  */
 export function getOptimizedThumbnail(
   url: string,
   width: number = 400,
   height: number = 300
 ): string {
+  // Request 2x size for Retina displays
   return getOptimizedSupabaseImage(url, {
-    width,
-    height,
-    quality: 80,
+    width: width * 2,
+    height: height * 2,
+    quality: 85,
     format: 'webp',
     resize: 'cover',
   });
