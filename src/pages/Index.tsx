@@ -61,7 +61,7 @@ const Index = () => {
     queryKey: ["trending-articles"],
     staleTime: 4 * 24 * 60 * 60 * 1000, // 4 days cache
     queryFn: async () => {
-      // Get articles from past 14 days with engagement metrics
+      // Get articles from past 14 days, limit to 15 to reduce load
       const fourteenDaysAgo = new Date();
       fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
       
@@ -74,7 +74,8 @@ const Index = () => {
         `)
         .eq("status", "published")
         .gte("published_at", fourteenDaysAgo.toISOString())
-        .limit(30);
+        .order("view_count", { ascending: false, nullsFirst: false })
+        .limit(15);
       
       if (error) throw error;
       if (!articles || articles.length === 0) return [];
@@ -91,33 +92,8 @@ const Index = () => {
       // Sort by popularity score
       const sorted = articlesWithScore.sort((a, b) => b.popularityScore - a.popularityScore);
       
-      // Take top 8 for subtle shuffling
-      const topArticles = sorted.slice(0, 8);
-      
-      // Subtle shuffle: group by score tiers and shuffle within tiers
-      const tier1 = topArticles.slice(0, 2); // Top 2 stay in top positions
-      const tier2 = topArticles.slice(2, 5); // Next 3 can shuffle
-      const tier3 = topArticles.slice(5, 8); // Next 3 can shuffle
-      
-      // Shuffle within tiers using seeded randomness for consistency during cache
-      const shuffleArray = (arr: any[]) => {
-        const shuffled = [...arr];
-        for (let i = shuffled.length - 1; i > 0; i--) {
-          // Use current day as seed for subtle daily variation
-          const dayOfYear = Math.floor(Date.now() / (1000 * 60 * 60 * 24));
-          const j = Math.floor((Math.sin(dayOfYear * (i + 1)) + 1) * i / 2);
-          [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-        }
-        return shuffled;
-      };
-      
-      // Combine with subtle order variation
-      const result = [
-        ...shuffleArray(tier1),
-        ...shuffleArray(tier2),
-      ].slice(0, 5);
-      
-      return result;
+      // Take top 5 directly
+      return sorted.slice(0, 5);
     },
   });
 
@@ -125,28 +101,9 @@ const Index = () => {
     queryKey: ["latest-articles"],
     staleTime: 5 * 60 * 1000, // 5 minutes
     queryFn: async () => {
-      // First get sticky articles
-      const { data: stickyArticles, error: stickyError } = await supabase
-        .from("articles")
-        .select(`
-          *,
-          authors (name, slug),
-          categories:primary_category_id (name, slug)
-        `)
-        .eq("status", "published")
-        .eq("sticky", true)
-        .eq("featured_on_homepage", true)
-        .order("published_at", { ascending: false, nullsFirst: false })
-        .limit(3);
-      
-      if (stickyError) throw stickyError;
-      
-      // Then get remaining articles to fill up to 12
-      const stickyIds = (stickyArticles || []).map(a => a.id);
-      const remainingCount = 12 - (stickyArticles?.length || 0);
-      
-      if (remainingCount > 0) {
-        const query = supabase
+      // Fetch both sticky and regular articles in parallel
+      const [stickyResult, regularResult] = await Promise.all([
+        supabase
           .from("articles")
           .select(`
             *,
@@ -154,24 +111,32 @@ const Index = () => {
             categories:primary_category_id (name, slug)
           `)
           .eq("status", "published")
+          .eq("sticky", true)
           .eq("featured_on_homepage", true)
           .order("published_at", { ascending: false, nullsFirst: false })
-          .limit(remainingCount);
-        
-        // Exclude sticky articles if we have any
-        if (stickyIds.length > 0) {
-          query.not('id', 'in', `(${stickyIds.join(',')})`);
-        }
-        
-        const { data: regularArticles, error: regularError } = await query;
-        
-        if (regularError) throw regularError;
-        
-        // Combine sticky articles at the top with regular articles
-        return [...(stickyArticles || []), ...(regularArticles || [])];
-      }
+          .limit(3),
+        supabase
+          .from("articles")
+          .select(`
+            *,
+            authors (name, slug),
+            categories:primary_category_id (name, slug)
+          `)
+          .eq("status", "published")
+          .eq("sticky", false)
+          .eq("featured_on_homepage", true)
+          .order("published_at", { ascending: false, nullsFirst: false })
+          .limit(12)
+      ]);
       
-      return stickyArticles || [];
+      if (stickyResult.error) throw stickyResult.error;
+      if (regularResult.error) throw regularResult.error;
+      
+      const stickyArticles = stickyResult.data || [];
+      const regularArticles = regularResult.data || [];
+      
+      // Combine: sticky first, then regular, limit to 12 total
+      return [...stickyArticles, ...regularArticles].slice(0, 12);
     },
   });
 
@@ -179,44 +144,33 @@ const Index = () => {
     queryKey: ["featured-authors"],
     staleTime: 10 * 60 * 1000, // 10 minutes
     queryFn: async () => {
-      // Fetch Intelligence Desk author
-      const { data: intelligenceDesk, error: idError } = await supabase
-        .from("authors")
-        .select("*")
-        .eq("slug", "intelligence-desk")
-        .single();
+      // Fetch both Intelligence Desk and top authors in parallel
+      const [intelligenceDeskResult, topAuthorsResult] = await Promise.all([
+        supabase
+          .from("authors")
+          .select("*")
+          .eq("slug", "intelligence-desk")
+          .maybeSingle(),
+        supabase
+          .from("authors")
+          .select("*")
+          .neq("slug", "intelligence-desk")
+          .order("article_count", { ascending: false })
+          .limit(5)
+      ]);
       
-      if (idError && idError.code !== 'PGRST116') throw idError;
+      if (topAuthorsResult.error) throw topAuthorsResult.error;
       
-      // Fetch other top authors
-      const query = supabase
-        .from("authors")
-        .select("*")
-        .order("article_count", { ascending: false })
-        .limit(intelligenceDesk ? 5 : 4);
-      
-      // Exclude Intelligence Desk from main query if found
-      if (intelligenceDesk) {
-        query.neq("slug", "intelligence-desk");
-      }
-      
-      const { data: otherAuthors, error } = await query;
-      
-      if (error) throw error;
+      const intelligenceDesk = intelligenceDeskResult.data;
+      const otherAuthors = topAuthorsResult.data || [];
       
       // Arrange authors: first 3 from top authors, Intelligence Desk as 4th
-      const result = [];
-      const authors = otherAuthors || [];
+      const result = otherAuthors.slice(0, 3);
       
-      // Add first 3 top authors
-      result.push(...authors.slice(0, 3));
-      
-      // Add Intelligence Desk as 4th if available
       if (intelligenceDesk) {
         result.push(intelligenceDesk);
-      } else {
-        // If Intelligence Desk not found, just use the 4th author
-        if (authors[3]) result.push(authors[3]);
+      } else if (otherAuthors[3]) {
+        result.push(otherAuthors[3]);
       }
       
       return result;
