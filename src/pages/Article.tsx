@@ -16,6 +16,7 @@ import { Helmet } from "react-helmet";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
 import { useAdminRole } from "@/hooks/useAdminRole";
+import DOMPurify from "dompurify";
 
 const Article = () => {
   const { category, slug } = useParams();
@@ -435,7 +436,11 @@ const Article = () => {
         return `<p class="leading-relaxed mb-6">${block.replace(/\n/g, ' ')}</p>`;
       });
       
-      return <div dangerouslySetInnerHTML={{ __html: htmlBlocks.join('\n') }} />;
+      const sanitizedHtml = DOMPurify.sanitize(htmlBlocks.join('\n'), {
+        ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'a', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'blockquote', 'code', 'pre', 'div', 'span'],
+        ALLOWED_ATTR: ['href', 'target', 'rel', 'class']
+      });
+      return <div dangerouslySetInnerHTML={{ __html: sanitizedHtml }} />;
     }
     
     // Otherwise try to parse as JSON blocks (legacy format)
@@ -493,11 +498,15 @@ const Article = () => {
             }
             
             const processedContent = processInlineFormatting(block.content);
+            const sanitizedContent = DOMPurify.sanitize(processedContent, {
+              ALLOWED_TAGS: ['strong', 'em', 'a', 'br', 'span'],
+              ALLOWED_ATTR: ['href', 'target', 'rel', 'class']
+            });
             return (
               <p 
                 key={index} 
                 className={`leading-relaxed mb-6 ${isLikelyImageCaption ? 'text-sm text-muted-foreground text-center -mt-4' : ''}`}
-                dangerouslySetInnerHTML={{ __html: processedContent }}
+                dangerouslySetInnerHTML={{ __html: sanitizedContent }}
               />
             );
             
@@ -528,13 +537,19 @@ const Article = () => {
             
             return (
               <ListTag key={index} className={listClass}>
-                {listItems.map((item: string, i: number) => (
-                  <li 
-                    key={i} 
-                    className="leading-relaxed"
-                    dangerouslySetInnerHTML={{ __html: processInlineFormatting(item) }}
-                  />
-                ))}
+                {listItems.map((item: string, i: number) => {
+                  const sanitizedItem = DOMPurify.sanitize(processInlineFormatting(item), {
+                    ALLOWED_TAGS: ['strong', 'em', 'a', 'br', 'span'],
+                    ALLOWED_ATTR: ['href', 'target', 'rel', 'class']
+                  });
+                  return (
+                    <li 
+                      key={i} 
+                      className="leading-relaxed"
+                      dangerouslySetInnerHTML={{ __html: sanitizedItem }}
+                    />
+                  );
+                })}
               </ListTag>
             );
             
