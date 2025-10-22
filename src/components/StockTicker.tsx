@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { TrendingUp, TrendingDown } from "lucide-react";
@@ -84,4 +85,4 @@ const StockTicker = () => {
   );
 };
 
-export default StockTicker;
+export default memo(StockTicker);

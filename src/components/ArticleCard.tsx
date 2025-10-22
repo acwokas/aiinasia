@@ -1,3 +1,5 @@
+import { memo } from "react";
+import { Link } from "react-router-dom";
 import { Clock, User, TrendingUp, BookOpen } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { getOptimizedThumbnail, generateResponsiveSrcSet } from "@/lib/imageOptimization";
@@ -33,7 +35,7 @@ const ArticleCard = ({
 }: ArticleCardProps) => {
   return (
     <article className={`article-card ${featured ? 'md:col-span-2 md:row-span-2' : ''}`}>
-      <a href={`/${categorySlug}/${slug}`} className="block">
+      <Link to={`/${categorySlug}/${slug}`} className="block">
         <div className="relative aspect-video overflow-hidden">
           <img 
             src={getOptimizedThumbnail(image, featured ? 800 : 400, featured ? 600 : 300)} 
@@ -88,9 +90,9 @@ const ArticleCard = ({
             </div>
           </div>
         </div>
-      </a>
+      </Link>
     </article>
   );
 };
 
-export default ArticleCard;
+export default memo(ArticleCard);

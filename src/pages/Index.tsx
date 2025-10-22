@@ -34,11 +34,16 @@ const Index = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: featuredArticle } = useQuery({
-    queryKey: ["featured-article"],
+  // Optimized: Fetch homepage articles and trending in a single efficient query
+  const { data: homepageData, isLoading } = useQuery({
+    queryKey: ["homepage-articles"],
     staleTime: 5 * 60 * 1000, // 5 minutes
     queryFn: async () => {
-      const { data, error } = await supabase
+      const fourteenDaysAgo = new Date();
+      fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
+      
+      // Single batched query for all homepage articles
+      const { data: articles, error } = await supabase
         .from("articles")
         .select(`
           *,
@@ -49,23 +54,17 @@ const Index = () => {
         .eq("featured_on_homepage", true)
         .order("sticky", { ascending: false })
         .order("published_at", { ascending: false, nullsFirst: false })
-        .limit(1)
-        .maybeSingle();
+        .limit(15);
       
       if (error) throw error;
-      return data;
-    },
-  });
-
-  const { data: trendingArticles } = useQuery({
-    queryKey: ["trending-articles"],
-    staleTime: 4 * 24 * 60 * 60 * 1000, // 4 days cache
-    queryFn: async () => {
-      // Get articles from past 14 days, limit to 15 to reduce load
-      const fourteenDaysAgo = new Date();
-      fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
+      if (!articles || articles.length === 0) return { featured: null, latest: [], trending: [] };
       
-      const { data: articles, error } = await supabase
+      // Split into featured (first one) and latest (rest)
+      const featured = articles[0];
+      const latest = articles.slice(1, 13); // Take up to 12 for latest
+      
+      // Get trending articles from recent high-engagement content
+      const { data: trendingData, error: trendingError } = await supabase
         .from("articles")
         .select(`
           *,
@@ -75,70 +74,21 @@ const Index = () => {
         .eq("status", "published")
         .gte("published_at", fourteenDaysAgo.toISOString())
         .order("view_count", { ascending: false, nullsFirst: false })
-        .limit(15);
+        .limit(5);
       
-      if (error) throw error;
-      if (!articles || articles.length === 0) return [];
+      if (trendingError) console.error("Error fetching trending:", trendingError);
       
-      // Calculate popularity score: views * 1 + likes * 3 + comments * 5
-      const articlesWithScore = articles.map(article => ({
-        ...article,
-        popularityScore: 
-          (article.view_count || 0) * 1 + 
-          (article.like_count || 0) * 3 + 
-          (article.comment_count || 0) * 5
-      }));
-      
-      // Sort by popularity score
-      const sorted = articlesWithScore.sort((a, b) => b.popularityScore - a.popularityScore);
-      
-      // Take top 5 directly
-      return sorted.slice(0, 5);
+      return {
+        featured,
+        latest,
+        trending: trendingData || []
+      };
     },
   });
 
-  const { data: latestArticles, isLoading } = useQuery({
-    queryKey: ["latest-articles"],
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    queryFn: async () => {
-      // Fetch both sticky and regular articles in parallel
-      const [stickyResult, regularResult] = await Promise.all([
-        supabase
-          .from("articles")
-          .select(`
-            *,
-            authors (name, slug),
-            categories:primary_category_id (name, slug)
-          `)
-          .eq("status", "published")
-          .eq("sticky", true)
-          .eq("featured_on_homepage", true)
-          .order("published_at", { ascending: false, nullsFirst: false })
-          .limit(3),
-        supabase
-          .from("articles")
-          .select(`
-            *,
-            authors (name, slug),
-            categories:primary_category_id (name, slug)
-          `)
-          .eq("status", "published")
-          .eq("sticky", false)
-          .eq("featured_on_homepage", true)
-          .order("published_at", { ascending: false, nullsFirst: false })
-          .limit(12)
-      ]);
-      
-      if (stickyResult.error) throw stickyResult.error;
-      if (regularResult.error) throw regularResult.error;
-      
-      const stickyArticles = stickyResult.data || [];
-      const regularArticles = regularResult.data || [];
-      
-      // Combine: sticky first, then regular, limit to 12 total
-      return [...stickyArticles, ...regularArticles].slice(0, 12);
-    },
-  });
+  const featuredArticle = homepageData?.featured;
+  const latestArticles = homepageData?.latest;
+  const trendingArticles = homepageData?.trending;
 
   const { data: featuredAuthors } = useQuery({
     queryKey: ["featured-authors"],

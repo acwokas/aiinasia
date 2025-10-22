@@ -4,58 +4,71 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { lazy, Suspense } from "react";
+import { Loader2 } from "lucide-react";
+
+// Eager load critical components for first paint
 import Index from "./pages/Index";
-import Article from "./pages/Article";
-import Category from "./pages/Category";
-import Tag from "./pages/Tag";
-import AuthorProfile from "./pages/AuthorProfile";
-import SitemapRedirect from "./pages/SitemapRedirect";
-import Search from "./pages/Search";
-import Auth from "./pages/Auth";
-import Admin from "./pages/Admin";
-import Articles from "./pages/Articles";
-import Editor from "./pages/Editor";
-import Profile from "./pages/Profile";
-import About from "./pages/About";
-import Contact from "./pages/Contact";
-import Privacy from "./pages/Privacy";
-import Terms from "./pages/Terms";
-import CookiePolicy from "./pages/CookiePolicy";
-import Redirects from "./pages/Redirects";
-import BulkImport from "./pages/BulkImport";
-import ImageMigration from "./pages/ImageMigration";
-import ExtractImageUrls from "./pages/ExtractImageUrls";
-import UpdateArticleImages from "./pages/UpdateArticleImages";
-import MigrationDashboard from "./pages/MigrationDashboard";
-import BulkRedirects from "./pages/BulkRedirects";
-import MigrateCategoryUrls from "./pages/MigrateCategoryUrls";
-import ContentProcessor from "./pages/ContentProcessor";
-import CategoryMapper from "./pages/CategoryMapper";
-import CleanArticles from "./pages/CleanArticles";
-import FixMigratedContent from "./pages/FixMigratedContent";
-import RemoveTweetLinks from "./pages/RemoveTweetLinks";
-import PublishAllArticles from "./pages/PublishAllArticles";
-import BulkCommentGeneration from "./pages/BulkCommentGeneration";
-import GenerateTldrBulk from "./pages/GenerateTldrBulk";
-import AssignCategories from "./pages/AssignCategories";
-import FixBrokenImage from "./pages/FixBrokenImage";
-import BulkOperations from "./pages/BulkOperations";
-import ContentAnalytics from "./pages/ContentAnalytics";
-import SEOTools from "./pages/SEOTools";
-import AuthorManagement from "./pages/AuthorManagement";
-import EditorsPickManager from "./pages/EditorsPickManager";
-import NotFound from "./pages/NotFound";
-import Events from "./pages/Events";
-import Newsletter from "./pages/Newsletter";
-import NewsletterManager from "./pages/NewsletterManager";
-import NewsletterArchive from "./pages/NewsletterArchive";
-import NewsletterView from "./pages/NewsletterView";
 import WelcomePopup from "./components/WelcomePopup";
 import ScoutChatbot from "./components/ScoutChatbot";
 import GoogleAnalytics from "./components/GoogleAnalytics";
 import { loadGoogleAdsScript } from "./components/GoogleAds";
 import ConsentBanner from "./components/ConsentBanner";
 import { CollectiveFooter } from "./components/CollectiveFooter";
+
+// Lazy load all other pages for better performance
+const Article = lazy(() => import("./pages/Article"));
+const Category = lazy(() => import("./pages/Category"));
+const Tag = lazy(() => import("./pages/Tag"));
+const AuthorProfile = lazy(() => import("./pages/AuthorProfile"));
+const SitemapRedirect = lazy(() => import("./pages/SitemapRedirect"));
+const Search = lazy(() => import("./pages/Search"));
+const Auth = lazy(() => import("./pages/Auth"));
+const Admin = lazy(() => import("./pages/Admin"));
+const Articles = lazy(() => import("./pages/Articles"));
+const Editor = lazy(() => import("./pages/Editor"));
+const Profile = lazy(() => import("./pages/Profile"));
+const About = lazy(() => import("./pages/About"));
+const Contact = lazy(() => import("./pages/Contact"));
+const Privacy = lazy(() => import("./pages/Privacy"));
+const Terms = lazy(() => import("./pages/Terms"));
+const CookiePolicy = lazy(() => import("./pages/CookiePolicy"));
+const Redirects = lazy(() => import("./pages/Redirects"));
+const BulkImport = lazy(() => import("./pages/BulkImport"));
+const ImageMigration = lazy(() => import("./pages/ImageMigration"));
+const ExtractImageUrls = lazy(() => import("./pages/ExtractImageUrls"));
+const UpdateArticleImages = lazy(() => import("./pages/UpdateArticleImages"));
+const MigrationDashboard = lazy(() => import("./pages/MigrationDashboard"));
+const BulkRedirects = lazy(() => import("./pages/BulkRedirects"));
+const MigrateCategoryUrls = lazy(() => import("./pages/MigrateCategoryUrls"));
+const ContentProcessor = lazy(() => import("./pages/ContentProcessor"));
+const CategoryMapper = lazy(() => import("./pages/CategoryMapper"));
+const CleanArticles = lazy(() => import("./pages/CleanArticles"));
+const FixMigratedContent = lazy(() => import("./pages/FixMigratedContent"));
+const RemoveTweetLinks = lazy(() => import("./pages/RemoveTweetLinks"));
+const PublishAllArticles = lazy(() => import("./pages/PublishAllArticles"));
+const BulkCommentGeneration = lazy(() => import("./pages/BulkCommentGeneration"));
+const GenerateTldrBulk = lazy(() => import("./pages/GenerateTldrBulk"));
+const AssignCategories = lazy(() => import("./pages/AssignCategories"));
+const FixBrokenImage = lazy(() => import("./pages/FixBrokenImage"));
+const BulkOperations = lazy(() => import("./pages/BulkOperations"));
+const ContentAnalytics = lazy(() => import("./pages/ContentAnalytics"));
+const SEOTools = lazy(() => import("./pages/SEOTools"));
+const AuthorManagement = lazy(() => import("./pages/AuthorManagement"));
+const EditorsPickManager = lazy(() => import("./pages/EditorsPickManager"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const Events = lazy(() => import("./pages/Events"));
+const Newsletter = lazy(() => import("./pages/Newsletter"));
+const NewsletterManager = lazy(() => import("./pages/NewsletterManager"));
+const NewsletterArchive = lazy(() => import("./pages/NewsletterArchive"));
+const NewsletterView = lazy(() => import("./pages/NewsletterView"));
+
+// Loading fallback component
+const PageLoader = () => (
+  <div className="min-h-screen flex items-center justify-center">
+    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+  </div>
+);
 
 loadGoogleAdsScript();
 
@@ -72,55 +85,57 @@ const App = () => (
           <ConsentBanner />
           <WelcomePopup />
           <ScoutChatbot />
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/:category/:slug" element={<Article />} />
-            <Route path="/category/:slug" element={<Category />} />
-          <Route path="/tag/:slug" element={<Tag />} />
-          <Route path="/voices/:slug" element={<AuthorProfile />} />
-          <Route path="/sitemap.xml" element={<SitemapRedirect />} />
-            <Route path="/search" element={<Search />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/admin" element={<Admin />} />
-            <Route path="/admin/articles" element={<Articles />} />
-            <Route path="/editor" element={<Editor />} />
-            <Route path="/editor/:id" element={<Editor />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/events" element={<Events />} />
-          <Route path="/newsletter" element={<Newsletter />} />
-          <Route path="/newsletter-manager" element={<NewsletterManager />} />
-          <Route path="/newsletter/archive" element={<NewsletterArchive />} />
-          <Route path="/newsletter/archive/:date" element={<NewsletterView />} />
-            <Route path="/privacy" element={<Privacy />} />
-            <Route path="/terms" element={<Terms />} />
-            <Route path="/cookie-policy" element={<CookiePolicy />} />
-            <Route path="/redirects" element={<Redirects />} />
-            <Route path="/admin/bulk-import" element={<BulkImport />} />
-            <Route path="/admin/extract-image-urls" element={<ExtractImageUrls />} />
-            <Route path="/admin/image-migration" element={<ImageMigration />} />
-            <Route path="/admin/update-article-images" element={<UpdateArticleImages />} />
-            <Route path="/admin/migration-dashboard" element={<MigrationDashboard />} />
-            <Route path="/admin/bulk-redirects" element={<BulkRedirects />} />
-            <Route path="/admin/migrate-category-urls" element={<MigrateCategoryUrls />} />
-            <Route path="/admin/content-processor" element={<ContentProcessor />} />
-            <Route path="/admin/category-mapper" element={<CategoryMapper />} />
-            <Route path="/admin/clean-articles" element={<CleanArticles />} />
-            <Route path="/admin/fix-migrated-content" element={<FixMigratedContent />} />
-            <Route path="/admin/remove-tweet-links" element={<RemoveTweetLinks />} />
-            <Route path="/admin/publish-all" element={<PublishAllArticles />} />
-            <Route path="/admin/bulk-comments" element={<BulkCommentGeneration />} />
-           <Route path="/admin/generate-tldr" element={<GenerateTldrBulk />} />
-          <Route path="/admin/assign-categories" element={<AssignCategories />} />
-            <Route path="/admin/fix-broken-image" element={<FixBrokenImage />} />
-            <Route path="/admin/bulk-operations" element={<BulkOperations />} />
-            <Route path="/admin/analytics" element={<ContentAnalytics />} />
-            <Route path="/admin/seo-tools" element={<SEOTools />} />
-            <Route path="/admin/author-management" element={<AuthorManagement />} />
-            <Route path="/admin/editors-picks" element={<EditorsPickManager />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/:category/:slug" element={<Article />} />
+              <Route path="/category/:slug" element={<Category />} />
+              <Route path="/tag/:slug" element={<Tag />} />
+              <Route path="/voices/:slug" element={<AuthorProfile />} />
+              <Route path="/sitemap.xml" element={<SitemapRedirect />} />
+              <Route path="/search" element={<Search />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/admin" element={<Admin />} />
+              <Route path="/admin/articles" element={<Articles />} />
+              <Route path="/editor" element={<Editor />} />
+              <Route path="/editor/:id" element={<Editor />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/events" element={<Events />} />
+              <Route path="/newsletter" element={<Newsletter />} />
+              <Route path="/newsletter-manager" element={<NewsletterManager />} />
+              <Route path="/newsletter/archive" element={<NewsletterArchive />} />
+              <Route path="/newsletter/archive/:date" element={<NewsletterView />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="/cookie-policy" element={<CookiePolicy />} />
+              <Route path="/redirects" element={<Redirects />} />
+              <Route path="/admin/bulk-import" element={<BulkImport />} />
+              <Route path="/admin/extract-image-urls" element={<ExtractImageUrls />} />
+              <Route path="/admin/image-migration" element={<ImageMigration />} />
+              <Route path="/admin/update-article-images" element={<UpdateArticleImages />} />
+              <Route path="/admin/migration-dashboard" element={<MigrationDashboard />} />
+              <Route path="/admin/bulk-redirects" element={<BulkRedirects />} />
+              <Route path="/admin/migrate-category-urls" element={<MigrateCategoryUrls />} />
+              <Route path="/admin/content-processor" element={<ContentProcessor />} />
+              <Route path="/admin/category-mapper" element={<CategoryMapper />} />
+              <Route path="/admin/clean-articles" element={<CleanArticles />} />
+              <Route path="/admin/fix-migrated-content" element={<FixMigratedContent />} />
+              <Route path="/admin/remove-tweet-links" element={<RemoveTweetLinks />} />
+              <Route path="/admin/publish-all" element={<PublishAllArticles />} />
+              <Route path="/admin/bulk-comments" element={<BulkCommentGeneration />} />
+              <Route path="/admin/generate-tldr" element={<GenerateTldrBulk />} />
+              <Route path="/admin/assign-categories" element={<AssignCategories />} />
+              <Route path="/admin/fix-broken-image" element={<FixBrokenImage />} />
+              <Route path="/admin/bulk-operations" element={<BulkOperations />} />
+              <Route path="/admin/analytics" element={<ContentAnalytics />} />
+              <Route path="/admin/seo-tools" element={<SEOTools />} />
+              <Route path="/admin/author-management" element={<AuthorManagement />} />
+              <Route path="/admin/editors-picks" element={<EditorsPickManager />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
           <CollectiveFooter />
         </BrowserRouter>
       </TooltipProvider>

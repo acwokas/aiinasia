@@ -18,13 +18,46 @@ export default defineConfig(({ mode }) => ({
   build: {
     rollupOptions: {
       output: {
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'ui-vendor': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-tabs'],
-          'query-vendor': ['@tanstack/react-query'],
+        manualChunks: (id) => {
+          // React core - highest priority
+          if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
+            return 'react-core';
+          }
+          // Radix UI components
+          if (id.includes('@radix-ui')) {
+            return 'ui-components';
+          }
+          // React Query
+          if (id.includes('@tanstack/react-query')) {
+            return 'query';
+          }
+          // Supabase
+          if (id.includes('@supabase')) {
+            return 'supabase';
+          }
+          // Date utilities
+          if (id.includes('date-fns')) {
+            return 'date-utils';
+          }
+          // Icons
+          if (id.includes('lucide-react')) {
+            return 'icons';
+          }
+          // Admin pages
+          if (id.includes('/pages/') && (id.includes('Admin') || id.includes('Bulk') || id.includes('Migration'))) {
+            return 'admin-pages';
+          }
         },
       },
     },
     chunkSizeWarningLimit: 1000,
+    // Enable minification
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+      },
+    },
   },
 }));
