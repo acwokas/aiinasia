@@ -18,7 +18,7 @@ async function generateNewsletterHTML(
   // Fetch all content for the edition
   const { data: topStories } = await supabase
     .from('newsletter_top_stories')
-    .select('article_id, articles(*)')
+    .select('article_id, position, articles(*)')
     .eq('edition_id', edition.id)
     .order('position');
 
@@ -28,9 +28,29 @@ async function generateNewsletterHTML(
     .eq('id', edition.hero_article_id)
     .single();
 
+  const { data: quickTakes } = await supabase
+    .from('newsletter_quick_takes')
+    .select('*')
+    .eq('edition_id', edition.id)
+    .order('display_order');
+
+  const { data: toolsPrompts } = await supabase
+    .from('newsletter_tools_prompts')
+    .select('*')
+    .eq('is_active', true)
+    .limit(3);
+
+  const { data: sponsor } = await supabase
+    .from('newsletter_sponsors')
+    .select('*')
+    .eq('is_active', true)
+    .order('priority', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
   const greeting = subscriber.first_name ? `Hi ${subscriber.first_name}!` : 'Hi there!';
   
-  // Basic HTML template (will be enhanced in UI component)
+  // Comprehensive HTML newsletter template
   return `
 <!DOCTYPE html>
 <html>
@@ -51,8 +71,8 @@ async function generateNewsletterHTML(
 
   ${edition.editor_note ? `
   <div style="background: #f9fafb; padding: 20px; border-left: 4px solid #8B5CF6; margin-bottom: 30px;">
-    <h3 style="margin-top: 0;">Editor's Note</h3>
-    <p>${edition.editor_note}</p>
+    <h3 style="margin-top: 0;">📝 Editor's Note</h3>
+    <p style="margin: 0;">${edition.editor_note}</p>
   </div>
   ` : ''}
 
@@ -70,15 +90,65 @@ async function generateNewsletterHTML(
     ` : ''}
   </div>
 
+  ${quickTakes && quickTakes.length > 0 ? `
+  <div style="margin-bottom: 40px;">
+    <h2 style="color: #8B5CF6;">⚡ Quick Takes</h2>
+    <div style="background: #fafafa; padding: 20px; border-radius: 8px;">
+      ${quickTakes.map((take: any) => `
+      <div style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #e5e7eb;">
+        <h4 style="margin: 0 0 5px 0; font-size: 16px;">${take.headline}</h4>
+        <p style="margin: 0; font-size: 14px; color: #666;">${take.insight}</p>
+        ${take.source_url ? `<a href="${take.source_url}" style="font-size: 12px; color: #8B5CF6;">Read more →</a>` : ''}
+      </div>
+      `).join('')}
+    </div>
+  </div>
+  ` : ''}
+
   <div style="margin-bottom: 40px;">
     <h2 style="color: #8B5CF6;">📚 Top Stories This Week</h2>
-    ${topStories?.map((story: any) => `
+    ${topStories?.map((story: any, index: number) => `
     <div style="border-bottom: 1px solid #e5e7eb; padding: 15px 0;">
-      <h4 style="margin: 0 0 10px 0;"><a href="${Deno.env.get('SUPABASE_URL')}/functions/v1/track-newsletter-engagement?tid=${trackingId}&aid=${story.articles.id}&section=top" style="color: #8B5CF6; text-decoration: none;">${story.articles.title}</a></h4>
-      <p style="color: #666; margin: 0; font-size: 14px;">${story.articles.excerpt || ''}</p>
+      <div style="display: flex; align-items: start; gap: 10px;">
+        <span style="font-weight: bold; color: #8B5CF6; font-size: 20px;">${index + 1}</span>
+        <div>
+          <h4 style="margin: 0 0 10px 0;"><a href="${Deno.env.get('SUPABASE_URL')}/functions/v1/track-newsletter-engagement?tid=${trackingId}&aid=${story.articles.id}&section=top${index + 1}" style="color: #333; text-decoration: none;">${story.articles.title}</a></h4>
+          <p style="color: #666; margin: 0; font-size: 14px;">${story.articles.excerpt || ''}</p>
+          <a href="${Deno.env.get('SUPABASE_URL')}/functions/v1/track-newsletter-engagement?tid=${trackingId}&aid=${story.articles.id}&section=top${index + 1}" style="color: #8B5CF6; font-size: 14px; text-decoration: none;">Read more →</a>
+        </div>
+      </div>
     </div>
     `).join('') || ''}
   </div>
+
+  ${toolsPrompts && toolsPrompts.length > 0 ? `
+  <div style="margin-bottom: 40px;">
+    <h2 style="color: #8B5CF6;">🛠️ Tools & Prompts Worth Trying</h2>
+    ${toolsPrompts.map((item: any) => `
+    <div style="margin-bottom: 15px; padding: 15px; background: #f9fafb; border-radius: 8px;">
+      <h4 style="margin: 0 0 5px 0;">${item.title}</h4>
+      <p style="margin: 0 0 10px 0; font-size: 14px; color: #666;">${item.description}</p>
+      <a href="${item.url}" style="color: #8B5CF6; text-decoration: none; font-size: 14px;">Try it now →</a>
+    </div>
+    `).join('')}
+  </div>
+  ` : ''}
+
+  ${sponsor ? `
+  <div style="margin-bottom: 40px; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; text-align: center;">
+    <p style="color: white; font-size: 12px; margin: 0 0 10px 0; opacity: 0.8;">SPONSORED</p>
+    ${sponsor.banner_image_url ? `<img src="${sponsor.banner_image_url}" alt="${sponsor.name}" style="max-width: 100%; height: auto; border-radius: 8px; margin-bottom: 15px;" />` : ''}
+    <h3 style="color: white; margin: 0 0 10px 0;">${sponsor.name}</h3>
+    <a href="${sponsor.website_url}" style="display: inline-block; background: white; color: #764ba2; padding: 10px 30px; text-decoration: none; border-radius: 5px; font-weight: bold;">${sponsor.cta_text || 'Learn More'}</a>
+  </div>
+  ` : ''}
+
+  ${edition.mini_case_study ? `
+  <div style="margin-bottom: 40px; padding: 20px; background: #f0f9ff; border-left: 4px solid #3b82f6; border-radius: 8px;">
+    <h3 style="margin-top: 0; color: #3b82f6;">💡 Mini Case Study</h3>
+    <p style="margin: 0;">${edition.mini_case_study}</p>
+  </div>
+  ` : ''}
 
   <div style="text-align: center; margin: 40px 0; padding: 20px; background: linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%); border-radius: 10px;">
     <p style="color: white; font-size: 16px; margin: 0;">💪 Opening this email earned you <strong>+5 points</strong>!</p>
