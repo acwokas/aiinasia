@@ -112,8 +112,9 @@ const ScoutChatbot = () => {
       );
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to get response");
+        const errorData = await response.json().catch(() => ({ error: "Failed to get response" }));
+        console.error("Scout chat error:", response.status, errorData);
+        throw new Error(errorData.error || `Failed to get response (${response.status})`);
       }
 
       if (!response.body) throw new Error("No response body");
@@ -146,58 +147,62 @@ const ScoutChatbot = () => {
           const jsonStr = line.slice(6).trim();
           if (jsonStr === "[DONE]") break;
 
-          try {
-            const parsed = JSON.parse(jsonStr);
-            const delta = parsed.choices?.[0]?.delta;
-            
-            // Handle tool calls
-            if (delta?.tool_calls) {
-              const toolCall = delta.tool_calls[0];
-              if (toolCall?.function?.arguments) {
-                toolCallBuffer += toolCall.function.arguments;
-              }
-            } else if (delta?.content) {
-              assistantContent += delta.content;
-              setMessages((prev) =>
-                prev.map((msg, i) =>
-                  i === prev.length - 1
-                    ? { ...msg, content: assistantContent }
-                    : msg
-                )
-              );
-            }
-
-            // Check if finish_reason indicates tool call completion
-            if (parsed.choices?.[0]?.finish_reason === "tool_calls" && toolCallBuffer) {
-              try {
-                const toolArgs = JSON.parse(toolCallBuffer);
-                searchQuery = toolArgs.query;
-                
-                // Search for articles
-                const { data: articles } = await supabase
-                  .from("articles")
-                  .select("id, title, slug, excerpt")
-                  .eq("status", "published")
-                  .or(`title.ilike.%${searchQuery}%,excerpt.ilike.%${searchQuery}%,content.ilike.%${searchQuery}%`)
-                  .limit(5);
-
-                if (articles && articles.length > 0) {
-                  setMessages((prev) =>
-                    prev.map((msg, i) =>
-                      i === prev.length - 1
-                        ? { ...msg, articles: articles as Article[] }
-                        : msg
-                    )
-                  );
+            try {
+              const parsed = JSON.parse(jsonStr);
+              const delta = parsed.choices?.[0]?.delta;
+              
+              // Handle tool calls
+              if (delta?.tool_calls) {
+                const toolCall = delta.tool_calls[0];
+                if (toolCall?.function?.arguments) {
+                  toolCallBuffer += toolCall.function.arguments;
                 }
-              } catch (e) {
-                console.error("Error parsing tool call:", e);
+              } else if (delta?.content) {
+                assistantContent += delta.content;
+                setMessages((prev) =>
+                  prev.map((msg, i) =>
+                    i === prev.length - 1
+                      ? { ...msg, content: assistantContent }
+                      : msg
+                  )
+                );
               }
+
+              // Check if finish_reason indicates tool call completion
+              if (parsed.choices?.[0]?.finish_reason === "tool_calls" && toolCallBuffer) {
+                try {
+                  const toolArgs = JSON.parse(toolCallBuffer);
+                  searchQuery = toolArgs.query;
+                  console.log("Scout searching for:", searchQuery);
+                  
+                  // Search for articles
+                  const { data: articles, error: searchError } = await supabase
+                    .from("articles")
+                    .select("id, title, slug, excerpt")
+                    .eq("status", "published")
+                    .or(`title.ilike.%${searchQuery}%,excerpt.ilike.%${searchQuery}%,content.ilike.%${searchQuery}%`)
+                    .limit(5);
+
+                  if (searchError) {
+                    console.error("Article search error:", searchError);
+                  } else if (articles && articles.length > 0) {
+                    console.log("Found articles:", articles.length);
+                    setMessages((prev) =>
+                      prev.map((msg, i) =>
+                        i === prev.length - 1
+                          ? { ...msg, articles: articles as Article[] }
+                          : msg
+                      )
+                    );
+                  }
+                } catch (e) {
+                  console.error("Error parsing tool call:", e);
+                }
+              }
+            } catch (e) {
+              textBuffer = line + "\n" + textBuffer;
+              break;
             }
-          } catch (e) {
-            textBuffer = line + "\n" + textBuffer;
-            break;
-          }
         }
       }
 
@@ -227,12 +232,13 @@ const ScoutChatbot = () => {
       setIsLoading(false);
       fetchQueryLimit(); // Refresh query count after successful message
     } catch (error) {
-      console.error("Chat error:", error);
+      console.error("Scout chat error:", error);
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to send message",
+        description: error instanceof Error ? error.message : "Failed to send message. Please try again.",
         variant: "destructive",
       });
+      // Remove the empty assistant message
       setMessages((prev) => prev.slice(0, -1));
       setIsLoading(false);
     }
@@ -274,7 +280,7 @@ const ScoutChatbot = () => {
         <div className="absolute inset-0 bg-gradient-to-br from-primary/30 to-accent/30 rounded-2xl blur-2xl" />
         
         {/* Main container */}
-        <div className="relative bg-card backdrop-blur-xl border-2 border-primary/50 rounded-2xl shadow-[0_8px_80px_rgba(0,188,212,0.6),0_0_0_1px_rgba(0,188,212,0.2)] flex flex-col overflow-hidden">
+        <div className="relative bg-card/98 backdrop-blur-xl border-2 border-primary/50 rounded-2xl shadow-[0_8px_80px_rgba(0,188,212,0.6),0_0_0_1px_rgba(0,188,212,0.2)] flex flex-col overflow-hidden">
         {/* Animated background grid */}
         <div className="absolute inset-0 opacity-[0.03]" style={{
           backgroundImage: 'linear-gradient(hsl(var(--primary)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)',
@@ -333,7 +339,7 @@ const ScoutChatbot = () => {
               className={`max-w-[80%] rounded-2xl p-3 relative group ${
                 msg.role === "user"
                   ? "bg-gradient-to-br from-primary to-accent text-primary-foreground shadow-[0_0_20px_rgba(0,188,212,0.3)] border border-primary/20"
-                  : "bg-muted/50 backdrop-blur border border-border/50"
+                  : "bg-card border border-border shadow-sm"
               }`}
             >
               {msg.role === "user" && (
@@ -377,7 +383,7 @@ const ScoutChatbot = () => {
                 </div>
               </div>
             </div>
-            <div className="bg-muted/50 backdrop-blur border border-border/50 rounded-2xl p-3 flex items-center gap-2">
+            <div className="bg-card border border-border rounded-2xl p-3 flex items-center gap-2 shadow-sm">
               <Loader2 className="h-4 w-4 animate-spin text-primary" />
               <div className="flex gap-1">
                 <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0s' }} />
