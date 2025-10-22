@@ -16,10 +16,19 @@ import { useToast } from "@/hooks/use-toast";
 import { PromptAndGoBanner } from "@/components/PromptAndGoBanner";
 import { BusinessInAByteAd } from "@/components/BusinessInAByteAd";
 import RecommendedArticles from "@/components/RecommendedArticles";
+import { z } from "zod";
+
+const newsletterSchema = z.object({
+  email: z.string()
+    .trim()
+    .email({ message: "Invalid email address" })
+    .max(255, { message: "Email must be less than 255 characters" }),
+});
 
 const Index = () => {
   const [newsletterEmail, setNewsletterEmail] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isNewsletterSubmitting, setIsNewsletterSubmitting] = useState(false);
+  const [isNewsletterSubscribed, setIsNewsletterSubscribed] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -251,30 +260,65 @@ const Index = () => {
     };
   }, []);
 
-  const handleNewsletterSignup = async (e: React.FormEvent) => {
+  const handleNewsletterSignup = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsSubmitting(true);
+    setIsNewsletterSubmitting(true);
+    
+    const formData = new FormData(e.currentTarget);
+    const rawData = {
+      email: formData.get('email') as string,
+    };
 
     try {
+      const validatedData = newsletterSchema.parse(rawData);
+
+      // Check if already subscribed
+      const { data: existing } = await supabase
+        .from("newsletter_subscribers")
+        .select("id")
+        .eq("email", validatedData.email)
+        .maybeSingle();
+
+      if (existing) {
+        toast({
+          title: "Already subscribed",
+          description: "This email is already subscribed to our newsletter.",
+        });
+        setIsNewsletterSubmitting(false);
+        return;
+      }
+
       const { error } = await supabase
         .from("newsletter_subscribers")
-        .insert([{ email: newsletterEmail }]);
+        .insert({ email: validatedData.email });
 
       if (error) throw error;
 
+      setIsNewsletterSubscribed(true);
       toast({
-        title: "Success!",
-        description: "You've been subscribed to our newsletter.",
+        title: "Successfully subscribed!",
+        description: "Welcome aboard! Check your inbox for our latest insights.",
       });
+      
+      (e.target as HTMLFormElement).reset();
       setNewsletterEmail("");
     } catch (error) {
-      toast({
-        title: "Subscription failed",
-        description: "Please try again later.",
-        variant: "destructive",
-      });
+      if (error instanceof z.ZodError) {
+        toast({
+          title: "Validation Error",
+          description: error.errors[0].message,
+          variant: "destructive",
+        });
+      } else {
+        console.error('Error subscribing:', error);
+        toast({
+          title: "Error",
+          description: "Failed to subscribe. Please try again.",
+          variant: "destructive",
+        });
+      }
     } finally {
-      setIsSubmitting(false);
+      setIsNewsletterSubmitting(false);
     }
   };
 
@@ -670,9 +714,37 @@ const Index = () => {
             <p className="text-lg mb-8 opacity-90">
               Join 10,000+ professionals getting the AI in ASIA Brief every week.
             </p>
-            <Button asChild variant="secondary" size="lg">
-              <Link to="/newsletter">Subscribe Now</Link>
-            </Button>
+            
+            {!isNewsletterSubscribed ? (
+              <form onSubmit={handleNewsletterSignup} className="max-w-md mx-auto">
+                <div className="flex gap-2">
+                  <Input 
+                    id="newsletter-email" 
+                    name="email" 
+                    type="email" 
+                    required 
+                    maxLength={255}
+                    placeholder="your@email.com" 
+                    className="flex-1 bg-background text-foreground"
+                    value={newsletterEmail}
+                    onChange={(e) => setNewsletterEmail(e.target.value)}
+                  />
+                  <Button type="submit" variant="secondary" disabled={isNewsletterSubmitting}>
+                    {isNewsletterSubmitting ? "Subscribing..." : "Subscribe"}
+                  </Button>
+                </div>
+                <p className="text-xs opacity-75 mt-2">
+                  No spam. Unsubscribe anytime. We respect your privacy.
+                </p>
+              </form>
+            ) : (
+              <div className="bg-background/10 border border-primary-foreground/20 rounded-lg p-6 max-w-md mx-auto">
+                <p className="text-lg font-semibold">You're all set!</p>
+                <p className="text-sm opacity-90 mt-2">
+                  Check your inbox for our latest insights.
+                </p>
+              </div>
+            )}
           </div>
         </section>
       </main>
