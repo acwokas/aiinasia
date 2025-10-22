@@ -144,15 +144,15 @@ const Index = () => {
     queryKey: ["featured-authors"],
     staleTime: 10 * 60 * 1000, // 10 minutes
     queryFn: async () => {
-      // Fetch both Intelligence Desk and top authors in parallel
+      // Fetch both Intelligence Desk and top authors in parallel using public view
       const [intelligenceDeskResult, topAuthorsResult] = await Promise.all([
         supabase
-          .from("authors")
+          .from("authors_public")
           .select("*")
           .eq("slug", "intelligence-desk")
           .maybeSingle(),
         supabase
-          .from("authors")
+          .from("authors_public")
           .select("*")
           .neq("slug", "intelligence-desk")
           .order("article_count", { ascending: false })

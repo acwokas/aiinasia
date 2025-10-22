@@ -27,9 +27,10 @@ const collectiveLinks = [
   },
   {
     subdomain: "shop.withthepowerof.ai",
-    url: "https://www.myofferclub.com",
+    url: "#",
     displayName: "MyOfferClub.com",
     logo: myOfferClubLogo,
+    comingSoon: true,
   },
   {
     subdomain: "learn.withthepowerof.ai",
@@ -81,34 +82,56 @@ export const CollectiveFooter = () => {
               {collectiveLinks.map((link) => (
                 <Tooltip key={link.subdomain}>
                   <TooltipTrigger asChild>
-                    <a
-                      href={link.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex flex-col items-center gap-3 group"
-                    >
-                      <div className="w-40 h-28 bg-white rounded-lg p-3 flex items-center justify-center transition-all duration-300 group-hover:scale-105 group-hover:border-2 group-hover:border-[hsl(198,100%,50%)] group-hover:shadow-lg group-hover:shadow-[hsl(198,100%,50%)]/20">
-                        <img
-                          src={link.logo}
-                          alt={link.displayName}
-                          className={`max-w-full max-h-full object-contain ${
-                            link.subdomain === "shop.withthepowerof.ai" || link.subdomain === "learn.withthepowerof.ai"
-                              ? "scale-125"
-                              : ""
-                          }`}
-                          loading="lazy"
-                          width={136}
-                          height={76}
-                        />
+                    {link.comingSoon ? (
+                      <div className="flex flex-col items-center gap-3 cursor-not-allowed">
+                        <div className="w-40 h-28 bg-white rounded-lg p-3 flex items-center justify-center opacity-40">
+                          <img
+                            src={link.logo}
+                            alt={link.displayName}
+                            className={`max-w-full max-h-full object-contain ${
+                              link.subdomain === "shop.withthepowerof.ai" || link.subdomain === "learn.withthepowerof.ai"
+                                ? "scale-125"
+                                : ""
+                            }`}
+                            loading="lazy"
+                            width={136}
+                            height={76}
+                          />
+                        </div>
+                        <div className="flex items-center gap-1 text-gray-500 text-sm font-medium opacity-50">
+                          {link.subdomain}
+                        </div>
                       </div>
-                      <div className="flex items-center gap-1 text-[hsl(198,100%,50%)] text-sm font-medium">
-                        {link.subdomain}
-                        <ExternalLink className="w-3 h-3" />
-                      </div>
-                    </a>
+                    ) : (
+                      <a
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex flex-col items-center gap-3 group"
+                      >
+                        <div className="w-40 h-28 bg-white rounded-lg p-3 flex items-center justify-center transition-all duration-300 group-hover:scale-105 group-hover:border-2 group-hover:border-[hsl(198,100%,50%)] group-hover:shadow-lg group-hover:shadow-[hsl(198,100%,50%)]/20">
+                          <img
+                            src={link.logo}
+                            alt={link.displayName}
+                            className={`max-w-full max-h-full object-contain ${
+                              link.subdomain === "shop.withthepowerof.ai" || link.subdomain === "learn.withthepowerof.ai"
+                                ? "scale-125"
+                                : ""
+                            }`}
+                            loading="lazy"
+                            width={136}
+                            height={76}
+                          />
+                        </div>
+                        <div className="flex items-center gap-1 text-[hsl(198,100%,50%)] text-sm font-medium">
+                          {link.subdomain}
+                          <ExternalLink className="w-3 h-3" />
+                        </div>
+                      </a>
+                    )}
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>{link.displayName}</p>
+                    <p>{link.comingSoon ? "Coming Soon" : link.displayName}</p>
                   </TooltipContent>
                 </Tooltip>
               ))}
