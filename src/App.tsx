@@ -53,6 +53,7 @@ import GoogleAnalytics from "./components/GoogleAnalytics";
 import { loadGoogleAdsScript } from "./components/GoogleAds";
 import ConsentBanner from "./components/ConsentBanner";
 import { CollectiveFooter } from "./components/CollectiveFooter";
+import { ScrollToTop } from "./components/ScrollToTop";
 
 loadGoogleAdsScript();
 
@@ -65,6 +66,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <ScrollToTop />
           <GoogleAnalytics />
           <ConsentBanner />
           <NewsletterPopup />
