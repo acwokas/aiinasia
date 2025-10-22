@@ -56,9 +56,7 @@ const Category = () => {
             )
           `)
           .eq("category_id", category.id)
-          .eq("articles.status", "published")
-          .order("articles.published_at", { ascending: false })
-          .limit(50);
+          .eq("articles.status", "published");
         
         if (error) throw error;
         
@@ -122,12 +120,17 @@ const Category = () => {
         `)
         .eq("category_id", category.id)
         .eq("articles.status", "published")
-        .eq("articles.authors.name", "Koo Ping Shung")
-        .order("articles.published_at", { ascending: false })
-        .limit(3);
+        .eq("articles.authors.name", "Koo Ping Shung");
       
       if (error) throw error;
-      return data?.map(item => item.articles).filter(Boolean) || [];
+      
+      // Extract articles and sort by published date in JavaScript
+      const articles = data?.map(item => item.articles).filter(Boolean) || [];
+      return articles
+        .sort((a: any, b: any) => 
+          new Date(b.published_at).getTime() - new Date(a.published_at).getTime()
+        )
+        .slice(0, 3);
     },
   });
 
@@ -149,12 +152,17 @@ const Category = () => {
         `)
         .eq("category_id", category.id)
         .eq("articles.status", "published")
-        .eq("articles.authors.name", "Adrian Watkins")
-        .order("articles.published_at", { ascending: false })
-        .limit(3);
+        .eq("articles.authors.name", "Adrian Watkins");
       
       if (error) throw error;
-      return data?.map(item => item.articles).filter(Boolean) || [];
+      
+      // Extract articles and sort by published date in JavaScript
+      const articles = data?.map(item => item.articles).filter(Boolean) || [];
+      return articles
+        .sort((a: any, b: any) => 
+          new Date(b.published_at).getTime() - new Date(a.published_at).getTime()
+        )
+        .slice(0, 3);
     },
   });
 
@@ -176,17 +184,18 @@ const Category = () => {
             )
           `)
           .eq("category_id", category.id)
-          .eq("articles.status", "published")
-          .order("articles.view_count", { ascending: false })
-          .limit(20);
+          .eq("articles.status", "published");
         
         if (error) throw error;
         
-        // Extract articles and filter out Intelligence Desk
-        return data
+        // Extract articles, filter out Intelligence Desk, and sort by view count in JavaScript
+        const articles = data
           ?.map(item => item.articles)
-          .filter(article => article && article.authors?.name !== 'Intelligence Desk')
-          .slice(0, 6) || [];
+          .filter(article => article && article.authors?.name !== 'Intelligence Desk') || [];
+        
+        return articles
+          .sort((a: any, b: any) => (b.view_count || 0) - (a.view_count || 0))
+          .slice(0, 6);
       }
 
       const { data, error } = await supabase
