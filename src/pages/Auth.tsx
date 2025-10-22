@@ -11,7 +11,7 @@ import { Loader2, Eye, EyeOff, Upload, ChevronRight, Zap } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { compressImage } from "@/lib/imageCompression";
-import logo from "@/assets/aiinasia-logo-brand.png";
+import logo from "@/assets/aiinasia-logo-brand-new.png";
 
 const INTEREST_OPTIONS = [
   "Artificial Intelligence",
