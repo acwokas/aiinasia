@@ -1,5 +1,5 @@
 import { ExternalLink, Rocket } from "lucide-react";
-import businessInAByteLogo from "@/assets/businessinabyte-logo.webp";
+import businessInAByteLogo from "@/assets/businessinabyte-logo-ad.png";
 
 export const BusinessInAByteAd = () => {
   return (
