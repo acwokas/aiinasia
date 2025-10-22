@@ -44,21 +44,10 @@ export default defineConfig(({ mode }) => ({
     },
     chunkSizeWarningLimit: 1000,
     cssCodeSplit: true,
-    cssMinify: 'lightningcss',
     modulePreload: {
       polyfill: true,
     },
-    minify: mode === 'production' ? 'terser' : false,
-    terserOptions: mode === 'production' ? {
-      compress: {
-        drop_console: true,
-        drop_debugger: true,
-        pure_funcs: ['console.log', 'console.info', 'console.debug', 'console.warn'],
-      },
-      mangle: {
-        safari10: true,
-      },
-    } : undefined,
+    minify: 'esbuild',
   },
   css: {
     devSourcemap: mode === 'development',
