@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { Helmet } from "react-helmet";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import {
@@ -13,6 +14,19 @@ import {
 const About = () => {
   return (
     <div className="min-h-screen flex flex-col">
+      <Helmet>
+        <title>About AI in ASIA - Leading AI News & Insights Platform</title>
+        <meta name="description" content="Learn about AI in ASIA, your trusted source for AI news, insights, and education. Part of the you.withthepowerof.ai ecosystem, democratizing artificial intelligence across Asia." />
+        <link rel="canonical" href="https://aiinasia.com/about" />
+        <meta property="og:title" content="About AI in ASIA - Leading AI News & Insights Platform" />
+        <meta property="og:description" content="Learn about AI in ASIA and our mission to democratize artificial intelligence across Asia." />
+        <meta property="og:url" content="https://aiinasia.com/about" />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:title" content="About AI in ASIA" />
+        <meta name="twitter:description" content="Learn about AI in ASIA and our mission to democratize artificial intelligence across Asia." />
+      </Helmet>
+
       <Header />
       
       <main className="flex-1 container mx-auto px-4 py-12 max-w-4xl">

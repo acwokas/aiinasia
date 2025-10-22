@@ -262,6 +262,13 @@ const Category = () => {
         <title>{category?.name} - AI News & Insights | AI in ASIA</title>
         <meta name="description" content={category?.description || `Explore the latest ${category?.name} articles, news, and insights on AI in ASIA. Expert coverage of artificial intelligence developments across Asia.`} />
         <link rel="canonical" href={`https://aiinasia.com/category/${category?.slug}`} />
+        <meta property="og:title" content={`${category?.name} - AI News & Insights | AI in ASIA`} />
+        <meta property="og:description" content={category?.description || `Explore the latest ${category?.name} articles.`} />
+        <meta property="og:url" content={`https://aiinasia.com/category/${category?.slug}`} />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`${category?.name} - AI News & Insights | AI in ASIA`} />
+        <meta name="twitter:description" content={category?.description || `Explore the latest ${category?.name} articles.`} />
       </Helmet>
 
       <BreadcrumbStructuredData

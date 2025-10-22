@@ -291,6 +291,16 @@ const Index = () => {
       <Helmet>
         <title>AI in ASIA - Leading AI News, Insights & Innovation Across Asia</title>
         <meta name="description" content="Your trusted source for AI news, insights, and education across Asia. Breaking news, expert analysis, and practical guides on artificial intelligence. Powered by you.withthepowerof.ai." />
+        <link rel="canonical" href="https://aiinasia.com/" />
+        <meta property="og:title" content="AI in ASIA - Leading AI News, Insights & Innovation Across Asia" />
+        <meta property="og:description" content="Your trusted source for AI news, insights, and education across Asia. Breaking news, expert analysis, and practical guides on artificial intelligence." />
+        <meta property="og:url" content="https://aiinasia.com/" />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="https://aiinasia.com/og-image.png" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="AI in ASIA - Leading AI News, Insights & Innovation Across Asia" />
+        <meta name="twitter:description" content="Your trusted source for AI news, insights, and education across Asia." />
+        <meta name="twitter:image" content="https://aiinasia.com/og-image.png" />
       </Helmet>
       
       <OrganizationStructuredData />

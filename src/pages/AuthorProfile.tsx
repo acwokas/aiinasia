@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ArticleCard from "@/components/ArticleCard";
+import { PersonStructuredData } from "@/components/StructuredData";
 import { Button } from "@/components/ui/button";
 import { Loader2, Twitter, Linkedin, Globe, ChevronDown, ChevronUp } from "lucide-react";
 import {
@@ -73,13 +74,25 @@ const AuthorProfile = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Helmet>
-        <title>{author?.name} - Author Profile | AI Scout News</title>
+        <title>{author?.name} - Author Profile | AI in ASIA</title>
         <meta name="description" content={author?.bio || `Read articles by ${author?.name}. ${articles?.length || 0} articles published.`} />
+        <link rel="canonical" href={`https://aiinasia.com/author/${author?.slug}`} />
         <meta property="og:title" content={`${author?.name} - Author Profile`} />
         <meta property="og:description" content={author?.bio || `Read articles by ${author?.name}`} />
+        <meta property="og:url" content={`https://aiinasia.com/author/${author?.slug}`} />
         {author?.avatar_url && <meta property="og:image" content={author.avatar_url} />}
         <meta property="og:type" content="profile" />
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:title" content={`${author?.name} - Author Profile`} />
+        <meta name="twitter:description" content={author?.bio || `Read articles by ${author?.name}`} />
       </Helmet>
+
+      <PersonStructuredData
+        name={author?.name || ''}
+        bio={author?.bio}
+        imageUrl={author?.avatar_url}
+        url={`/author/${author?.slug}`}
+      />
       <Header />
       
       <main className="flex-1">

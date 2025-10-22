@@ -114,6 +114,14 @@ const Events = () => {
       <Helmet>
         <title>AI Events & Conferences Calendar | AI in ASIA</title>
         <meta name="description" content="Discover upcoming AI conferences, summits, and workshops across Asia Pacific and globally. Stay updated with the latest artificial intelligence events." />
+        <link rel="canonical" href="https://aiinasia.com/events" />
+        <meta property="og:title" content="AI Events & Conferences Calendar | AI in ASIA" />
+        <meta property="og:description" content="Discover upcoming AI conferences, summits, and workshops across Asia Pacific and globally." />
+        <meta property="og:url" content="https://aiinasia.com/events" />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:title" content="AI Events & Conferences Calendar | AI in ASIA" />
+        <meta name="twitter:description" content="Discover upcoming AI conferences and events across Asia Pacific." />
       </Helmet>
       
       <div className="min-h-screen flex flex-col">
