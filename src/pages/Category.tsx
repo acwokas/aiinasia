@@ -148,7 +148,7 @@ const Category = () => {
     },
   });
 
-  // Fetch Adrian Watkins's articles for "Adrian's Arena" section
+  // Fetch Adrian Watkins's articles for "Adrian's Angle" section
   const { data: adrianArticles } = useQuery({
     queryKey: ["adrian-articles", category?.id],
     enabled: category?.slug === "voices" && !!category?.id,
