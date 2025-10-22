@@ -8,13 +8,12 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Major AI companies (publicly traded)
+// Major AI companies (publicly traded) - removed 0700.HK due to API limitations
 const AI_STOCKS = [
   { symbol: 'NVDA', name: 'NVIDIA' },
   { symbol: 'META', name: 'Meta' },
   { symbol: 'MSFT', name: 'Microsoft' },
   { symbol: 'GOOGL', name: 'Alphabet' },
-  { symbol: '0700.HK', name: 'Tencent' },
   { symbol: 'BABA', name: 'Alibaba' },
   { symbol: 'BIDU', name: 'Baidu' },
   { symbol: 'AMZN', name: 'Amazon' },
@@ -65,7 +64,13 @@ serve(async (req) => {
 
     return new Response(
       JSON.stringify({ stocks: validStocks }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { 
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json',
+          'Cache-Control': 'public, max-age=300, s-maxage=300' // 5 min cache
+        } 
+      }
     );
   } catch (error) {
     console.error('Error in fetch-stock-data function:', error);

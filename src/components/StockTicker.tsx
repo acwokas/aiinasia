@@ -19,8 +19,9 @@ const StockTicker = () => {
       if (error) throw error;
       return data as { stocks: Stock[] };
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    refetchInterval: 5 * 60 * 1000, // Refetch every 5 minutes instead of 1
+    staleTime: 10 * 60 * 1000, // 10 minutes cache
+    refetchInterval: 10 * 60 * 1000, // Refetch every 10 minutes
+    retry: 1, // Only retry once on failure
   });
 
   if (isLoading || !data?.stocks) return null;
