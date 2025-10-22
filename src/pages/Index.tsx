@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
@@ -6,7 +6,7 @@ import { format } from "date-fns";
 import { Helmet } from "react-helmet";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-const StockTicker = lazy(() => import("@/components/StockTicker"));
+import StockTicker from "@/components/StockTicker";
 import { OrganizationStructuredData } from "@/components/StructuredData";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,7 +18,7 @@ import { BusinessInAByteAd } from "@/components/BusinessInAByteAd";
 import RecommendedArticles from "@/components/RecommendedArticles";
 import { EditorsPick } from "@/components/EditorsPick";
 import { z } from "zod";
-import { getOptimizedAvatar, getOptimizedHeroImage, getOptimizedThumbnail, getOptimizedSmallThumbnail, generateResponsiveSrcSet } from "@/lib/imageOptimization";
+import { getOptimizedAvatar, getOptimizedHeroImage, getOptimizedThumbnail, generateResponsiveSrcSet } from "@/lib/imageOptimization";
 
 const newsletterSchema = z.object({
   email: z.string()
@@ -37,8 +37,6 @@ const Index = () => {
   const { data: featuredArticle } = useQuery({
     queryKey: ["featured-article"],
     staleTime: 5 * 60 * 1000, // 5 minutes
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("articles")
@@ -318,12 +316,8 @@ const Index = () => {
         <link rel="canonical" href="https://aiinasia.com/" />
         
         {/* Preconnect to critical origins for faster resource loading */}
-        <link rel="preconnect" href="https://ppvifagplcdjpdpqknzt.supabase.co" crossOrigin="" />
+        <link rel="preconnect" href="https://ppvifagplcdjpdpqknzt.supabase.co" />
         <link rel="dns-prefetch" href="https://ppvifagplcdjpdpqknzt.supabase.co" />
-        <link rel="preconnect" href="https://www.googletagmanager.com" />
-        <link rel="preconnect" href="https://pagead2.googlesyndication.com" />
-        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
-        <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com" />
         
         {/* Preload LCP image for faster loading */}
         {featuredArticle?.featured_image_url && (
@@ -332,7 +326,7 @@ const Index = () => {
             as="image" 
             href={getOptimizedHeroImage(featuredArticle.featured_image_url, 1280)}
             imageSrcSet={featuredArticle.featured_image_url.includes('supabase.co/storage') ? generateResponsiveSrcSet(featuredArticle.featured_image_url, [640, 960, 1280]) : undefined}
-            imageSizes="(max-width: 768px) 100vw, 1280px"
+            imageSizes="(max-width: 768px) 100vw, 640px"
           />
         )}
         {!featuredArticle && trendingArticles?.[0]?.featured_image_url && (
@@ -341,7 +335,7 @@ const Index = () => {
             as="image" 
             href={getOptimizedHeroImage(trendingArticles[0].featured_image_url, 1280)}
             imageSrcSet={trendingArticles[0].featured_image_url.includes('supabase.co/storage') ? generateResponsiveSrcSet(trendingArticles[0].featured_image_url, [640, 960, 1280]) : undefined}
-            imageSizes="(max-width: 768px) 100vw, 1280px"
+            imageSizes="(max-width: 768px) 100vw, 640px"
           />
         )}
         
@@ -359,9 +353,7 @@ const Index = () => {
       <OrganizationStructuredData />
       
       <Header />
-      <Suspense fallback={<div className="h-10" />}>
-        <StockTicker />
-      </Suspense>
+      <StockTicker />
       
       <main className="flex-1">
         {/* Hero Grid Section */}
@@ -387,13 +379,9 @@ const Index = () => {
                 >
                   <div className={`relative ${index === 0 ? 'aspect-video' : 'aspect-[16/9]'} overflow-hidden rounded-lg mb-2`}>
                     <img 
-                      src={getOptimizedThumbnail(article.featured_image_url || "/placeholder.svg", index === 0 ? 400 : 200, index === 0 ? 300 : 150)} 
-                      srcSet={article.featured_image_url?.includes('supabase.co/storage') ? generateResponsiveSrcSet(article.featured_image_url, index === 0 ? [320, 480, 640] : [200, 320, 480]) : undefined}
-                      sizes={index === 0 ? "(max-width: 768px) 100vw, 400px" : "(max-width: 768px) 100vw, 200px"}
+                      src={article.featured_image_url || "/placeholder.svg"} 
                       alt={article.title}
                       loading="lazy"
-                      width={index === 0 ? 400 : 200}
-                      height={index === 0 ? 300 : 150}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                     <Badge className="absolute top-2 left-2 bg-primary text-primary-foreground text-xs">
@@ -434,13 +422,13 @@ const Index = () => {
                     <img 
                       src={getOptimizedHeroImage(featuredArticle.featured_image_url || "/placeholder.svg", 1280)} 
                       srcSet={featuredArticle.featured_image_url?.includes('supabase.co/storage') ? generateResponsiveSrcSet(featuredArticle.featured_image_url, [640, 960, 1280]) : undefined}
-                      sizes="(max-width: 768px) 100vw, 1280px"
+                      sizes="(max-width: 768px) 100vw, 640px"
                       alt={featuredArticle.title}
                       loading="eager"
-                      decoding="async"
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      width={1280}
+                      width={640}
                       height={600}
+                      fetchPriority="high"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
                     <div className="absolute bottom-0 left-0 right-0 p-8">
@@ -463,13 +451,12 @@ const Index = () => {
                       <img 
                         src={getOptimizedHeroImage(trendingArticles[0].featured_image_url || "/placeholder.svg", 1280)} 
                         srcSet={trendingArticles[0].featured_image_url?.includes('supabase.co/storage') ? generateResponsiveSrcSet(trendingArticles[0].featured_image_url, [640, 960, 1280]) : undefined}
-                        sizes="(max-width: 768px) 100vw, 1280px"
+                        sizes="(max-width: 768px) 100vw, 640px"
                         alt={trendingArticles[0].title}
-                        fetchPriority="high"
-                        decoding="async"
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        width={1280}
+                        width={640}
                         height={600}
+                        fetchPriority="high"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
                       <div className="absolute bottom-0 left-0 right-0 p-8">
@@ -565,13 +552,9 @@ const Index = () => {
                       <div>
                         <div className="relative aspect-video overflow-hidden rounded-lg mb-2">
                           <img 
-                            src={getOptimizedThumbnail(article.featured_image_url || "/placeholder.svg", 320, 180)} 
-                            srcSet={article.featured_image_url?.includes('supabase.co/storage') ? generateResponsiveSrcSet(article.featured_image_url, [240, 320, 480]) : undefined}
-                            sizes="(max-width: 768px) 100vw, 320px"
+                            src={article.featured_image_url || "/placeholder.svg"} 
                             alt={article.title}
                             loading="lazy"
-                            width={320}
-                            height={180}
                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                           />
                           <Badge className="absolute top-2 left-2 bg-secondary text-secondary-foreground text-xs">
@@ -590,13 +573,9 @@ const Index = () => {
                       <div className="flex gap-3">
                         <div className="relative w-20 h-20 flex-shrink-0 overflow-hidden rounded">
                           <img 
-                            src={getOptimizedSmallThumbnail(article.featured_image_url || "/placeholder.svg", 80, 80)} 
-                            srcSet={article.featured_image_url?.includes('supabase.co/storage') ? generateResponsiveSrcSet(article.featured_image_url, [80, 120, 160]) : undefined}
-                            sizes="80px"
+                            src={article.featured_image_url || "/placeholder.svg"} 
                             alt={article.title}
                             loading="lazy"
-                            width={80}
-                            height={80}
                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                           />
                         </div>
@@ -651,9 +630,9 @@ const Index = () => {
                 >
                   {author.avatar_url ? (
                     <img 
-                      src={getOptimizedAvatar(author.avatar_url, 80)} 
-                      srcSet={author.avatar_url.includes('supabase.co/storage') ? generateResponsiveSrcSet(author.avatar_url, [80, 120, 160]) : undefined}
-                      sizes="80px"
+                      src={getOptimizedAvatar(author.avatar_url, 160)} 
+                      srcSet={author.avatar_url.includes('supabase.co/storage') ? generateResponsiveSrcSet(author.avatar_url, [80, 160, 240]) : undefined}
+                      sizes="(max-width: 768px) 80px, 160px"
                       alt={author.name}
                       className="w-20 h-20 rounded-full object-cover mx-auto mb-4 ring-2 ring-primary"
                       loading="lazy"

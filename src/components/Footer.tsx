@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import logo from "@/assets/aiinasia-logo-brand-new.png";
+import logo from "@/assets/aiinasia-logo.png";
 import { z } from "zod";
 
 const emailSchema = z.string()

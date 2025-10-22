@@ -45,11 +45,11 @@ export function getOptimizedSupabaseImage(
 }
 
 /**
- * Generates srcset for responsive images with proper DPR support
+ * Generates srcset for responsive images
  */
 export function generateResponsiveSrcSet(
   url: string,
-  widths: number[] = [320, 480, 640, 960, 1280]
+  widths: number[] = [320, 640, 960, 1280, 1920]
 ): string {
   if (!url.includes('supabase.co/storage')) {
     return '';
@@ -57,43 +57,37 @@ export function generateResponsiveSrcSet(
 
   return widths
     .map((width) => {
-      const optimizedUrl = getOptimizedSupabaseImage(url, { 
-        width,
-        quality: 80 // Balanced quality for responsive images
-      });
+      const optimizedUrl = getOptimizedSupabaseImage(url, { width });
       return `${optimizedUrl} ${width}w`;
     })
     .join(', ');
 }
 
 /**
- * Get optimized avatar image with DPR support
+ * Get optimized avatar image
  */
 export function getOptimizedAvatar(url: string, size: number = 160): string {
-  // Match display size more precisely (1.5x for balance between quality and size)
-  const actualSize = Math.ceil(size * 1.5);
   return getOptimizedSupabaseImage(url, {
-    width: actualSize,
-    height: actualSize,
-    quality: 75, // Lower quality for small avatars - still looks good
+    width: size,
+    height: size,
+    quality: 85,
     format: 'webp',
     resize: 'cover',
   });
 }
 
 /**
- * Get optimized article thumbnail with DPR support
+ * Get optimized article thumbnail
  */
 export function getOptimizedThumbnail(
   url: string,
   width: number = 400,
   height: number = 300
 ): string {
-  // Use 1.5x for balance (not full 2x to reduce file size)
   return getOptimizedSupabaseImage(url, {
-    width: Math.ceil(width * 1.5),
-    height: Math.ceil(height * 1.5),
-    quality: 78, // Good balance for thumbnails
+    width,
+    height,
+    quality: 80,
     format: 'webp',
     resize: 'cover',
   });
@@ -108,26 +102,7 @@ export function getOptimizedHeroImage(
 ): string {
   return getOptimizedSupabaseImage(url, {
     width,
-    quality: 82,
+    quality: 85,
     format: 'webp',
-  });
-}
-
-/**
- * Get optimized small thumbnail (for sidebar, list items)
- * Uses lower quality since small size makes it less noticeable
- */
-export function getOptimizedSmallThumbnail(
-  url: string,
-  width: number = 160,
-  height: number = 160
-): string {
-  // Use exact requested size (no DPR multiplication for tiny thumbs)
-  return getOptimizedSupabaseImage(url, {
-    width,
-    height,
-    quality: 70, // Lower quality fine for small thumbnails
-    format: 'webp',
-    resize: 'cover',
   });
 }

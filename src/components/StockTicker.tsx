@@ -22,13 +22,12 @@ const StockTicker = () => {
     staleTime: 10 * 60 * 1000, // 10 minutes cache
     refetchInterval: 10 * 60 * 1000, // Refetch every 10 minutes
     retry: 1, // Only retry once on failure
-    enabled: typeof window !== 'undefined', // Only run on client
   });
 
   if (isLoading || !data?.stocks) return null;
 
   return (
-    <div className="bg-primary/5 border-y border-primary/10 overflow-hidden">
+    <div className="bg-secondary/50 border-y border-border overflow-hidden">
       <div className="ticker-wrapper">
         <div className="ticker-content">
           {/* Duplicate the stocks array to create seamless loop */}

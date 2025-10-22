@@ -10,7 +10,6 @@ import { MPUAd } from "@/components/GoogleAds";
 import { PromptAndGoBanner } from "@/components/PromptAndGoBanner";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { 
   Loader2, 
@@ -65,7 +64,7 @@ const Category = () => {
         .from("categories")
         .select("*")
         .eq("slug", slug)
-        .maybeSingle();
+        .single();
       
       if (error) throw error;
       return data;
@@ -497,30 +496,10 @@ const Category = () => {
     },
   });
 
-  if (categoryLoading) {
+  if (categoryLoading || articlesLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  if (!category) {
-    return (
-      <div className="min-h-screen flex flex-col">
-        <Header />
-        <main className="flex-1 container mx-auto px-4 py-16">
-          <div className="max-w-2xl mx-auto text-center">
-            <h1 className="headline text-4xl mb-4">Category Not Found</h1>
-            <p className="text-muted-foreground mb-8">
-              We couldn't find a category with the slug "{slug}".
-            </p>
-            <Button asChild>
-              <Link to="/">Back to Home</Link>
-            </Button>
-          </div>
-        </main>
-        <Footer />
       </div>
     );
   }

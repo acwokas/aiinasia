@@ -1,5 +1,4 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
-import { requireAdmin, getUserFromAuth } from '../_shared/requireAdmin.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -16,22 +15,6 @@ Deno.serve(async (req) => {
 
   try {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-    // Verify admin authentication
-    const authHeader = req.headers.get('Authorization');
-    const user = await getUserFromAuth(supabase, authHeader);
-    
-    if (!user) {
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
-        { 
-          status: 401,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
-    }
-
-    await requireAdmin(supabase, user.id);
 
     // Get all articles
     const { data: articles, error: fetchError } = await supabase

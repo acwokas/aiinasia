@@ -1,10 +1,10 @@
 import { ExternalLink } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import aiinasiaLogo from "@/assets/aiinasia-logo-brand-new.png";
-import businessInAByteLogo from "@/assets/businessinabyte-logo-new.png";
-import promptAndGoLogo from "@/assets/promptandgo-logo-new.png";
-import myOfferClubLogo from "@/assets/myofferclub-logo-new.png";
-import aiAcademyLogo from "@/assets/aiacademy-logo-new.png";
+import aiinasiaLogo from "@/assets/aiinasia-logo.png";
+import businessInAByteLogo from "@/assets/businessinabyte-logo.png";
+import promptAndGoLogo from "@/assets/promptandgo-logo.png";
+import myOfferClubLogo from "@/assets/myofferclub-logo.png";
+import aiAcademyLogo from "@/assets/aiacademy-logo.png";
 
 const collectiveLinks = [
   {
