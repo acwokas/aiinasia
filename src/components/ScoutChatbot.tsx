@@ -271,7 +271,7 @@ const ScoutChatbot = () => {
     <>
       {/* Backdrop overlay */}
       <div 
-        className="fixed inset-0 bg-black/70 backdrop-blur-md z-40"
+        className="fixed inset-0 bg-background/60 backdrop-blur-sm z-40"
         onClick={() => setIsOpen(false)}
       />
       
@@ -280,7 +280,7 @@ const ScoutChatbot = () => {
         <div className="absolute inset-0 bg-gradient-to-br from-primary/30 to-accent/30 rounded-2xl blur-2xl" />
         
         {/* Main container */}
-        <div className="relative bg-background border-2 border-primary/50 rounded-2xl shadow-[0_8px_80px_rgba(0,188,212,0.6),0_0_0_1px_rgba(0,188,212,0.2)] flex flex-col overflow-hidden">
+        <div className="relative bg-card/98 backdrop-blur-xl border-2 border-primary/50 rounded-2xl shadow-[0_8px_80px_rgba(0,188,212,0.6),0_0_0_1px_rgba(0,188,212,0.2)] flex flex-col overflow-hidden">
         {/* Animated background grid */}
         <div className="absolute inset-0 opacity-[0.03]" style={{
           backgroundImage: 'linear-gradient(hsl(var(--primary)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)',
@@ -300,11 +300,11 @@ const ScoutChatbot = () => {
               </div>
             </div>
             <div>
-              <h3 className="font-bold text-lg flex items-center gap-2 text-foreground">
+              <h3 className="font-bold text-lg flex items-center gap-2">
                 Ask Scout
                 <Sparkles className="h-4 w-4 text-accent animate-pulse" />
               </h3>
-              <p className="text-xs text-foreground/70">AI-Powered Assistant</p>
+              <p className="text-xs text-muted-foreground">AI-Powered Assistant</p>
             </div>
           </div>
           <Button
@@ -339,7 +339,7 @@ const ScoutChatbot = () => {
               className={`max-w-[80%] rounded-2xl p-3 relative group ${
                 msg.role === "user"
                   ? "bg-gradient-to-br from-primary to-accent text-primary-foreground shadow-[0_0_20px_rgba(0,188,212,0.3)] border border-primary/20"
-                  : "bg-muted border border-border shadow-sm"
+                  : "bg-card border border-border shadow-sm"
               }`}
             >
               {msg.role === "user" && (
@@ -383,7 +383,7 @@ const ScoutChatbot = () => {
                 </div>
               </div>
             </div>
-            <div className="bg-muted border border-border rounded-2xl p-3 flex items-center gap-2 shadow-sm">
+            <div className="bg-card border border-border rounded-2xl p-3 flex items-center gap-2 shadow-sm">
               <Loader2 className="h-4 w-4 animate-spin text-primary" />
               <div className="flex gap-1">
                 <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0s' }} />
