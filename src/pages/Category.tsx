@@ -683,7 +683,6 @@ const Category = () => {
           {/* Editor's Pick - Horizontal Layout (shown for all categories) */}
           {editorsPick && (
             <section className="mb-12">
-              <h2 className="text-2xl font-bold mb-6">Editor's Pick</h2>
               <Card className="overflow-hidden hover:shadow-xl transition-shadow group">
                 <Link to={`/${category?.slug}/${editorsPick.slug}`} className="flex flex-col md:flex-row gap-0">
                   <div className="md:w-2/5 relative aspect-video md:aspect-auto overflow-hidden">
@@ -694,7 +693,7 @@ const Category = () => {
                     />
                   </div>
                   <div className="md:w-3/5 p-6 md:p-8 flex flex-col justify-center">
-                    <Badge className="w-fit mb-3 bg-primary/10 text-primary hover:bg-primary/20">
+                    <Badge className="w-fit mb-3 bg-green-800 text-white hover:bg-green-900">
                       Editor's Pick
                     </Badge>
                     <h2 className="headline text-2xl md:text-3xl mb-4 group-hover:text-primary transition-colors">
