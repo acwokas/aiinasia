@@ -99,25 +99,21 @@ const About = () => {
                 </p>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <Card className="p-6 text-center hover:shadow-lg transition-shadow">
-                  <Users className="h-12 w-12 text-primary mx-auto mb-3" />
-                  <h3 className="font-bold text-2xl mb-1">50K+</h3>
-                  <p className="text-sm text-muted-foreground">Active Readers</p>
+                <Card className="p-6 hover:shadow-lg transition-shadow">
+                  <Target className="h-10 w-10 text-primary mb-3" />
+                  <p className="text-sm text-muted-foreground leading-relaxed">Covering Asia's AI evolution since 2022</p>
                 </Card>
-                <Card className="p-6 text-center hover:shadow-lg transition-shadow">
-                  <BookOpen className="h-12 w-12 text-primary mx-auto mb-3" />
-                  <h3 className="font-bold text-2xl mb-1">1000+</h3>
-                  <p className="text-sm text-muted-foreground">Articles</p>
+                <Card className="p-6 hover:shadow-lg transition-shadow">
+                  <Globe className="h-10 w-10 text-primary mb-3" />
+                  <p className="text-sm text-muted-foreground leading-relaxed">Read by professionals in 20+ countries across Asia-Pacific</p>
                 </Card>
-                <Card className="p-6 text-center hover:shadow-lg transition-shadow">
-                  <Globe className="h-12 w-12 text-primary mx-auto mb-3" />
-                  <h3 className="font-bold text-2xl mb-1">15+</h3>
-                  <p className="text-sm text-muted-foreground">Countries</p>
+                <Card className="p-6 hover:shadow-lg transition-shadow">
+                  <Users className="h-10 w-10 text-primary mb-3" />
+                  <p className="text-sm text-muted-foreground leading-relaxed">Home to 4,000+ reader insights and discussions</p>
                 </Card>
-                <Card className="p-6 text-center hover:shadow-lg transition-shadow">
-                  <TrendingUp className="h-12 w-12 text-primary mx-auto mb-3" />
-                  <h3 className="font-bold text-2xl mb-1">Daily</h3>
-                  <p className="text-sm text-muted-foreground">Updates</p>
+                <Card className="p-6 hover:shadow-lg transition-shadow">
+                  <TrendingUp className="h-10 w-10 text-primary mb-3" />
+                  <p className="text-sm text-muted-foreground leading-relaxed">Updated daily with AI news, analysis, and research across the region</p>
                 </Card>
               </div>
             </div>
