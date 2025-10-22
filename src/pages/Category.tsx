@@ -470,11 +470,11 @@ const Category = () => {
           {/* Voices Layout: The View From Koo (Left) + Latest & Ad (Right) */}
           {category?.slug === 'voices' ? (
             <section className="mb-12">
+              <h2 className="text-2xl font-bold mb-6">The View From Koo</h2>
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 {/* The View From Koo - Larger Featured Card on Left */}
                 {kooArticles && kooArticles.length > 0 && (
                   <div className="lg:col-span-8">
-                    <h2 className="text-2xl font-bold mb-6">The View From Koo</h2>
                     <Card className="overflow-hidden hover:shadow-xl transition-shadow group">
                       <Link to={`/${category?.slug}/${kooArticles[0].slug}`}>
                         <div className="relative aspect-video overflow-hidden">
