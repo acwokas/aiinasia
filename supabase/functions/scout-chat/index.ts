@@ -132,7 +132,28 @@ Guidelines:
 - Focus on Asia-Pacific AI developments when relevant
 - Cite credible sources when discussing facts
 - Admit when you don't know something
-- Suggest relevant topics or articles when appropriate`;
+- When users ask about specific topics, companies, people, or events, use the search_articles tool to find relevant articles from our database
+- Always call search_articles when a user query mentions searchable terms`;
+
+    const tools = [
+      {
+        type: "function",
+        function: {
+          name: "search_articles",
+          description: "Search for articles in the AIinASIA database by keywords. Use this when users ask about specific topics, companies, people, or events.",
+          parameters: {
+            type: "object",
+            properties: {
+              query: {
+                type: "string",
+                description: "The search query (e.g., 'Rory Sutherland', 'Lenovo', 'OpenAI')"
+              }
+            },
+            required: ["query"]
+          }
+        }
+      }
+    ];
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -146,6 +167,7 @@ Guidelines:
           { role: 'system', content: systemPrompt },
           ...messages
         ],
+        tools,
         stream: true,
       }),
     });

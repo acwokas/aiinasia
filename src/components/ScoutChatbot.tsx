@@ -7,9 +7,17 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
+interface Article {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string | null;
+}
+
 interface Message {
   role: "user" | "assistant";
   content: string;
+  articles?: Article[];
 }
 
 const ScoutChatbot = () => {
@@ -114,6 +122,8 @@ const ScoutChatbot = () => {
       const decoder = new TextDecoder();
       let assistantContent = "";
       let textBuffer = "";
+      let toolCallBuffer = "";
+      let searchQuery = "";
 
       // Add empty assistant message that we'll update
       setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
@@ -138,9 +148,16 @@ const ScoutChatbot = () => {
 
           try {
             const parsed = JSON.parse(jsonStr);
-            const content = parsed.choices?.[0]?.delta?.content;
-            if (content) {
-              assistantContent += content;
+            const delta = parsed.choices?.[0]?.delta;
+            
+            // Handle tool calls
+            if (delta?.tool_calls) {
+              const toolCall = delta.tool_calls[0];
+              if (toolCall?.function?.arguments) {
+                toolCallBuffer += toolCall.function.arguments;
+              }
+            } else if (delta?.content) {
+              assistantContent += delta.content;
               setMessages((prev) =>
                 prev.map((msg, i) =>
                   i === prev.length - 1
@@ -149,9 +166,60 @@ const ScoutChatbot = () => {
                 )
               );
             }
-          } catch {
+
+            // Check if finish_reason indicates tool call completion
+            if (parsed.choices?.[0]?.finish_reason === "tool_calls" && toolCallBuffer) {
+              try {
+                const toolArgs = JSON.parse(toolCallBuffer);
+                searchQuery = toolArgs.query;
+                
+                // Search for articles
+                const { data: articles } = await supabase
+                  .from("articles")
+                  .select("id, title, slug, excerpt")
+                  .eq("status", "published")
+                  .or(`title.ilike.%${searchQuery}%,excerpt.ilike.%${searchQuery}%,content.ilike.%${searchQuery}%`)
+                  .limit(5);
+
+                if (articles && articles.length > 0) {
+                  setMessages((prev) =>
+                    prev.map((msg, i) =>
+                      i === prev.length - 1
+                        ? { ...msg, articles: articles as Article[] }
+                        : msg
+                    )
+                  );
+                }
+              } catch (e) {
+                console.error("Error parsing tool call:", e);
+              }
+            }
+          } catch (e) {
             textBuffer = line + "\n" + textBuffer;
             break;
+          }
+        }
+      }
+
+      // Flush any remaining buffer content
+      if (textBuffer.trim() && !textBuffer.startsWith("data: [DONE]")) {
+        const lines = textBuffer.split("\n");
+        for (const line of lines) {
+          if (line.startsWith("data: ") && line.slice(6).trim() !== "[DONE]") {
+            try {
+              const parsed = JSON.parse(line.slice(6));
+              const content = parsed.choices?.[0]?.delta?.content;
+              if (content) {
+                assistantContent += content;
+                setMessages((prev) =>
+                  prev.map((msg, i) =>
+                    i === prev.length - 1
+                      ? { ...msg, content: assistantContent }
+                      : msg
+                  )
+                );
+              }
+            } catch {}
           }
         }
       }
@@ -271,7 +339,31 @@ const ScoutChatbot = () => {
               {msg.role === "user" && (
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition-opacity -z-10" />
               )}
-              <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+              <p className="text-sm whitespace-pre-wrap leading-relaxed break-words">{msg.content}</p>
+              
+              {msg.articles && msg.articles.length > 0 && (
+                <div className="mt-3 space-y-2 border-t border-border/30 pt-3">
+                  <p className="text-xs font-semibold text-muted-foreground">Related Articles:</p>
+                  {msg.articles.map((article) => (
+                    <a
+                      key={article.id}
+                      href={`/article/${article.slug}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block p-2 rounded-lg bg-background/50 hover:bg-background/80 border border-border/30 hover:border-primary/50 transition-all group/article"
+                    >
+                      <p className="text-sm font-medium group-hover/article:text-primary transition-colors line-clamp-2">
+                        {article.title}
+                      </p>
+                      {article.excerpt && (
+                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                          {article.excerpt}
+                        </p>
+                      )}
+                    </a>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         ))}
