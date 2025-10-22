@@ -644,6 +644,9 @@ const Index = () => {
                   )}
                   <h3 className="font-semibold mb-1">{author.name}</h3>
                   <p className="text-sm text-muted-foreground mb-2">{author.job_title || "Contributor"}</p>
+                  {author.bio && (
+                    <p className="text-xs text-muted-foreground mb-2 line-clamp-3">{author.bio}</p>
+                  )}
                   <p className="text-xs text-muted-foreground">{author.article_count || 0} articles</p>
                 </Link>
               ))}
