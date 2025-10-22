@@ -2,6 +2,9 @@ import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -10,6 +13,23 @@ import {
   BreadcrumbSeparator,
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
+import {
+  Sparkles,
+  Trophy,
+  Users,
+  Target,
+  Zap,
+  Shield,
+  BookOpen,
+  TrendingUp,
+  Globe,
+  Award,
+  Star,
+  Brain,
+  Rocket,
+  CheckCircle2,
+  GraduationCap
+} from "lucide-react";
 
 const About = () => {
   return (
@@ -29,143 +49,349 @@ const About = () => {
 
       <Header />
       
-      <main className="flex-1 container mx-auto px-4 py-12 max-w-4xl">
-        <Breadcrumb className="mb-6">
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link to="/">Home</Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>About</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-        
-        <h1 className="headline text-4xl md:text-5xl mb-6">About AI in ASIA</h1>
-        
-        <div className="prose prose-lg max-w-none space-y-6">
-          <p className="text-xl text-muted-foreground">
-            AI in ASIA is the leading platform for artificial intelligence news, insights, and education across Asia, powered by you.withthepowerof.ai.
-          </p>
+      {/* Hero Section */}
+      <section className="bg-gradient-to-br from-primary/10 via-background to-secondary/10 py-16 border-b">
+        <div className="container mx-auto px-4">
+          <Breadcrumb className="mb-6">
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link to="/">Home</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>About</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
           
-          <h2 className="headline text-3xl mt-8 mb-4">The Power of AI for Everyone</h2>
-          <p>
-            <strong>you.withthepowerof.ai</strong> is our parent organization dedicated to democratizing artificial intelligence. We believe that AI shouldn't be confined to tech giants and research labs—it should empower individuals, businesses, and communities worldwide to achieve more.
-          </p>
-          <p>
-            Our mission is to make AI accessible, understandable, and actionable for everyone. We bridge the gap between cutting-edge AI innovation and practical implementation through education, tools, and trusted journalism.
-          </p>
-          
-          <h2 className="headline text-3xl mt-8 mb-4">AI in ASIA's Mission</h2>
-          <p>
-            As the news and insights arm of you.withthepowerof.ai, AI in ASIA empowers the region's builders, innovators, and decision-makers with timely, accurate, and actionable AI intelligence. From breakthrough research to practical applications, we cover the stories that matter most to Asia's rapidly evolving AI landscape.
-          </p>
-          
-          <h2 className="headline text-3xl mt-8 mb-4">What We Cover</h2>
-          <ul className="space-y-2">
-            <li>Breaking AI news and developments across Asia</li>
-            <li>In-depth features on AI strategy, policy, and implementation</li>
-            <li>Interviews with leading AI researchers and entrepreneurs</li>
-            <li>Practical guides and tools for AI adoption</li>
-            <li>Educational resources through AI Academy</li>
-            <li>Regional AI trends and their global implications</li>
-            <li>Live AI events, conferences, and community meetups</li>
-            <li>Creator tools and resources for AI content generation</li>
-          </ul>
-          
-          <h2 className="headline text-3xl mt-8 mb-4">Gamification & Rewards 🎯</h2>
-          <p>
-            At AI in ASIA, we believe learning about AI should be engaging and rewarding. That's why we've built a comprehensive points and achievement system that recognizes your engagement and unlocks exclusive benefits.
-          </p>
-          
-          <h3 className="font-semibold text-xl mt-6 mb-3">How to Earn Points</h3>
-          <ul className="space-y-2">
-            <li><strong>Sign Up (20-50+ points)</strong> – Create your account and complete your profile to earn bonus points</li>
-            <li><strong>Read Articles (5 points)</strong> – Stay informed and earn points for every article you read</li>
-            <li><strong><Link to="/newsletter" className="text-primary hover:underline">Subscribe</Link> to Newsletter (25 points)</strong> – Never miss important AI news and earn the Newsletter Insider badge</li>
-            <li><strong>Complete Your Profile</strong> – Add your interests, company details, and profile picture for extra points</li>
-            <li><strong>Engage with Content</strong> – Comment, share, and participate in the community</li>
-          </ul>
-          
-          <h3 className="font-semibold text-xl mt-6 mb-3">Unlock Exclusive Benefits</h3>
-          <p>
-            As you accumulate points, you'll progress through member levels and unlock increasingly valuable benefits:
-          </p>
-          
-          <div className="bg-muted/50 rounded-lg p-6 my-6 space-y-4">
-            <div>
-              <h4 className="font-semibold text-blue-600 dark:text-blue-400 mb-2">🌟 Explorer (0-99 points)</h4>
-              <p className="text-sm">Basic Scout AI assistant access, article bookmarks, and personalized news feed</p>
+          <div className="max-w-4xl">
+            <div className="flex items-center gap-3 mb-4">
+              <Sparkles className="h-12 w-12 text-primary" />
+              <h1 className="headline text-4xl md:text-6xl">About AI in ASIA</h1>
             </div>
-            <div>
-              <h4 className="font-semibold text-purple-600 dark:text-purple-400 mb-2">⚡ Enthusiast (100-499 points)</h4>
-              <p className="text-sm">Enhanced Scout AI queries, early access to select content, and exclusive newsletter segments</p>
-            </div>
-            <div>
-              <h4 className="font-semibold text-orange-600 dark:text-orange-400 mb-2">🏆 Expert (500-999 points)</h4>
-              <p className="text-sm">Premium Scout AI capabilities, access to member-only articles, special partner offers, and priority event registration</p>
-            </div>
-            <div>
-              <h4 className="font-semibold text-red-600 dark:text-red-400 mb-2">👑 Thought Leader (1000+ points)</h4>
-              <p className="text-sm">Unlimited Scout AI queries, all premium content access, VIP partner benefits, exclusive industry insights, and recognition in our community</p>
-            </div>
-          </div>
-          
-          <h3 className="font-semibold text-xl mt-6 mb-3">Scout AI Assistant 🤖</h3>
-          <p>
-            Scout is your personal AI research assistant, available 24/7 to help you understand AI trends, research topics, and get instant answers to your questions. Scout's capabilities scale with your member level:
-          </p>
-          <ul className="space-y-2 mt-3">
-            <li><strong>Explorer level</strong> – Basic queries and article summaries</li>
-            <li><strong>Enthusiast level</strong> – Enhanced research and multi-source analysis</li>
-            <li><strong>Expert level</strong> – Advanced insights and trend analysis</li>
-            <li><strong>Thought Leader level</strong> – Unlimited queries with premium AI models and deep-dive research</li>
-          </ul>
-          
-          <h3 className="font-semibold text-xl mt-6 mb-3">Partner Benefits & Premium Access</h3>
-          <p>
-            Your points don't just unlock features on AI in ASIA—they open doors across the entire <strong>you.withthepowerof.ai</strong> ecosystem:
-          </p>
-          <ul className="space-y-2 mt-3">
-            <li><strong>PromptAndGo.ai</strong> – Discounted access to premium prompt templates and advanced tools</li>
-            <li><strong>BusinessInAByte.com</strong> – Exclusive strategy reports and case studies</li>
-            <li><strong>AI Academy</strong> – Course discounts and priority enrollment</li>
-            <li><strong>Industry Partners</strong> – Special offers from leading AI tools and platforms</li>
-            <li><strong>Premium Events</strong> – Free or discounted tickets to AI conferences and workshops</li>
-          </ul>
-          
-          <h2 className="headline text-3xl mt-8 mb-4">Our Ecosystem</h2>
-          <p>
-            AI in ASIA is part of the <strong>you.withthepowerof.ai</strong> integrated ecosystem, where your engagement and learning journey is recognized across all platforms:
-          </p>
-          <ul className="space-y-2">
-            <li><strong>AI in ASIA</strong> – Trusted AI news, insights, and analysis with gamified learning</li>
-            <li><strong>PromptAndGo.ai</strong> – Prompt engineering tools and resources for practitioners</li>
-            <li><strong>BusinessInAByte.com</strong> – AI strategies and implementation guides for business leaders</li>
-            <li><strong>AIAcademy.asia</strong> – Structured learning paths and professional certification programs</li>
-          </ul>
-          <p className="mt-4">
-            Together, these platforms form a comprehensive support system for anyone looking to understand, implement, or excel with AI technology—with rewards that grow as you do.
-          </p>
-          
-          <h2 className="headline text-3xl mt-8 mb-4">Editorial Standards</h2>
-          <p>
-            We maintain strict editorial independence and transparency. Our content is researched, fact-checked, and written to the highest journalistic standards. Our gamification system is designed to reward engagement, not influence editorial decisions.
-          </p>
-          
-          <div className="bg-muted/50 rounded-lg p-8 mt-12">
-            <h3 className="font-semibold text-xl mb-4">Get In Touch</h3>
-            <p>
-              Have a story tip, partnership enquiry, or feedback? <a href="/contact" className="text-primary hover:underline">Contact us</a>.
+            <p className="text-xl md:text-2xl text-muted-foreground mb-6">
+              The leading platform for artificial intelligence news, insights, and education across Asia
             </p>
-            <p className="mt-4 text-sm text-muted-foreground">
-              Part of the you.withthepowerof.ai family – Empowering everyone with accessible AI
-            </p>
+            <Badge variant="secondary" className="text-base py-2 px-4">
+              Powered by you.withthepowerof.ai
+            </Badge>
           </div>
         </div>
+      </section>
+
+      <main className="flex-1">
+        {/* Mission Section */}
+        <section className="container mx-auto px-4 py-16">
+          <div className="max-w-6xl mx-auto">
+            <div className="grid md:grid-cols-2 gap-12 items-center mb-16">
+              <div>
+                <h2 className="headline text-3xl md:text-4xl mb-6 flex items-center gap-3">
+                  <Target className="h-8 w-8 text-primary" />
+                  Our Mission
+                </h2>
+                <p className="text-lg text-muted-foreground mb-4">
+                  AI in ASIA empowers the region's builders, innovators, and decision-makers with timely, accurate, and actionable AI intelligence.
+                </p>
+                <p className="text-lg text-muted-foreground">
+                  From breakthrough research to practical applications, we cover the stories that matter most to Asia's rapidly evolving AI landscape.
+                </p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <Card className="p-6 text-center hover:shadow-lg transition-shadow">
+                  <Users className="h-12 w-12 text-primary mx-auto mb-3" />
+                  <h3 className="font-bold text-2xl mb-1">50K+</h3>
+                  <p className="text-sm text-muted-foreground">Active Readers</p>
+                </Card>
+                <Card className="p-6 text-center hover:shadow-lg transition-shadow">
+                  <BookOpen className="h-12 w-12 text-primary mx-auto mb-3" />
+                  <h3 className="font-bold text-2xl mb-1">1000+</h3>
+                  <p className="text-sm text-muted-foreground">Articles</p>
+                </Card>
+                <Card className="p-6 text-center hover:shadow-lg transition-shadow">
+                  <Globe className="h-12 w-12 text-primary mx-auto mb-3" />
+                  <h3 className="font-bold text-2xl mb-1">15+</h3>
+                  <p className="text-sm text-muted-foreground">Countries</p>
+                </Card>
+                <Card className="p-6 text-center hover:shadow-lg transition-shadow">
+                  <TrendingUp className="h-12 w-12 text-primary mx-auto mb-3" />
+                  <h3 className="font-bold text-2xl mb-1">Daily</h3>
+                  <p className="text-sm text-muted-foreground">Updates</p>
+                </Card>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Coverage Section */}
+        <section className="bg-muted/30 py-16">
+          <div className="container mx-auto px-4">
+            <div className="max-w-6xl mx-auto">
+              <h2 className="headline text-3xl md:text-4xl mb-12 text-center">What We Cover</h2>
+              <div className="grid md:grid-cols-3 gap-6">
+                <Card className="p-6 hover:shadow-lg transition-shadow">
+                  <Zap className="h-10 w-10 text-primary mb-4" />
+                  <h3 className="font-bold text-xl mb-3">Breaking News</h3>
+                  <ul className="space-y-2 text-muted-foreground">
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                      <span>Latest AI developments</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                      <span>Regional AI trends</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                      <span>Industry updates</span>
+                    </li>
+                  </ul>
+                </Card>
+
+                <Card className="p-6 hover:shadow-lg transition-shadow">
+                  <Brain className="h-10 w-10 text-primary mb-4" />
+                  <h3 className="font-bold text-xl mb-3">Deep Insights</h3>
+                  <ul className="space-y-2 text-muted-foreground">
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                      <span>In-depth analysis</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                      <span>Expert interviews</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                      <span>Research deep-dives</span>
+                    </li>
+                  </ul>
+                </Card>
+
+                <Card className="p-6 hover:shadow-lg transition-shadow">
+                  <Rocket className="h-10 w-10 text-primary mb-4" />
+                  <h3 className="font-bold text-xl mb-3">Practical Guides</h3>
+                  <ul className="space-y-2 text-muted-foreground">
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                      <span>Implementation guides</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                      <span>Tool reviews</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                      <span>Best practices</span>
+                    </li>
+                  </ul>
+                </Card>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Gamification Section */}
+        <section className="container mx-auto px-4 py-16">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-12">
+              <Trophy className="h-16 w-16 text-primary mx-auto mb-4" />
+              <h2 className="headline text-3xl md:text-4xl mb-4">Gamification & Rewards</h2>
+              <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+                Learning about AI should be engaging and rewarding. Earn points, unlock achievements, and access exclusive benefits.
+              </p>
+            </div>
+
+            {/* How to Earn Points */}
+            <Card className="p-8 mb-8">
+              <h3 className="font-bold text-2xl mb-6 flex items-center gap-3">
+                <Star className="h-8 w-8 text-primary" />
+                How to Earn Points
+              </h3>
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="flex gap-4">
+                  <div className="flex-shrink-0">
+                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Users className="h-6 w-6 text-primary" />
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold mb-1">Sign Up (20-50+ points)</h4>
+                    <p className="text-sm text-muted-foreground">Create your account and complete your profile</p>
+                  </div>
+                </div>
+                <div className="flex gap-4">
+                  <div className="flex-shrink-0">
+                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                      <BookOpen className="h-6 w-6 text-primary" />
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold mb-1">Read Articles (10 points)</h4>
+                    <p className="text-sm text-muted-foreground">Stay informed and earn points for every article</p>
+                  </div>
+                </div>
+                <div className="flex gap-4">
+                  <div className="flex-shrink-0">
+                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Zap className="h-6 w-6 text-primary" />
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold mb-1">Subscribe (25 points)</h4>
+                    <p className="text-sm text-muted-foreground">
+                      <Link to="/newsletter" className="text-primary hover:underline">Subscribe to our newsletter</Link>
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-4">
+                  <div className="flex-shrink-0">
+                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Target className="h-6 w-6 text-primary" />
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold mb-1">Engage & Share</h4>
+                    <p className="text-sm text-muted-foreground">Comment, bookmark, and participate in the community</p>
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            {/* Member Levels */}
+            <div className="grid md:grid-cols-4 gap-6 mb-12">
+              <Card className="p-6 border-2 border-blue-200 dark:border-blue-800 hover:shadow-lg transition-shadow">
+                <div className="text-center">
+                  <div className="text-4xl mb-3">🌟</div>
+                  <h4 className="font-bold text-lg mb-2 text-blue-600 dark:text-blue-400">Explorer</h4>
+                  <p className="text-sm font-semibold mb-3">0-99 points</p>
+                  <p className="text-sm text-muted-foreground">Basic Scout AI access & personalized feed</p>
+                </div>
+              </Card>
+              
+              <Card className="p-6 border-2 border-purple-200 dark:border-purple-800 hover:shadow-lg transition-shadow">
+                <div className="text-center">
+                  <div className="text-4xl mb-3">⚡</div>
+                  <h4 className="font-bold text-lg mb-2 text-purple-600 dark:text-purple-400">Enthusiast</h4>
+                  <p className="text-sm font-semibold mb-3">100-499 points</p>
+                  <p className="text-sm text-muted-foreground">Enhanced Scout AI & early content access</p>
+                </div>
+              </Card>
+              
+              <Card className="p-6 border-2 border-orange-200 dark:border-orange-800 hover:shadow-lg transition-shadow">
+                <div className="text-center">
+                  <div className="text-4xl mb-3">🏆</div>
+                  <h4 className="font-bold text-lg mb-2 text-orange-600 dark:text-orange-400">Expert</h4>
+                  <p className="text-sm font-semibold mb-3">500-999 points</p>
+                  <p className="text-sm text-muted-foreground">Premium Scout AI & member-only articles</p>
+                </div>
+              </Card>
+              
+              <Card className="p-6 border-2 border-red-200 dark:border-red-800 hover:shadow-lg transition-shadow">
+                <div className="text-center">
+                  <div className="text-4xl mb-3">👑</div>
+                  <h4 className="font-bold text-lg mb-2 text-red-600 dark:text-red-400">Thought Leader</h4>
+                  <p className="text-sm font-semibold mb-3">1000+ points</p>
+                  <p className="text-sm text-muted-foreground">Unlimited Scout AI & VIP benefits</p>
+                </div>
+              </Card>
+            </div>
+          </div>
+        </section>
+
+        {/* Ecosystem Section */}
+        <section className="bg-muted/30 py-16">
+          <div className="container mx-auto px-4">
+            <div className="max-w-6xl mx-auto">
+              <h2 className="headline text-3xl md:text-4xl mb-4 text-center">Our Ecosystem</h2>
+              <p className="text-center text-lg text-muted-foreground mb-12 max-w-3xl mx-auto">
+                AI in ASIA is part of the <strong>you.withthepowerof.ai</strong> integrated ecosystem
+              </p>
+              
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <a href="https://aiinasia.com" target="_blank" rel="noopener noreferrer">
+                  <Card className="p-6 text-center hover:shadow-lg transition-all hover:-translate-y-1 h-full">
+                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-secondary mx-auto mb-4 flex items-center justify-center">
+                      <Sparkles className="h-8 w-8 text-white" />
+                    </div>
+                    <h3 className="font-bold text-lg mb-2">AI in ASIA</h3>
+                    <p className="text-sm text-muted-foreground">Trusted AI news & insights</p>
+                  </Card>
+                </a>
+                
+                <a href="https://promptandgo.ai" target="_blank" rel="noopener noreferrer">
+                  <Card className="p-6 text-center hover:shadow-lg transition-all hover:-translate-y-1 h-full">
+                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-secondary mx-auto mb-4 flex items-center justify-center">
+                      <Zap className="h-8 w-8 text-white" />
+                    </div>
+                    <h3 className="font-bold text-lg mb-2">PromptAndGo</h3>
+                    <p className="text-sm text-muted-foreground">Prompt engineering tools</p>
+                  </Card>
+                </a>
+                
+                <a href="https://businessinabyte.com" target="_blank" rel="noopener noreferrer">
+                  <Card className="p-6 text-center hover:shadow-lg transition-all hover:-translate-y-1 h-full">
+                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-secondary mx-auto mb-4 flex items-center justify-center">
+                      <TrendingUp className="h-8 w-8 text-white" />
+                    </div>
+                    <h3 className="font-bold text-lg mb-2">Business In A Byte</h3>
+                    <p className="text-sm text-muted-foreground">AI business strategies</p>
+                  </Card>
+                </a>
+                
+                <a href="https://aiacademy.asia" target="_blank" rel="noopener noreferrer">
+                  <Card className="p-6 text-center hover:shadow-lg transition-all hover:-translate-y-1 h-full">
+                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-secondary mx-auto mb-4 flex items-center justify-center">
+                      <GraduationCap className="h-8 w-8 text-white" />
+                    </div>
+                    <h3 className="font-bold text-lg mb-2">AI Academy</h3>
+                    <p className="text-sm text-muted-foreground">Structured learning paths</p>
+                  </Card>
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Editorial Standards */}
+        <section className="container mx-auto px-4 py-16">
+          <div className="max-w-4xl mx-auto">
+            <Card className="p-8 bg-gradient-to-br from-primary/5 to-secondary/5">
+              <div className="flex items-start gap-6">
+                <div className="flex-shrink-0">
+                  <Shield className="h-12 w-12 text-primary" />
+                </div>
+                <div>
+                  <h2 className="headline text-2xl md:text-3xl mb-4">Editorial Standards</h2>
+                  <p className="text-lg text-muted-foreground mb-4">
+                    We maintain strict editorial independence and transparency. Our content is researched, fact-checked, and written to the highest journalistic standards.
+                  </p>
+                  <p className="text-lg text-muted-foreground">
+                    Our gamification system is designed to reward engagement, not influence editorial decisions.
+                  </p>
+                </div>
+              </div>
+            </Card>
+          </div>
+        </section>
+
+        {/* CTA Section */}
+        <section className="bg-gradient-to-br from-primary/10 via-background to-secondary/10 py-16">
+          <div className="container mx-auto px-4">
+            <div className="max-w-3xl mx-auto text-center">
+              <h2 className="headline text-3xl md:text-4xl mb-6">Get In Touch</h2>
+              <p className="text-xl text-muted-foreground mb-8">
+                Have a story tip, partnership enquiry, or feedback?
+              </p>
+              <Button asChild size="lg" className="text-lg px-8">
+                <Link to="/contact">Contact Us</Link>
+              </Button>
+              <p className="mt-8 text-sm text-muted-foreground">
+                Part of the <strong>you.withthepowerof.ai</strong> family – Empowering everyone with accessible AI
+              </p>
+            </div>
+          </div>
+        </section>
       </main>
       
       <Footer />
