@@ -182,11 +182,33 @@ const Category = () => {
 
   // Fetch Editor's Pick - Most popular article excluding featured and latest
   const { data: editorsPick } = useQuery({
-    queryKey: ["editors-pick", category?.id, articles],
+    queryKey: ["editors-pick", category?.id, slug],
     enabled: !!category?.id && !!articles,
     queryFn: async () => {
       if (!category?.id || !articles) return null;
 
+      // First, check if there's a manually selected editor's pick for this category
+      const { data: manualPick, error: manualError } = await supabase
+        .from("editors_picks")
+        .select(`
+          article_id,
+          articles (
+            *,
+            authors (name, slug),
+            categories:primary_category_id (name, slug)
+          )
+        `)
+        .eq("location", slug)
+        .maybeSingle();
+
+      if (manualError && manualError.code !== 'PGRST116') throw manualError;
+      
+      // If manual pick exists and article is published, return it
+      if (manualPick?.articles && (manualPick.articles as any).status === 'published') {
+        return manualPick.articles;
+      }
+
+      // Otherwise, fallback to automatic selection
       // Get IDs to exclude (featured article + latest articles shown)
       const excludeIds = [
         articles[0]?.id, // Featured article

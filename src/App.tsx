@@ -43,6 +43,7 @@ import BulkOperations from "./pages/BulkOperations";
 import ContentAnalytics from "./pages/ContentAnalytics";
 import SEOTools from "./pages/SEOTools";
 import AuthorManagement from "./pages/AuthorManagement";
+import EditorsPickManager from "./pages/EditorsPickManager";
 import NotFound from "./pages/NotFound";
 import Events from "./pages/Events";
 import Newsletter from "./pages/Newsletter";
@@ -111,6 +112,7 @@ const App = () => (
             <Route path="/admin/analytics" element={<ContentAnalytics />} />
             <Route path="/admin/seo-tools" element={<SEOTools />} />
             <Route path="/admin/author-management" element={<AuthorManagement />} />
+            <Route path="/admin/editors-picks" element={<EditorsPickManager />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <CollectiveFooter />

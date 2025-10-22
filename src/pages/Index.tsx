@@ -16,6 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { PromptAndGoBanner } from "@/components/PromptAndGoBanner";
 import { BusinessInAByteAd } from "@/components/BusinessInAByteAd";
 import RecommendedArticles from "@/components/RecommendedArticles";
+import { EditorsPick } from "@/components/EditorsPick";
 import { z } from "zod";
 
 const newsletterSchema = z.object({
@@ -234,6 +235,28 @@ const Index = () => {
       
       if (error) throw error;
       return data;
+    },
+  });
+
+  const { data: editorsPick } = useQuery({
+    queryKey: ["editors-pick-homepage"],
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("editors_picks")
+        .select(`
+          article_id,
+          articles (
+            *,
+            authors (name, slug),
+            categories:primary_category_id (name, slug)
+          )
+        `)
+        .eq("location", "homepage")
+        .maybeSingle();
+      
+      if (error) throw error;
+      return data?.articles;
     },
   });
 
@@ -585,6 +608,13 @@ const Index = () => {
         <section className="container mx-auto px-4 py-8">
           <PromptAndGoBanner />
         </section>
+
+        {/* Editor's Pick */}
+        {editorsPick && (
+          <section className="container mx-auto px-4 py-8">
+            <EditorsPick article={editorsPick} />
+          </section>
+        )}
 
         {/* Trending Tools Section */}
         <section className="container mx-auto px-4 py-12">
