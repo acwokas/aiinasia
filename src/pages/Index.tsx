@@ -360,6 +360,31 @@ const Index = () => {
         <title>AI in ASIA - Leading AI News, Insights & Innovation Across Asia</title>
         <meta name="description" content="Your trusted source for AI news, insights, and education across Asia. Breaking news, expert analysis, and practical guides on artificial intelligence. Powered by you.withthepowerof.ai." />
         <link rel="canonical" href="https://aiinasia.com/" />
+        
+        {/* Preconnect to critical origins for faster resource loading */}
+        <link rel="preconnect" href="https://ppvifagplcdjpdpqknzt.supabase.co" />
+        <link rel="dns-prefetch" href="https://ppvifagplcdjpdpqknzt.supabase.co" />
+        
+        {/* Preload LCP image for faster loading */}
+        {featuredArticle?.featured_image_url && (
+          <link 
+            rel="preload" 
+            as="image" 
+            href={getOptimizedHeroImage(featuredArticle.featured_image_url, 1280)}
+            imageSrcSet={featuredArticle.featured_image_url.includes('supabase.co/storage') ? generateResponsiveSrcSet(featuredArticle.featured_image_url, [640, 960, 1280]) : undefined}
+            imageSizes="(max-width: 768px) 100vw, 640px"
+          />
+        )}
+        {!featuredArticle && trendingArticles?.[0]?.featured_image_url && (
+          <link 
+            rel="preload" 
+            as="image" 
+            href={getOptimizedHeroImage(trendingArticles[0].featured_image_url, 1280)}
+            imageSrcSet={trendingArticles[0].featured_image_url.includes('supabase.co/storage') ? generateResponsiveSrcSet(trendingArticles[0].featured_image_url, [640, 960, 1280]) : undefined}
+            imageSizes="(max-width: 768px) 100vw, 640px"
+          />
+        )}
+        
         <meta property="og:title" content="AI in ASIA - Leading AI News, Insights & Innovation Across Asia" />
         <meta property="og:description" content="Your trusted source for AI news, insights, and education across Asia. Breaking news, expert analysis, and practical guides on artificial intelligence." />
         <meta property="og:url" content="https://aiinasia.com/" />
