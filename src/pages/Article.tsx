@@ -400,7 +400,7 @@ const Article = () => {
           return `<h3 class="text-2xl font-semibold mt-8 mb-4">${block.substring(4)}</h3>`;
         }
         if (block.startsWith('## ')) {
-          return `<h2 class="text-3xl font-bold mt-8 mb-4">${block.substring(3)}</h2>`;
+          return `<h2 class="text-3xl font-bold mt-12 mb-6 text-foreground">${block.substring(3)}</h2>`;
         }
         if (block.startsWith('# ')) {
           return `<h1 class="text-4xl font-bold mt-8 mb-4">${block.substring(2)}</h1>`;
@@ -408,7 +408,11 @@ const Article = () => {
         
         // Check for blockquotes
         if (block.startsWith('> ')) {
-          return `<blockquote class="border-l-4 border-primary pl-6 py-2 my-8 italic text-xl">${block.substring(2)}</blockquote>`;
+          const quoteContent = block.substring(2);
+          return `<blockquote class="border-l-4 border-primary bg-primary/5 pl-6 pr-4 py-4 my-8 relative">
+            <span class="text-primary text-5xl absolute -left-2 top-2 opacity-50">"</span>
+            <p class="italic text-lg text-foreground/90 leading-relaxed">${quoteContent}</p>
+          </blockquote>`;
         }
         
         // Check for unordered lists (multiple lines starting with -)
