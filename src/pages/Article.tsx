@@ -585,7 +585,7 @@ const Article = () => {
   return (
     <>
       <Helmet>
-        <title>{(article.meta_title || article.title).replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'")} | AI in ASIA</title>
+        <title>{((article.meta_title || article.title || 'Article') + '').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'")} | AI in ASIA</title>
         <meta name="description" content={article.meta_description || article.excerpt || ''} />
         <meta name="author" content={article.authors?.name || 'AI in ASIA'} />
         <meta property="article:published_time" content={article.published_at || ''} />

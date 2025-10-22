@@ -511,7 +511,7 @@ const Category = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Helmet>
-        <title>{category?.name} - AI News & Insights | AI in ASIA</title>
+        <title>{category?.name || 'Category'} - AI News & Insights | AI in ASIA</title>
         <meta name="description" content={category?.description || `Explore the latest ${category?.name} articles, news, and insights on AI in ASIA. Expert coverage of artificial intelligence developments across Asia.`} />
         <link rel="canonical" href={`https://aiinasia.com/category/${category?.slug}`} />
         <meta property="og:title" content={`${category?.name} - AI News & Insights | AI in ASIA`} />

@@ -74,7 +74,7 @@ const AuthorProfile = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Helmet>
-        <title>{author?.name} - Author Profile | AI in ASIA</title>
+        <title>{author?.name || 'Author'} - Author Profile | AI in ASIA</title>
         <meta name="description" content={author?.bio || `Read articles by ${author?.name}. ${articles?.length || 0} articles published.`} />
         <link rel="canonical" href={`https://aiinasia.com/voices/${author?.slug}`} />
         <meta property="og:title" content={`${author?.name} - Author Profile`} />

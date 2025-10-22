@@ -73,7 +73,7 @@ const Tag = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Helmet>
-        <title>{tag?.name} - Tagged Articles | AI in ASIA</title>
+        <title>{tag?.name || 'Tag'} - Tagged Articles | AI in ASIA</title>
         <meta name="description" content={tag?.description || `Explore articles tagged with ${tag?.name}. ${articles?.length || 0} articles covering AI news, insights, and developments.`} />
         <link rel="canonical" href={`https://aiinasia.com/tag/${tag?.slug}`} />
         <meta property="og:title" content={`${tag?.name} - Tagged Articles | AI in ASIA`} />
