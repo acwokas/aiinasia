@@ -612,7 +612,7 @@ const Category = () => {
                 {/* The View From Koo - Larger Featured Card on Left */}
                 <div className="lg:col-span-8">
                     <Card className="overflow-hidden hover:shadow-xl transition-shadow group">
-                      <Link to={`/${category?.slug}/${kooArticles[0].slug}`}>
+                      <Link to={`/${kooArticles[0].categories?.slug || category?.slug}/${kooArticles[0].slug}`}>
                         <div className="relative aspect-video overflow-hidden">
                           <img 
                             src={kooArticles[0].featured_image_url} 
@@ -652,7 +652,7 @@ const Category = () => {
                       {latestArticles.slice(0, 4).map((article) => (
                         <Link 
                           key={article.id}
-                          to={`/${category?.slug}/${article.slug}`}
+                          to={`/${article.categories?.slug || category?.slug}/${article.slug}`}
                           className="flex gap-3 group"
                         >
                           <img 
@@ -683,7 +683,7 @@ const Category = () => {
                 {featuredArticle && (
                   <div className="lg:col-span-8">
                     <Card className="overflow-hidden hover:shadow-xl transition-shadow group">
-                      <Link to={`/${category?.slug}/${featuredArticle.slug}`}>
+                      <Link to={`/${featuredArticle.categories?.slug || category?.slug}/${featuredArticle.slug}`}>
                         <div className="relative aspect-[16/9] overflow-hidden">
                           <img 
                             src={featuredArticle.featured_image_url} 
@@ -729,7 +729,7 @@ const Category = () => {
                       {latestArticles.slice(0, 4).map((article) => (
                         <Link 
                           key={article.id}
-                          to={`/${category?.slug}/${article.slug}`}
+                          to={`/${article.categories?.slug || category?.slug}/${article.slug}`}
                           className="flex gap-3 group"
                         >
                           <img 
@@ -759,7 +759,7 @@ const Category = () => {
           {editorsPick && (
             <section className="mb-12">
               <Card className="overflow-hidden hover:shadow-xl transition-shadow group">
-                <Link to={`/${category?.slug}/${editorsPick.slug}`} className="flex flex-col md:flex-row gap-0">
+                <Link to={`/${editorsPick.categories?.slug || category?.slug}/${editorsPick.slug}`} className="flex flex-col md:flex-row gap-0">
                   <div className="md:w-2/5 relative aspect-video md:aspect-auto overflow-hidden">
                     <img 
                       src={editorsPick.featured_image_url} 
@@ -816,7 +816,7 @@ const Category = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {mostReadArticles.slice(0, 4).map((article, index) => (
                   <Card key={article.id} className="overflow-hidden hover:shadow-lg transition-shadow group">
-                    <Link to={`/${category?.slug}/${article.slug}`} className="flex gap-4 p-4">
+                    <Link to={`/${article.categories?.slug || category?.slug}/${article.slug}`} className="flex gap-4 p-4">
                       <div className="flex-shrink-0 w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
                         <span className="text-2xl font-bold text-primary">{index + 1}</span>
                       </div>
@@ -855,7 +855,7 @@ const Category = () => {
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                 {trendingArticles.map((article, index) => (
                   <Card key={article.id} className="overflow-hidden hover:shadow-lg transition-shadow group relative">
-                    <Link to={`/${category?.slug}/${article.slug}`}>
+                    <Link to={`/${article.categories?.slug || category?.slug}/${article.slug}`}>
                       <div className="absolute top-2 left-2 z-10 w-8 h-8 bg-orange-600 text-white rounded-full flex items-center justify-center font-bold text-sm">
                         {index + 1}
                       </div>
@@ -926,7 +926,7 @@ const Category = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {tagData.articles.map((article) => (
                         <Card key={article.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                          <Link to={`/${category?.slug}/${article.slug}`} className="flex flex-col sm:flex-row gap-4 p-4">
+                          <Link to={`/${article.categories?.slug || category?.slug}/${article.slug}`} className="flex flex-col sm:flex-row gap-4 p-4">
                             <img 
                               src={article.featured_image_url} 
                               alt={article.title}
@@ -968,7 +968,7 @@ const Category = () => {
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {moreArticles.map((article) => (
                   <Card key={article.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                    <Link to={`/${category?.slug}/${article.slug}`}>
+                    <Link to={`/${article.categories?.slug || category?.slug}/${article.slug}`}>
                       <div className="relative aspect-video overflow-hidden">
                         <img 
                           src={article.featured_image_url} 
