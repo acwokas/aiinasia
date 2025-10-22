@@ -729,27 +729,486 @@ export type Database = {
         }
         Relationships: []
       }
+      newsletter_editions: {
+        Row: {
+          comments_count_override: number | null
+          created_at: string
+          created_by: string | null
+          edition_date: string
+          editor_note: string | null
+          hero_article_id: string | null
+          hero_article_manual_override: boolean | null
+          hero_article_original: string | null
+          id: string
+          meme_alt_text: string | null
+          meme_caption: string | null
+          meme_image_url: string | null
+          mini_case_study: string | null
+          scheduled_send_time: string | null
+          send_timezone: string
+          status: Database["public"]["Enums"]["newsletter_status"]
+          subject_line: string
+          subject_line_variant_b: string | null
+          total_clicked: number | null
+          total_opened: number | null
+          total_sent: number | null
+          updated_at: string
+        }
+        Insert: {
+          comments_count_override?: number | null
+          created_at?: string
+          created_by?: string | null
+          edition_date: string
+          editor_note?: string | null
+          hero_article_id?: string | null
+          hero_article_manual_override?: boolean | null
+          hero_article_original?: string | null
+          id?: string
+          meme_alt_text?: string | null
+          meme_caption?: string | null
+          meme_image_url?: string | null
+          mini_case_study?: string | null
+          scheduled_send_time?: string | null
+          send_timezone?: string
+          status?: Database["public"]["Enums"]["newsletter_status"]
+          subject_line: string
+          subject_line_variant_b?: string | null
+          total_clicked?: number | null
+          total_opened?: number | null
+          total_sent?: number | null
+          updated_at?: string
+        }
+        Update: {
+          comments_count_override?: number | null
+          created_at?: string
+          created_by?: string | null
+          edition_date?: string
+          editor_note?: string | null
+          hero_article_id?: string | null
+          hero_article_manual_override?: boolean | null
+          hero_article_original?: string | null
+          id?: string
+          meme_alt_text?: string | null
+          meme_caption?: string | null
+          meme_image_url?: string | null
+          mini_case_study?: string | null
+          scheduled_send_time?: string | null
+          send_timezone?: string
+          status?: Database["public"]["Enums"]["newsletter_status"]
+          subject_line?: string
+          subject_line_variant_b?: string | null
+          total_clicked?: number | null
+          total_opened?: number | null
+          total_sent?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "newsletter_editions_hero_article_id_fkey"
+            columns: ["hero_article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "newsletter_editions_hero_article_original_fkey"
+            columns: ["hero_article_original"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      newsletter_fun_facts: {
+        Row: {
+          created_at: string
+          fact_text: string
+          id: string
+          is_active: boolean | null
+          last_used_at: string | null
+          source: string | null
+          used_count: number | null
+        }
+        Insert: {
+          created_at?: string
+          fact_text: string
+          id?: string
+          is_active?: boolean | null
+          last_used_at?: string | null
+          source?: string | null
+          used_count?: number | null
+        }
+        Update: {
+          created_at?: string
+          fact_text?: string
+          id?: string
+          is_active?: boolean | null
+          last_used_at?: string | null
+          source?: string | null
+          used_count?: number | null
+        }
+        Relationships: []
+      }
+      newsletter_mystery_links: {
+        Row: {
+          category: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          expires_at: string
+          id: string
+          is_active: boolean | null
+          title: string
+          url: string
+          used_in_editions: string[] | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          expires_at?: string
+          id?: string
+          is_active?: boolean | null
+          title: string
+          url: string
+          used_in_editions?: string[] | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          expires_at?: string
+          id?: string
+          is_active?: boolean | null
+          title?: string
+          url?: string
+          used_in_editions?: string[] | null
+        }
+        Relationships: []
+      }
+      newsletter_news_sources: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean | null
+          last_scraped_at: string | null
+          name: string
+          region: string | null
+          rss_feed_url: string | null
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          last_scraped_at?: string | null
+          name: string
+          region?: string | null
+          rss_feed_url?: string | null
+          url: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          last_scraped_at?: string | null
+          name?: string
+          region?: string | null
+          rss_feed_url?: string | null
+          url?: string
+        }
+        Relationships: []
+      }
+      newsletter_quick_takes: {
+        Row: {
+          created_at: string
+          display_order: number | null
+          edition_id: string | null
+          headline: string
+          id: string
+          insight: string
+          manually_selected: boolean | null
+          scraped_at: string | null
+          source_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number | null
+          edition_id?: string | null
+          headline: string
+          id?: string
+          insight: string
+          manually_selected?: boolean | null
+          scraped_at?: string | null
+          source_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          display_order?: number | null
+          edition_id?: string | null
+          headline?: string
+          id?: string
+          insight?: string
+          manually_selected?: boolean | null
+          scraped_at?: string | null
+          source_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "newsletter_quick_takes_edition_id_fkey"
+            columns: ["edition_id"]
+            isOneToOne: false
+            referencedRelation: "newsletter_editions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      newsletter_sends: {
+        Row: {
+          bounced: boolean | null
+          clicked_at: string | null
+          clicked_sections: Json | null
+          edition_id: string
+          id: string
+          opened_at: string | null
+          sent_at: string
+          subscriber_id: string
+          unsubscribed_at: string | null
+          variant: string | null
+        }
+        Insert: {
+          bounced?: boolean | null
+          clicked_at?: string | null
+          clicked_sections?: Json | null
+          edition_id: string
+          id?: string
+          opened_at?: string | null
+          sent_at?: string
+          subscriber_id: string
+          unsubscribed_at?: string | null
+          variant?: string | null
+        }
+        Update: {
+          bounced?: boolean | null
+          clicked_at?: string | null
+          clicked_sections?: Json | null
+          edition_id?: string
+          id?: string
+          opened_at?: string | null
+          sent_at?: string
+          subscriber_id?: string
+          unsubscribed_at?: string | null
+          variant?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "newsletter_sends_edition_id_fkey"
+            columns: ["edition_id"]
+            isOneToOne: false
+            referencedRelation: "newsletter_editions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "newsletter_sends_subscriber_id_fkey"
+            columns: ["subscriber_id"]
+            isOneToOne: false
+            referencedRelation: "newsletter_subscribers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      newsletter_sponsors: {
+        Row: {
+          banner_image_url: string | null
+          created_at: string
+          cta_text: string | null
+          id: string
+          is_active: boolean | null
+          is_collective_site: boolean | null
+          logo_url: string | null
+          name: string
+          priority: number | null
+          updated_at: string
+          website_url: string
+        }
+        Insert: {
+          banner_image_url?: string | null
+          created_at?: string
+          cta_text?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_collective_site?: boolean | null
+          logo_url?: string | null
+          name: string
+          priority?: number | null
+          updated_at?: string
+          website_url: string
+        }
+        Update: {
+          banner_image_url?: string | null
+          created_at?: string
+          cta_text?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_collective_site?: boolean | null
+          logo_url?: string | null
+          name?: string
+          priority?: number | null
+          updated_at?: string
+          website_url?: string
+        }
+        Relationships: []
+      }
       newsletter_subscribers: {
         Row: {
           confirmed: boolean | null
           email: string
+          first_name: string | null
           id: string
+          points_earned: number | null
+          preferences: Json | null
           subscribed_at: string
+          total_clicks: number | null
+          total_opens: number | null
           unsubscribed_at: string | null
         }
         Insert: {
           confirmed?: boolean | null
           email: string
+          first_name?: string | null
           id?: string
+          points_earned?: number | null
+          preferences?: Json | null
           subscribed_at?: string
+          total_clicks?: number | null
+          total_opens?: number | null
           unsubscribed_at?: string | null
         }
         Update: {
           confirmed?: boolean | null
           email?: string
+          first_name?: string | null
           id?: string
+          points_earned?: number | null
+          preferences?: Json | null
           subscribed_at?: string
+          total_clicks?: number | null
+          total_opens?: number | null
           unsubscribed_at?: string | null
+        }
+        Relationships: []
+      }
+      newsletter_tools_prompts: {
+        Row: {
+          category: Database["public"]["Enums"]["tool_prompt_category"]
+          created_at: string
+          description: string
+          featured_image_url: string | null
+          id: string
+          is_active: boolean | null
+          source: string | null
+          title: string
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["tool_prompt_category"]
+          created_at?: string
+          description: string
+          featured_image_url?: string | null
+          id?: string
+          is_active?: boolean | null
+          source?: string | null
+          title: string
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["tool_prompt_category"]
+          created_at?: string
+          description?: string
+          featured_image_url?: string | null
+          id?: string
+          is_active?: boolean | null
+          source?: string | null
+          title?: string
+          updated_at?: string
+          url?: string
+        }
+        Relationships: []
+      }
+      newsletter_top_stories: {
+        Row: {
+          article_id: string
+          created_at: string
+          edition_id: string
+          id: string
+          manual_override: boolean | null
+          original_article_id: string | null
+          position: number
+        }
+        Insert: {
+          article_id: string
+          created_at?: string
+          edition_id: string
+          id?: string
+          manual_override?: boolean | null
+          original_article_id?: string | null
+          position: number
+        }
+        Update: {
+          article_id?: string
+          created_at?: string
+          edition_id?: string
+          id?: string
+          manual_override?: boolean | null
+          original_article_id?: string | null
+          position?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "newsletter_top_stories_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "newsletter_top_stories_edition_id_fkey"
+            columns: ["edition_id"]
+            isOneToOne: false
+            referencedRelation: "newsletter_editions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "newsletter_top_stories_original_article_id_fkey"
+            columns: ["original_article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      popup_settings: {
+        Row: {
+          active_popup: string
+          created_at: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          active_popup?: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          active_popup?: string
+          created_at?: string
+          id?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -1151,6 +1610,8 @@ export type Database = {
         | "review"
         | "explainer"
         | "podcast"
+      newsletter_status: "draft" | "scheduled" | "sent"
+      tool_prompt_category: "tool" | "prompt"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1301,6 +1762,8 @@ export const Constants = {
         "explainer",
         "podcast",
       ],
+      newsletter_status: ["draft", "scheduled", "sent"],
+      tool_prompt_category: ["tool", "prompt"],
     },
   },
 } as const

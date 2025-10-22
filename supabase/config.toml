@@ -50,3 +50,15 @@ verify_jwt = true
 
 [functions.scrape-ai-events]
 verify_jwt = true
+
+[functions.scrape-newsletter-news]
+verify_jwt = true
+
+[functions.generate-weekly-newsletter]
+verify_jwt = true
+
+[functions.send-weekly-newsletter]
+verify_jwt = true
+
+[functions.track-newsletter-engagement]
+verify_jwt = false
