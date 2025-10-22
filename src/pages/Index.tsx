@@ -328,7 +328,7 @@ const Index = () => {
             as="image" 
             href={getOptimizedHeroImage(featuredArticle.featured_image_url, 1280)}
             imageSrcSet={featuredArticle.featured_image_url.includes('supabase.co/storage') ? generateResponsiveSrcSet(featuredArticle.featured_image_url, [640, 960, 1280]) : undefined}
-            imageSizes="(max-width: 768px) 100vw, 640px"
+            imageSizes="(max-width: 768px) 100vw, 1280px"
           />
         )}
         {!featuredArticle && trendingArticles?.[0]?.featured_image_url && (
@@ -337,7 +337,7 @@ const Index = () => {
             as="image" 
             href={getOptimizedHeroImage(trendingArticles[0].featured_image_url, 1280)}
             imageSrcSet={trendingArticles[0].featured_image_url.includes('supabase.co/storage') ? generateResponsiveSrcSet(trendingArticles[0].featured_image_url, [640, 960, 1280]) : undefined}
-            imageSizes="(max-width: 768px) 100vw, 640px"
+            imageSizes="(max-width: 768px) 100vw, 1280px"
           />
         )}
         
