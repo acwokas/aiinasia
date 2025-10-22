@@ -646,48 +646,6 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
                 />
               </div>
 
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label>TL;DR Snapshot (3 Bullet Points)</Label>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={handleGenerateTldr}
-                    disabled={isGeneratingTldr || !title || !content}
-                  >
-                    {isGeneratingTldr ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                        Generating...
-                      </>
-                    ) : (
-                      "Generate TL;DR"
-                    )}
-                  </Button>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Appears below the featured image. Automatically removes existing TL;DR from content.
-                </p>
-                <div className="space-y-2">
-                  {[0, 1, 2].map((index) => (
-                    <div key={index} className="flex gap-2 items-start">
-                      <div className="flex-shrink-0 mt-3">
-                        <div className="w-2 h-2 rounded-full bg-primary" />
-                      </div>
-                      <Input
-                        value={tldrSnapshot[index] || ""}
-                        onChange={(e) => {
-                          const newTldr = [...tldrSnapshot];
-                          newTldr[index] = e.target.value;
-                          setTldrSnapshot(newTldr);
-                        }}
-                        placeholder={`Bullet point ${index + 1}`}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
 
               <div className="space-y-4">
                 <div>
@@ -1161,6 +1119,54 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle>TL;DR Snapshot</CardTitle>
+          <CardDescription>Generate 3 concise bullet points summarizing the article</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">
+              Appears below the featured image. Automatically removes existing TL;DR from content.
+            </p>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleGenerateTldr}
+              disabled={isGeneratingTldr || !title || !content}
+            >
+              {isGeneratingTldr ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Generating...
+                </>
+              ) : (
+                "Generate TL;DR"
+              )}
+            </Button>
+          </div>
+          <div className="space-y-2">
+            {[0, 1, 2].map((index) => (
+              <div key={index} className="flex gap-2 items-start">
+                <div className="flex-shrink-0 mt-3">
+                  <div className="w-2 h-2 rounded-full bg-primary" />
+                </div>
+                <Input
+                  value={tldrSnapshot[index] || ""}
+                  onChange={(e) => {
+                    const newTldr = [...tldrSnapshot];
+                    newTldr[index] = e.target.value;
+                    setTldrSnapshot(newTldr);
+                  }}
+                  placeholder={`Bullet point ${index + 1}`}
+                />
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="flex justify-end gap-4 mt-6">
         <Button onClick={handleSave}>
