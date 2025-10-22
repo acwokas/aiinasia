@@ -27,8 +27,19 @@ export default defineConfig(({ mode }) => ({
     },
     chunkSizeWarningLimit: 1000,
     cssCodeSplit: true,
+    cssMinify: 'lightningcss',
     modulePreload: {
       polyfill: true,
     },
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: mode === 'production',
+        pure_funcs: mode === 'production' ? ['console.log', 'console.info', 'console.debug'] : [],
+      },
+    },
+  },
+  css: {
+    devSourcemap: mode === 'development',
   },
 }));
