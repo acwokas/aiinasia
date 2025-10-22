@@ -616,39 +616,6 @@ const Index = () => {
           </section>
         )}
 
-        {/* Trending Tools Section */}
-        <section className="container mx-auto px-4 py-12">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="headline text-3xl flex items-center gap-2">
-              <TrendingUp className="h-8 w-8 text-primary" />
-              Trending AI Tools
-            </h2>
-            <Button variant="outline">View All Tools</Button>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              { name: "Prompt with the power of AI.", desc: "Advanced prompt engineering platform", url: "https://www.promptandgo.ai", category: "Productivity" },
-              { name: "Startup with the power of AI.", desc: "AI prompts and templates to supercharge your business", url: "https://www.businessinabyte.com", category: "Business" },
-              { name: "Shop with the power of AI.", desc: "AI-curated deals from around the web", url: "https://www.myofferclub.com", category: "Retail" },
-            ].map((tool, i) => (
-              <div key={i} className="article-card p-6 relative">
-                <Badge className="absolute top-3 right-3 bg-accent text-accent-foreground hover:bg-accent/90">
-                  {tool.category}
-                </Badge>
-                <h3 className="font-semibold text-lg mb-3 pr-20">{tool.name}</h3>
-                <p className="text-sm text-muted-foreground mb-4">{tool.desc}</p>
-                <Button variant="outline" size="sm" className="w-full" asChild>
-                  <a href={tool.url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2">
-                    Learn More
-                    <ExternalLink className="w-4 h-4" />
-                  </a>
-                </Button>
-              </div>
-            ))}
-          </div>
-        </section>
-
         {/* Featured Voices Section */}
         <section className="bg-muted/30 py-12">
           <div className="container mx-auto px-4">
@@ -727,6 +694,39 @@ const Index = () => {
                 No upcoming events at the moment. Check back soon!
               </div>
             )}
+          </div>
+        </section>
+
+        {/* Trending Tools Section */}
+        <section className="container mx-auto px-4 py-12">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="headline text-3xl flex items-center gap-2">
+              <TrendingUp className="h-8 w-8 text-primary" />
+              Trending AI Tools
+            </h2>
+            <Button variant="outline">View All Tools</Button>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              { name: "Prompt with the power of AI.", desc: "Advanced prompt engineering platform", url: "https://www.promptandgo.ai", category: "Productivity" },
+              { name: "Startup with the power of AI.", desc: "AI prompts and templates to supercharge your business", url: "https://www.businessinabyte.com", category: "Business" },
+              { name: "Shop with the power of AI.", desc: "AI-curated deals from around the web", url: "https://www.myofferclub.com", category: "Retail" },
+            ].map((tool, i) => (
+              <div key={i} className="article-card p-6 relative">
+                <Badge className="absolute top-3 right-3 bg-accent text-accent-foreground hover:bg-accent/90">
+                  {tool.category}
+                </Badge>
+                <h3 className="font-semibold text-lg mb-3 pr-20">{tool.name}</h3>
+                <p className="text-sm text-muted-foreground mb-4">{tool.desc}</p>
+                <Button variant="outline" size="sm" className="w-full" asChild>
+                  <a href={tool.url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2">
+                    Learn More
+                    <ExternalLink className="w-4 h-4" />
+                  </a>
+                </Button>
+              </div>
+            ))}
           </div>
         </section>
 
