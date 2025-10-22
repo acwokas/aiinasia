@@ -69,6 +69,39 @@ const Search = () => {
     queryKey: ["search", searchQuery, categoryFilter, authorFilter, tagFilter, dateFilter, sortBy],
     enabled: searchQuery.length > 0,
     queryFn: async () => {
+      // Normalize search query by removing special characters and creating variations
+      const normalizedQuery = searchQuery
+        .toLowerCase()
+        .replace(/['`'']/g, '') // Remove apostrophes
+        .replace(/[-–—]/g, ' ') // Replace hyphens with spaces
+        .trim();
+      
+      // Split into words for more flexible matching
+      const searchWords = normalizedQuery.split(/\s+/).filter(word => word.length > 0);
+      
+      // Build multiple search patterns
+      const searchPatterns = [];
+      
+      // Add original query pattern
+      searchPatterns.push(`title.ilike.%${searchQuery}%`);
+      searchPatterns.push(`excerpt.ilike.%${searchQuery}%`);
+      searchPatterns.push(`content.ilike.%${searchQuery}%`);
+      
+      // Add normalized query pattern if different from original
+      if (normalizedQuery !== searchQuery.toLowerCase()) {
+        searchPatterns.push(`title.ilike.%${normalizedQuery}%`);
+        searchPatterns.push(`excerpt.ilike.%${normalizedQuery}%`);
+        searchPatterns.push(`content.ilike.%${normalizedQuery}%`);
+      }
+      
+      // Add individual word patterns for better matching
+      searchWords.forEach(word => {
+        if (word.length > 2) { // Only add words with 3+ characters
+          searchPatterns.push(`title.ilike.%${word}%`);
+          searchPatterns.push(`excerpt.ilike.%${word}%`);
+        }
+      });
+      
       let query = supabase
         .from("articles")
         .select(`
@@ -78,7 +111,7 @@ const Search = () => {
           article_tags!inner (tag_id, tags (name, slug))
         `)
         .eq("status", "published")
-        .or(`title.ilike.%${searchQuery}%, excerpt.ilike.%${searchQuery}%`)
+        .or(searchPatterns.join(','))
         .limit(50);
 
       if (categoryFilter !== "all") {
