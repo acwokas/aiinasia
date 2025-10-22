@@ -107,6 +107,12 @@ const AuthorProfile = () => {
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
+                  <BreadcrumbLink asChild>
+                    <Link to="/category/voices">Voices</Link>
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
                   <BreadcrumbPage>{author?.name}</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
