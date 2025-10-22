@@ -58,6 +58,11 @@ serve(async (req) => {
         userPrompt = `Create a meta description for:\n\nTitle: ${context?.title || ''}\n\nContent: ${content}`;
         break;
       
+      case 'catchy-headline':
+        systemPrompt = 'You are Scout, a headline expert. Create a catchy, engaging, and short headline (under 60 characters) from the given content. Make it compelling and clickworthy while remaining accurate. Use British English. Return only the headline text.';
+        userPrompt = `Create a catchy headline from this content:\n\n${content}`;
+        break;
+      
       default:
         throw new Error('Invalid action');
     }

@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { Save, Upload, Loader2, Info, Plus, Pencil, CalendarIcon, Clock, ExternalLink } from "lucide-react";
+import { Save, Upload, Loader2, Info, Plus, Pencil, CalendarIcon, Clock, ExternalLink, Wand2 } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import ScoutWritingAssistant from "@/components/ScoutWritingAssistant";
@@ -104,6 +104,7 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
   });
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string>("");
+  const [isGeneratingHeadline, setIsGeneratingHeadline] = useState(false);
   const contentRef = useRef<HTMLTextAreaElement>(null);
   const excerptRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -418,6 +419,61 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
     }
   };
 
+  const handleGenerateHeadline = async () => {
+    setIsGeneratingHeadline(true);
+    try {
+      // Try to read from clipboard
+      let clipboardText = "";
+      try {
+        clipboardText = await navigator.clipboard.readText();
+      } catch (err) {
+        toast({
+          title: "Clipboard Access",
+          description: "Please paste your content into the browser prompt",
+          variant: "default"
+        });
+        clipboardText = prompt("Paste your content here:") || "";
+      }
+
+      if (!clipboardText || clipboardText.trim().length === 0) {
+        toast({
+          title: "No Content",
+          description: "Please copy some text to generate a headline from",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      const { data, error } = await supabase.functions.invoke("scout-assistant", {
+        body: {
+          action: "catchy-headline",
+          content: clipboardText,
+        },
+      });
+
+      if (error) throw error;
+
+      if (data?.result) {
+        setTitle(data.result);
+        if (!initialData) {
+          setSlug(generateSlug(data.result));
+        }
+        toast({
+          title: "Headline Generated!",
+          description: "Scout created a catchy headline from your content",
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to generate headline",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGeneratingHeadline(false);
+    }
+  };
+
   const handleSave = () => {
     let scheduledDateTime = null;
     let finalStatus = status;
@@ -485,13 +541,38 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label htmlFor="title">Title</Label>
+                <div className="flex items-center justify-between mb-2">
+                  <Label htmlFor="title">Title</Label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleGenerateHeadline}
+                    disabled={isGeneratingHeadline}
+                    title="Generate catchy headline from clipboard"
+                  >
+                    {isGeneratingHeadline ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        Generating...
+                      </>
+                    ) : (
+                      <>
+                        <Wand2 className="h-4 w-4 mr-2" />
+                        Scout Headline
+                      </>
+                    )}
+                  </Button>
+                </div>
                 <Input
                   id="title"
                   value={title}
                   onChange={(e) => handleTitleChange(e.target.value)}
                   placeholder="Enter article title..."
                 />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Copy content and click Scout Headline to generate a catchy title
+                </p>
               </div>
 
               <div>
