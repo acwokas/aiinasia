@@ -44,6 +44,7 @@ export default defineConfig(({ mode }) => ({
     },
     chunkSizeWarningLimit: 1000,
     cssCodeSplit: true,
+    cssMinify: 'lightningcss',
     modulePreload: {
       polyfill: true,
     },
@@ -58,5 +59,8 @@ export default defineConfig(({ mode }) => ({
         safari10: true,
       },
     } : undefined,
+  },
+  css: {
+    devSourcemap: mode === 'development',
   },
 }));
