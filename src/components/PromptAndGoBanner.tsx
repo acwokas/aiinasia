@@ -1,5 +1,5 @@
 import { ExternalLink } from "lucide-react";
-import promptAndGoLogo from "@/assets/promptandgo-logo.png";
+import promptAndGoLogo from "@/assets/promptandgo-logo.webp";
 
 export const PromptAndGoBanner = () => {
   return (

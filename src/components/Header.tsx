@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import logo from "@/assets/aiinasia-logo.png";
+import logo from "@/assets/aiinasia-logo.webp";
 
 const Header = () => {
   const [isDark, setIsDark] = useState(false);
