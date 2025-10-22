@@ -426,7 +426,7 @@ const Index = () => {
                 <Link to={`/${featuredArticle.categories?.slug || 'uncategorized'}/${featuredArticle.slug}`} className="block group">
                   <div className="relative h-[600px] overflow-hidden rounded-lg">
                     <img 
-                      src={featuredArticle.featured_image_url ? `${featuredArticle.featured_image_url}?width=1280&quality=85&format=webp` : "/placeholder.svg"} 
+                      src={getOptimizedHeroImage(featuredArticle.featured_image_url || "/placeholder.svg", 1280)} 
                       srcSet={featuredArticle.featured_image_url?.includes('supabase.co/storage') ? generateResponsiveSrcSet(featuredArticle.featured_image_url, [640, 960, 1280]) : undefined}
                       sizes="(max-width: 768px) 100vw, 1280px"
                       alt={featuredArticle.title}
@@ -455,7 +455,7 @@ const Index = () => {
                   <Link to={`/${trendingArticles[0].categories?.slug || 'uncategorized'}/${trendingArticles[0].slug}`} className="block group">
                     <div className="relative h-[600px] overflow-hidden rounded-lg">
                       <img 
-                        src={trendingArticles[0].featured_image_url ? `${trendingArticles[0].featured_image_url}?width=1280&quality=85&format=webp` : "/placeholder.svg"} 
+                        src={getOptimizedHeroImage(trendingArticles[0].featured_image_url || "/placeholder.svg", 1280)} 
                         srcSet={trendingArticles[0].featured_image_url?.includes('supabase.co/storage') ? generateResponsiveSrcSet(trendingArticles[0].featured_image_url, [640, 960, 1280]) : undefined}
                         sizes="(max-width: 768px) 100vw, 1280px"
                         alt={trendingArticles[0].title}
