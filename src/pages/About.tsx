@@ -191,16 +191,39 @@ const About = () => {
           </div>
         </section>
 
-        {/* Gamification Section */}
+        {/* Editorial Standards */}
         <section className="container mx-auto px-4 py-16">
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-12">
-              <Trophy className="h-16 w-16 text-primary mx-auto mb-4" />
-              <h2 className="headline text-3xl md:text-4xl mb-4">Gamification & Rewards</h2>
-              <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-                Learning about AI should be engaging and rewarding. Earn points, unlock achievements, and access exclusive benefits.
-              </p>
-            </div>
+          <div className="max-w-4xl mx-auto">
+            <Card className="p-8 bg-gradient-to-br from-primary/5 to-secondary/5">
+              <div className="flex items-start gap-6">
+                <div className="flex-shrink-0">
+                  <Shield className="h-12 w-12 text-primary" />
+                </div>
+                <div>
+                  <h2 className="headline text-2xl md:text-3xl mb-4">Editorial Standards</h2>
+                  <p className="text-lg text-muted-foreground mb-4">
+                    We maintain strict editorial independence and transparency. Our content is researched, fact-checked, and written to the highest journalistic standards.
+                  </p>
+                  <p className="text-lg text-muted-foreground">
+                    Our gamification system is designed to reward engagement, not influence editorial decisions.
+                  </p>
+                </div>
+              </div>
+            </Card>
+          </div>
+        </section>
+
+        {/* Learning is Rewarding Section */}
+        <section className="bg-muted/30 py-16">
+          <div className="container mx-auto px-4">
+            <div className="max-w-6xl mx-auto">
+              <div className="text-center mb-12">
+                <Trophy className="h-16 w-16 text-primary mx-auto mb-4" />
+                <h2 className="headline text-3xl md:text-4xl mb-4">Learning is Rewarding</h2>
+                <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+                  Learning about AI should be engaging and rewarding. Earn points, unlock achievements, and access exclusive benefits.
+                </p>
+              </div>
 
             {/* How to Earn Points */}
             <Card className="p-8 mb-8">
@@ -296,6 +319,7 @@ const About = () => {
                 </div>
               </Card>
             </div>
+            </div>
           </div>
         </section>
 
@@ -305,7 +329,10 @@ const About = () => {
             <div className="max-w-6xl mx-auto">
               <h2 className="headline text-3xl md:text-4xl mb-4 text-center">Our Ecosystem</h2>
               <p className="text-center text-lg text-muted-foreground mb-12 max-w-3xl mx-auto">
-                AI in ASIA is part of the <strong>you.withthepowerof.ai</strong> integrated ecosystem
+                AI in ASIA is part of the <a href="https://you.withthepowerof.ai" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">you.withthepowerof.ai <span className="inline-block">→</span></a> collective of connected brands built to help people and businesses get real value from AI. <span className="font-semibold">#democratizing AI for all.</span>
+              </p>
+              <p className="text-center text-lg text-muted-foreground mb-12 max-w-3xl mx-auto">
+                From education and media to tools, startups, and smart shopping - everything we create is designed to help you do more, with the power of AI.
               </p>
               
               <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -353,30 +380,8 @@ const About = () => {
           </div>
         </section>
 
-        {/* Editorial Standards */}
-        <section className="container mx-auto px-4 py-16">
-          <div className="max-w-4xl mx-auto">
-            <Card className="p-8 bg-gradient-to-br from-primary/5 to-secondary/5">
-              <div className="flex items-start gap-6">
-                <div className="flex-shrink-0">
-                  <Shield className="h-12 w-12 text-primary" />
-                </div>
-                <div>
-                  <h2 className="headline text-2xl md:text-3xl mb-4">Editorial Standards</h2>
-                  <p className="text-lg text-muted-foreground mb-4">
-                    We maintain strict editorial independence and transparency. Our content is researched, fact-checked, and written to the highest journalistic standards.
-                  </p>
-                  <p className="text-lg text-muted-foreground">
-                    Our gamification system is designed to reward engagement, not influence editorial decisions.
-                  </p>
-                </div>
-              </div>
-            </Card>
-          </div>
-        </section>
-
         {/* CTA Section */}
-        <section className="bg-gradient-to-br from-primary/10 via-background to-secondary/10 py-16">
+        <section className="container mx-auto px-4 py-16 bg-gradient-to-br from-primary/10 via-background to-secondary/10">
           <div className="container mx-auto px-4">
             <div className="max-w-3xl mx-auto text-center">
               <h2 className="headline text-3xl md:text-4xl mb-6">Get In Touch</h2>
