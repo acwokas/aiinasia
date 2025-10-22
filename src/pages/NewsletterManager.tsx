@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
