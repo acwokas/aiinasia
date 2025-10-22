@@ -1,5 +1,11 @@
 project_id = "ppvifagplcdjpdpqknzt"
 
+[functions.fix-migrated-content]
+verify_jwt = true
+
+[functions.remove-tweet-links]
+verify_jwt = true
+
 [functions.scout-chat]
 verify_jwt = false
 
