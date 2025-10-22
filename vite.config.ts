@@ -27,7 +27,6 @@ export default defineConfig(({ mode }) => ({
     },
     chunkSizeWarningLimit: 1000,
     cssCodeSplit: true,
-    cssMinify: 'lightningcss',
     modulePreload: {
       polyfill: true,
     },
@@ -38,8 +37,5 @@ export default defineConfig(({ mode }) => ({
         pure_funcs: mode === 'production' ? ['console.log', 'console.info', 'console.debug'] : [],
       },
     },
-  },
-  css: {
-    devSourcemap: mode === 'development',
   },
 }));
