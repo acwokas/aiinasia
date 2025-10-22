@@ -37,6 +37,8 @@ const Index = () => {
   const { data: featuredArticle } = useQuery({
     queryKey: ["featured-article"],
     staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("articles")
@@ -424,15 +426,15 @@ const Index = () => {
                 <Link to={`/${featuredArticle.categories?.slug || 'uncategorized'}/${featuredArticle.slug}`} className="block group">
                   <div className="relative h-[600px] overflow-hidden rounded-lg">
                     <img 
-                      src={getOptimizedHeroImage(featuredArticle.featured_image_url || "/placeholder.svg", 1280)} 
+                      src={featuredArticle.featured_image_url ? `${featuredArticle.featured_image_url}?width=1280&quality=85&format=webp` : "/placeholder.svg"} 
                       srcSet={featuredArticle.featured_image_url?.includes('supabase.co/storage') ? generateResponsiveSrcSet(featuredArticle.featured_image_url, [640, 960, 1280]) : undefined}
-                      sizes="(max-width: 768px) 100vw, 640px"
+                      sizes="(max-width: 768px) 100vw, 1280px"
                       alt={featuredArticle.title}
-                      loading="eager"
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      width={640}
-                      height={600}
                       fetchPriority="high"
+                      decoding="async"
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      width={1280}
+                      height={600}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
                     <div className="absolute bottom-0 left-0 right-0 p-8">
@@ -453,14 +455,15 @@ const Index = () => {
                   <Link to={`/${trendingArticles[0].categories?.slug || 'uncategorized'}/${trendingArticles[0].slug}`} className="block group">
                     <div className="relative h-[600px] overflow-hidden rounded-lg">
                       <img 
-                        src={getOptimizedHeroImage(trendingArticles[0].featured_image_url || "/placeholder.svg", 1280)} 
+                        src={trendingArticles[0].featured_image_url ? `${trendingArticles[0].featured_image_url}?width=1280&quality=85&format=webp` : "/placeholder.svg"} 
                         srcSet={trendingArticles[0].featured_image_url?.includes('supabase.co/storage') ? generateResponsiveSrcSet(trendingArticles[0].featured_image_url, [640, 960, 1280]) : undefined}
-                        sizes="(max-width: 768px) 100vw, 640px"
+                        sizes="(max-width: 768px) 100vw, 1280px"
                         alt={trendingArticles[0].title}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        width={640}
-                        height={600}
                         fetchPriority="high"
+                        decoding="async"
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        width={1280}
+                        height={600}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
                       <div className="absolute bottom-0 left-0 right-0 p-8">
