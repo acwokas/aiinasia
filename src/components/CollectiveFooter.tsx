@@ -56,7 +56,11 @@ export const CollectiveFooter = () => {
                 rel="noopener noreferrer"
                 className="text-[hsl(198,100%,50%)] hover:underline inline-flex items-center gap-1 transition-colors break-words"
               >
-                <span className="break-all">You.WithThePowerOf.AI</span>
+                <span className="break-all">
+                  You.
+                  <br className="sm:hidden" />
+                  WithThePowerOf.AI
+                </span>
                 <ExternalLink className="w-4 h-4 flex-shrink-0" />
               </a>{" "}
               Collective
