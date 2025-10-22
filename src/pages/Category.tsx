@@ -65,23 +65,37 @@ const Category = () => {
           ?.map(item => item.articles)
           .filter(article => article && article.authors?.name !== 'Intelligence Desk') || [];
         
-        // Sort: Latest first, then prioritize Adrian Watkins
-        return voicesArticles.sort((a: any, b: any) => {
-          const aDate = new Date(a.published_at).getTime();
-          const bDate = new Date(b.published_at).getTime();
-          const aIsAdrian = a.authors?.name === 'Adrian Watkins';
-          const bIsAdrian = b.authors?.name === 'Adrian Watkins';
-          
-          // Both same date range (within 7 days) - prioritize Adrian
-          const dateRange = 7 * 24 * 60 * 60 * 1000;
-          if (Math.abs(aDate - bDate) < dateRange) {
-            if (aIsAdrian && !bIsAdrian) return -1;
-            if (!aIsAdrian && bIsAdrian) return 1;
+        // Separate Adrian Watkins articles from others
+        const adrianArticles = voicesArticles
+          .filter((a: any) => a.authors?.name === 'Adrian Watkins')
+          .sort((a: any, b: any) => 
+            new Date(b.published_at).getTime() - new Date(a.published_at).getTime()
+          );
+        
+        const otherArticles = voicesArticles
+          .filter((a: any) => a.authors?.name !== 'Adrian Watkins')
+          .sort((a: any, b: any) => 
+            new Date(b.published_at).getTime() - new Date(a.published_at).getTime()
+          );
+        
+        // Mix articles with 60% Adrian, 40% others
+        // Pattern: Adrian, Adrian, Adrian, Other, Other (repeat)
+        const mixedArticles: any[] = [];
+        let adrianIndex = 0;
+        let otherIndex = 0;
+        
+        while (adrianIndex < adrianArticles.length || otherIndex < otherArticles.length) {
+          // Add 3 Adrian articles
+          for (let i = 0; i < 3 && adrianIndex < adrianArticles.length; i++) {
+            mixedArticles.push(adrianArticles[adrianIndex++]);
           }
-          
-          // Otherwise sort by date
-          return bDate - aDate;
-        });
+          // Add 2 other articles
+          for (let i = 0; i < 2 && otherIndex < otherArticles.length; i++) {
+            mixedArticles.push(otherArticles[otherIndex++]);
+          }
+        }
+        
+        return mixedArticles;
       }
 
       // Regular categories - fetch by primary_category_id
