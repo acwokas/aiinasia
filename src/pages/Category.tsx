@@ -44,6 +44,47 @@ const Category = () => {
     queryFn: async () => {
       if (!category?.id) return [];
 
+      // Special handling for Voices category - fetch from article_categories junction
+      if (slug === 'voices') {
+        const { data, error } = await supabase
+          .from("article_categories")
+          .select(`
+            articles (
+              *,
+              authors (name, slug),
+              categories:primary_category_id (name, slug)
+            )
+          `)
+          .eq("category_id", category.id)
+          .eq("articles.status", "published")
+          .order("articles.published_at", { ascending: false })
+          .limit(50);
+        
+        if (error) throw error;
+        
+        // Extract articles from the nested structure
+        const voicesArticles = data?.map(item => item.articles).filter(Boolean) || [];
+        
+        // Sort: Latest first, then prioritize Adrian Watkins
+        return voicesArticles.sort((a: any, b: any) => {
+          const aDate = new Date(a.published_at).getTime();
+          const bDate = new Date(b.published_at).getTime();
+          const aIsAdrian = a.authors?.name === 'Adrian Watkins';
+          const bIsAdrian = b.authors?.name === 'Adrian Watkins';
+          
+          // Both same date range (within 7 days) - prioritize Adrian
+          const dateRange = 7 * 24 * 60 * 60 * 1000;
+          if (Math.abs(aDate - bDate) < dateRange) {
+            if (aIsAdrian && !bIsAdrian) return -1;
+            if (!aIsAdrian && bIsAdrian) return 1;
+          }
+          
+          // Otherwise sort by date
+          return bDate - aDate;
+        });
+      }
+
+      // Regular categories - fetch by primary_category_id
       const { data, error } = await supabase
         .from("articles")
         .select(`
