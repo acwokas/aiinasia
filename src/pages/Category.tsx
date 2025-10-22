@@ -98,11 +98,6 @@ const Category = () => {
           ?.map(item => item.articles)
           .filter(article => article && article.authors?.name !== 'Intelligence Desk') || [];
         
-        console.log('Voices articles with categories:', voicesArticles.slice(0, 2).map(a => ({ 
-          title: a.title, 
-          slug: a.slug, 
-          categories: a.categories 
-        })));
         
         // Separate Adrian Watkins articles from others
         const adrianArticles = voicesArticles
@@ -441,13 +436,19 @@ const Category = () => {
             .eq("tag_id", tag.id)
             .eq("articles.primary_category_id", category.id)
             .eq("articles.status", "published")
-            .order("articles.published_at", { ascending: false })
             .limit(4);
           
           if (error) throw error;
+          
+          // Sort by published_at in JavaScript since we can't order embedded resources
+          const sortedArticles = (data?.map((item: any) => item.articles) || [])
+            .sort((a: any, b: any) => 
+              new Date(b.published_at).getTime() - new Date(a.published_at).getTime()
+            );
+          
           return {
             tag,
-            articles: data?.map((item: any) => item.articles) || []
+            articles: sortedArticles
           };
         })
       );
