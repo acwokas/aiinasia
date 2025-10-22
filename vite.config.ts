@@ -18,10 +18,27 @@ export default defineConfig(({ mode }) => ({
   build: {
     rollupOptions: {
       output: {
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'ui-vendor': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-tabs'],
-          'query-vendor': ['@tanstack/react-query'],
+        manualChunks: (id) => {
+          // Core React libraries
+          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
+            return 'react-core';
+          }
+          // React Router
+          if (id.includes('node_modules/react-router')) {
+            return 'react-router';
+          }
+          // Radix UI components - split into smaller chunks
+          if (id.includes('@radix-ui')) {
+            return 'radix-ui';
+          }
+          // React Query
+          if (id.includes('@tanstack/react-query')) {
+            return 'react-query';
+          }
+          // Other node_modules
+          if (id.includes('node_modules')) {
+            return 'vendor';
+          }
         },
       },
     },
@@ -34,7 +51,11 @@ export default defineConfig(({ mode }) => ({
     terserOptions: {
       compress: {
         drop_console: mode === 'production',
-        pure_funcs: mode === 'production' ? ['console.log', 'console.info', 'console.debug'] : [],
+        drop_debugger: mode === 'production',
+        pure_funcs: mode === 'production' ? ['console.log', 'console.info', 'console.debug', 'console.warn'] : [],
+      },
+      mangle: {
+        safari10: true,
       },
     },
   },
