@@ -33,6 +33,7 @@ import ContentProcessor from "./pages/ContentProcessor";
 import CategoryMapper from "./pages/CategoryMapper";
 import CleanArticles from "./pages/CleanArticles";
 import FixMigratedContent from "./pages/FixMigratedContent";
+import RemoveTweetLinks from "./pages/RemoveTweetLinks";
 import PublishAllArticles from "./pages/PublishAllArticles";
 import BulkCommentGeneration from "./pages/BulkCommentGeneration";
 import GenerateTldrBulk from "./pages/GenerateTldrBulk";
@@ -100,6 +101,7 @@ const App = () => (
             <Route path="/admin/category-mapper" element={<CategoryMapper />} />
             <Route path="/admin/clean-articles" element={<CleanArticles />} />
             <Route path="/admin/fix-migrated-content" element={<FixMigratedContent />} />
+            <Route path="/admin/remove-tweet-links" element={<RemoveTweetLinks />} />
             <Route path="/admin/publish-all" element={<PublishAllArticles />} />
             <Route path="/admin/bulk-comments" element={<BulkCommentGeneration />} />
            <Route path="/admin/generate-tldr" element={<GenerateTldrBulk />} />

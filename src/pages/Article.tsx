@@ -369,6 +369,11 @@ const Article = () => {
       
       // Process inline formatting FIRST (before splitting into blocks)
       let processed = consolidated
+        // Remove legacy WordPress tweet links (e.g., <a href="...">Tweet</a> or [Tweet](...))
+        .replace(/<a[^>]*>\s*Tweet\s*<\/a>/gi, '')
+        .replace(/\[Tweet\]\([^)]*\)/gi, '')
+        // Remove any standalone "Tweet" text that looks like a link remnant
+        .replace(/^\s*Tweet\s*$/gm, '')
         // Convert actual bold text first
         .replace(/\*\*([^\*]+?)\*\*/g, '<strong>$1</strong>')
         // Convert italic text (single asterisks only, not part of **)
@@ -443,6 +448,9 @@ const Article = () => {
         
         // Process inline formatting
         let processed = text
+          // Remove legacy WordPress tweet links
+          .replace(/<a[^>]*>\s*Tweet\s*<\/a>/gi, '')
+          .replace(/\[Tweet\]\([^)]*\)/gi, '')
           // Convert external links (http/https but not internal domain)
           .replace(/\[([^\]]+)\]\((https?:\/\/(?!aiinasia\.com)[^\)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-primary underline hover:no-underline">$1</a>')
           // Convert internal links
