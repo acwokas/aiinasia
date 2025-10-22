@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { ToolsPromptsManager } from "@/components/newsletter/ToolsPromptsManager";
 import { MysteryLinksManager } from "@/components/newsletter/MysteryLinksManager";
 import { SponsorsManager } from "@/components/newsletter/SponsorsManager";
+import { AutomationStatus } from "@/components/newsletter/AutomationStatus";
 import { Calendar, Send, Eye, Loader2 } from "lucide-react";
 
 export default function NewsletterManager() {
@@ -235,13 +236,20 @@ export default function NewsletterManager() {
         </Card>
 
         {/* Management Tabs */}
-        <Tabs defaultValue="manual" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+        <Tabs defaultValue="automation" className="w-full">
+          <TabsList className="grid w-full grid-cols-5">
+            <TabsTrigger value="automation">Automation</TabsTrigger>
             <TabsTrigger value="manual">Manual Content</TabsTrigger>
             <TabsTrigger value="tools">Tools & Prompts</TabsTrigger>
             <TabsTrigger value="mystery">Mystery Links</TabsTrigger>
             <TabsTrigger value="sponsors">Sponsors</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="automation">
+            <Card className="p-6">
+              <AutomationStatus />
+            </Card>
+          </TabsContent>
 
           <TabsContent value="manual" className="space-y-4">
             <Card className="p-6">

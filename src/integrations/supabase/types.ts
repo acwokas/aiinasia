@@ -729,6 +729,39 @@ export type Database = {
         }
         Relationships: []
       }
+      newsletter_automation_log: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          details: Json | null
+          error_message: string | null
+          id: string
+          job_name: string
+          started_at: string
+          status: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          details?: Json | null
+          error_message?: string | null
+          id?: string
+          job_name: string
+          started_at?: string
+          status: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          details?: Json | null
+          error_message?: string | null
+          id?: string
+          job_name?: string
+          started_at?: string
+          status?: string
+        }
+        Relationships: []
+      }
       newsletter_editions: {
         Row: {
           comments_count_override: number | null
