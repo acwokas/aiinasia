@@ -1,6 +1,6 @@
 import { ExternalLink } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import aiinasiaLogo from "@/assets/aiinasia-logo-optimized.png";
+import aiinasiaLogo from "@/assets/aiinasia-logo-brand.png";
 import businessInAByteLogo from "@/assets/businessinabyte-logo-optimized.png";
 import promptAndGoLogo from "@/assets/promptandgo-logo-optimized.png";
 import myOfferClubLogo from "@/assets/myofferclub-logo-optimized.png";
