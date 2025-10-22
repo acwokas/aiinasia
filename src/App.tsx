@@ -47,7 +47,7 @@ import EditorsPickManager from "./pages/EditorsPickManager";
 import NotFound from "./pages/NotFound";
 import Events from "./pages/Events";
 import Newsletter from "./pages/Newsletter";
-import NewsletterPopup from "./components/NewsletterPopup";
+import WelcomePopup from "./components/WelcomePopup";
 import ScoutChatbot from "./components/ScoutChatbot";
 import GoogleAnalytics from "./components/GoogleAnalytics";
 import { loadGoogleAdsScript } from "./components/GoogleAds";
@@ -67,7 +67,7 @@ const App = () => (
         <BrowserRouter>
           <GoogleAnalytics />
           <ConsentBanner />
-          <NewsletterPopup />
+          <WelcomePopup />
           <ScoutChatbot />
           <Routes>
             <Route path="/" element={<Index />} />
