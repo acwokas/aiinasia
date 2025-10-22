@@ -16,38 +16,7 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
-    rollupOptions: {
-      output: {
-        manualChunks: (id) => {
-          // Core React libraries
-          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
-            return 'react-core';
-          }
-          // React Router
-          if (id.includes('node_modules/react-router')) {
-            return 'react-router';
-          }
-          // Radix UI components - split into smaller chunks
-          if (id.includes('@radix-ui')) {
-            return 'radix-ui';
-          }
-          // React Query
-          if (id.includes('@tanstack/react-query')) {
-            return 'react-query';
-          }
-          // Other node_modules
-          if (id.includes('node_modules')) {
-            return 'vendor';
-          }
-        },
-      },
-    },
     chunkSizeWarningLimit: 1000,
-    cssCodeSplit: true,
-    modulePreload: {
-      polyfill: true,
-    },
-    minify: 'esbuild',
   },
   css: {
     devSourcemap: mode === 'development',
