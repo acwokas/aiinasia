@@ -27,7 +27,7 @@ const StockTicker = () => {
   if (isLoading || !data?.stocks) return null;
 
   return (
-    <div className="bg-secondary/50 border-y border-border overflow-hidden">
+    <div className="bg-primary border-y border-primary-foreground/20 overflow-hidden">
       <div className="ticker-wrapper">
         <div className="ticker-content">
           {/* Duplicate the stocks array to create seamless loop */}
@@ -36,12 +36,12 @@ const StockTicker = () => {
               key={`${stock.symbol}-${index}`}
               className="ticker-item inline-flex items-center gap-2 px-6 py-2"
             >
-              <span className="font-semibold text-sm">{stock.name}</span>
-              <span className="text-muted-foreground text-xs">{stock.symbol}</span>
-              <span className="font-mono text-sm">${stock.price.toFixed(2)}</span>
+              <span className="font-semibold text-sm text-primary-foreground">{stock.name}</span>
+              <span className="text-primary-foreground/70 text-xs">{stock.symbol}</span>
+              <span className="font-mono text-sm text-primary-foreground">${stock.price.toFixed(2)}</span>
               <span
                 className={`flex items-center gap-1 text-xs font-medium ${
-                  stock.change >= 0 ? 'text-green-600' : 'text-red-600'
+                  stock.change >= 0 ? 'text-green-300' : 'text-red-300'
                 }`}
               >
                 {stock.change >= 0 ? (
