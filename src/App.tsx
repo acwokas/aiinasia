@@ -15,6 +15,7 @@ import GoogleAnalytics from "./components/GoogleAnalytics";
 import { loadGoogleAdsScript } from "./components/GoogleAds";
 import ConsentBanner from "./components/ConsentBanner";
 import { CollectiveFooter } from "./components/CollectiveFooter";
+import { DatabaseErrorBoundary } from "./components/DatabaseErrorBoundary";
 
 // Lazy load all other pages for better performance
 const Article = lazy(() => import("./pages/Article"));
@@ -23,6 +24,7 @@ const Tag = lazy(() => import("./pages/Tag"));
 const AuthorProfile = lazy(() => import("./pages/AuthorProfile"));
 const SitemapRedirect = lazy(() => import("./pages/SitemapRedirect"));
 const Search = lazy(() => import("./pages/Search"));
+const ConnectionTest = lazy(() => import("./pages/ConnectionTest"));
 const Auth = lazy(() => import("./pages/Auth"));
 const Admin = lazy(() => import("./pages/Admin"));
 const Articles = lazy(() => import("./pages/Articles"));
@@ -78,14 +80,15 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <GoogleAnalytics />
-          <ConsentBanner />
-          <WelcomePopup />
-          <ScoutChatbot />
-          <Suspense fallback={<PageLoader />}>
+        <DatabaseErrorBoundary>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <GoogleAnalytics />
+            <ConsentBanner />
+            <WelcomePopup />
+            <ScoutChatbot />
+            <Suspense fallback={<PageLoader />}>
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/:category/:slug" element={<Article />} />
@@ -94,6 +97,7 @@ const App = () => (
               <Route path="/voices/:slug" element={<AuthorProfile />} />
               <Route path="/sitemap.xml" element={<SitemapRedirect />} />
               <Route path="/search" element={<Search />} />
+              <Route path="/connection-test" element={<ConnectionTest />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/admin" element={<Admin />} />
@@ -138,6 +142,7 @@ const App = () => (
           </Suspense>
           <CollectiveFooter />
         </BrowserRouter>
+        </DatabaseErrorBoundary>
       </TooltipProvider>
     </AuthProvider>
   </QueryClientProvider>
