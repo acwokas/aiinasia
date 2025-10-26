@@ -42,6 +42,7 @@ const ExtractImageUrls = lazy(() => import("./pages/ExtractImageUrls"));
 const UpdateArticleImages = lazy(() => import("./pages/UpdateArticleImages"));
 const MigrationDashboard = lazy(() => import("./pages/MigrationDashboard"));
 const BulkRedirects = lazy(() => import("./pages/BulkRedirects"));
+const CsvUrlReplacer = lazy(() => import("./pages/CsvUrlReplacer"));
 const MigrateCategoryUrls = lazy(() => import("./pages/MigrateCategoryUrls"));
 const ContentProcessor = lazy(() => import("./pages/ContentProcessor"));
 const CategoryMapper = lazy(() => import("./pages/CategoryMapper"));
@@ -121,6 +122,7 @@ const App = () => (
               <Route path="/admin/update-article-images" element={<UpdateArticleImages />} />
               <Route path="/admin/migration-dashboard" element={<MigrationDashboard />} />
               <Route path="/admin/bulk-redirects" element={<BulkRedirects />} />
+              <Route path="/admin/csv-url-replacer" element={<CsvUrlReplacer />} />
               <Route path="/admin/migrate-category-urls" element={<MigrateCategoryUrls />} />
               <Route path="/admin/content-processor" element={<ContentProcessor />} />
               <Route path="/admin/category-mapper" element={<CategoryMapper />} />
