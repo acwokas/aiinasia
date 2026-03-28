@@ -50,11 +50,16 @@ serve(async (req) => {
         .select("tag_id"),
     ]);
 
+    if (articlesRes.error) console.error("Articles error:", JSON.stringify(articlesRes.error));
+    if (categoriesRes.error) console.error("Categories error:", JSON.stringify(categoriesRes.error));
+    if (authorsRes.error) console.error("Authors error:", JSON.stringify(authorsRes.error));
+    if (articleTagsRes.error) console.error("ArticleTags error:", JSON.stringify(articleTagsRes.error));
+
     const articles = articlesRes.data ?? [];
     const categories = categoriesRes.data ?? [];
     const authors = authorsRes.data ?? [];
 
-    console.log(`Articles: ${articles.length}, Categories: ${categories.length}, Authors: ${authors.length}`);
+    console.log(`Articles: ${articles.length}, Categories: ${categories.length}, Authors: ${authors.length}, URL: ${supabaseUrl}`);
 
     // Get published article IDs for filtering tags
     const { data: publishedIds } = await supabase
