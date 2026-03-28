@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
-import Table from '@tiptap/extension-table';
+import { Table } from '@tiptap/extension-table';
 import TableRow from '@tiptap/extension-table-row';
 import TableCell from '@tiptap/extension-table-cell';
 import TableHeader from '@tiptap/extension-table-header';
@@ -215,7 +215,7 @@ const TipTapEditor = ({
       lastExternalValue.current = value;
       const html = convertMarkdownToHtml(value);
       if (editor.getHTML() !== html) {
-        editor.commands.setContent(html, false);
+        editor.commands.setContent(html, { emitUpdate: false });
       }
     }
   }, [value, editor]);
