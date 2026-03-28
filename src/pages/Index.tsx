@@ -18,7 +18,7 @@ import { BusinessInAByteAd } from "@/components/BusinessInAByteAd";
 import RecommendedArticles from "@/components/RecommendedArticles";
 import { EditorsPick } from "@/components/EditorsPick";
 import { z } from "zod";
-import { getOptimizedAvatar, getOptimizedHeroImage, getOptimizedThumbnail, generateResponsiveSrcSet } from "@/lib/imageOptimization";
+import { getOptimizedAvatar, getOptimizedHeroImage, getOptimizedThumbnail, generateResponsiveSrcSet, toProxyUrl } from "@/lib/imageOptimization";
 
 const newsletterSchema = z.object({
   email: z.string()
@@ -329,7 +329,7 @@ const Index = () => {
                 >
                   <div className={`relative ${index === 0 ? 'aspect-video' : 'aspect-[16/9]'} overflow-hidden rounded-lg mb-2`}>
                     <img 
-                      src={article.featured_image_url || "/placeholder.svg"} 
+                      src={toProxyUrl(article.featured_image_url) || "/placeholder.svg"} 
                       alt={article.title}
                       loading="lazy"
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
@@ -502,7 +502,7 @@ const Index = () => {
                       <div>
                         <div className="relative aspect-video overflow-hidden rounded-lg mb-2">
                           <img 
-                            src={article.featured_image_url || "/placeholder.svg"} 
+                            src={toProxyUrl(article.featured_image_url) || "/placeholder.svg"} 
                             alt={article.title}
                             loading="lazy"
                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
@@ -523,7 +523,7 @@ const Index = () => {
                       <div className="flex gap-3">
                         <div className="relative w-20 h-20 flex-shrink-0 overflow-hidden rounded">
                           <img 
-                            src={article.featured_image_url || "/placeholder.svg"} 
+                            src={toProxyUrl(article.featured_image_url) || "/placeholder.svg"} 
                             alt={article.title}
                             loading="lazy"
                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"

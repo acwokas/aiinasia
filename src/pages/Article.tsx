@@ -17,6 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
 import { useAdminRole } from "@/hooks/useAdminRole";
 import DOMPurify from "dompurify";
+import { toProxyUrl } from "@/lib/imageOptimization";
 
 const Article = () => {
   const { category, slug } = useParams();
@@ -594,13 +595,13 @@ const Article = () => {
         <meta property="article:section" content={article.categories?.name || ''} />
         <meta property="og:title" content={(article.meta_title || article.title).replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'")} />
         <meta property="og:description" content={article.meta_description || article.excerpt || ''} />
-        <meta property="og:image" content={article.featured_image_url || '/og-image.png'} />
+        <meta property="og:image" content={article.featured_image_url ? `https://aiinasia.com${toProxyUrl(article.featured_image_url)}` : 'https://aiinasia.com/og-image.png'} />
         <meta property="og:type" content="article" />
         <meta property="og:url" content={window.location.href} />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={(article.meta_title || article.title).replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'")} />
         <meta name="twitter:description" content={article.meta_description || article.excerpt || ''} />
-        <meta name="twitter:image" content={article.featured_image_url || '/og-image.png'} />
+        <meta name="twitter:image" content={article.featured_image_url ? `https://aiinasia.com${toProxyUrl(article.featured_image_url)}` : 'https://aiinasia.com/og-image.png'} />
         {isPreview ? (
           <meta name="robots" content="noindex, nofollow" />
         ) : (
@@ -817,7 +818,7 @@ const Article = () => {
             {article.featured_image_url && (
               <div className="relative aspect-video overflow-hidden rounded-lg mb-8">
                 <img 
-                  src={article.featured_image_url} 
+                  src={toProxyUrl(article.featured_image_url)} 
                   alt={article.featured_image_alt || article.title}
                   className="w-full h-full object-cover"
                 />
