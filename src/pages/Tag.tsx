@@ -76,6 +76,9 @@ const Tag = () => {
         <title>{tag?.name || 'Tag'} - Tagged Articles | AI in ASIA</title>
         <meta name="description" content={tag?.description || `Explore articles tagged with ${tag?.name}. ${articles?.length || 0} articles covering AI news, insights, and developments.`} />
         <link rel="canonical" href={`https://aiinasia.com/tag/${tag?.slug}`} />
+        {(!articles || articles.length === 0) && (
+          <meta name="robots" content="noindex, follow" />
+        )}
         <meta property="og:title" content={`${tag?.name} - Tagged Articles | AI in ASIA`} />
         <meta property="og:description" content={tag?.description || `Explore articles tagged with ${tag?.name}.`} />
         <meta property="og:url" content={`https://aiinasia.com/tag/${tag?.slug}`} />
