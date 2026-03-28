@@ -35,23 +35,74 @@ serve(async (req) => {
 
     const baseUrl = "https://aiinasia.com";
 
-    const [{ data: articles }, { data: categories }, { data: tags }, { data: authors }] = await Promise.all([
+    // Fetch articles, categories, authors, and article_tags in parallel
+    const [articlesRes, categoriesRes, authorsRes, articleTagsRes] = await Promise.all([
       supabase
         .from("articles")
-        .select("slug, updated_at, image_url, categories:primary_category_id(slug)")
+        .select("slug, updated_at, featured_image_url, categories:primary_category_id(slug)")
         .eq("status", "published")
         .order("updated_at", { ascending: false }),
       supabase.from("categories").select("slug"),
-      supabase.from("tags").select("slug"),
       supabase.from("authors").select("slug"),
+      // Get tag_id for each published article's tag
+      supabase
+        .from("article_tags")
+        .select("tag_id"),
     ]);
+
+    if (articlesRes.error) console.error("Articles error:", JSON.stringify(articlesRes.error));
+    if (categoriesRes.error) console.error("Categories error:", JSON.stringify(categoriesRes.error));
+    if (authorsRes.error) console.error("Authors error:", JSON.stringify(authorsRes.error));
+    if (articleTagsRes.error) console.error("ArticleTags error:", JSON.stringify(articleTagsRes.error));
+
+    const articles = articlesRes.data ?? [];
+    const categories = categoriesRes.data ?? [];
+    const authors = authorsRes.data ?? [];
+
+    console.log(`Articles: ${articles.length}, Categories: ${categories.length}, Authors: ${authors.length}, URL: ${supabaseUrl}`);
+
+    // Get published article IDs for filtering tags
+    const { data: publishedIds } = await supabase
+      .from("articles")
+      .select("id")
+      .eq("status", "published");
+
+    const publishedIdSet = new Set((publishedIds ?? []).map((a: { id: string }) => a.id));
+
+    // Get all article_tags
+    const { data: allArticleTags } = await supabase
+      .from("article_tags")
+      .select("article_id, tags(slug)");
+
+    // Count published articles per tag
+    const tagArticleCount = new Map<string, number>();
+    for (const at of allArticleTags ?? []) {
+      if (publishedIdSet.has(at.article_id)) {
+        const tagSlug = (at.tags as { slug?: string } | null)?.slug;
+        if (tagSlug) {
+          tagArticleCount.set(tagSlug, (tagArticleCount.get(tagSlug) ?? 0) + 1);
+        }
+      }
+    }
+    const qualifiedTags = Array.from(tagArticleCount.entries())
+      .filter(([, count]) => count >= 3)
+      .map(([slug]) => ({ slug }));
+
+    console.log(`Qualified tags (3+ articles): ${qualifiedTags.length}`);
+
+    // Filter out /category/innovation
+    const filteredCategories = categories.filter(
+      (c: { slug: string }) => c.slug !== "innovation"
+    );
 
     let sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n';
     sitemap +=
       '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n';
 
+    // Homepage
     sitemap += `  <url>\n    <loc>${baseUrl}/</loc>\n    <changefreq>daily</changefreq>\n    <priority>1.0</priority>\n  </url>\n`;
 
+    // Static pages
     const staticPages = [
       { path: "/about", priority: "0.8" },
       { path: "/contact", priority: "0.7" },
@@ -64,13 +115,14 @@ serve(async (req) => {
       sitemap += `  <url>\n    <loc>${baseUrl}${page.path}</loc>\n    <changefreq>monthly</changefreq>\n    <priority>${page.priority}</priority>\n  </url>\n`;
     }
 
-    for (const article of articles ?? []) {
+    // Articles
+    for (const article of articles) {
       const lastmod = article.updated_at
         ? new Date(article.updated_at).toISOString().split("T")[0]
         : new Date().toISOString().split("T")[0];
       const categorySlug = (article.categories as { slug?: string } | null)?.slug ?? "uncategorized";
       const articleUrl = `${baseUrl}/${categorySlug}/${article.slug}`;
-      const imageUrl = toProxyUrl(article.image_url);
+      const imageUrl = toProxyUrl(article.featured_image_url);
 
       sitemap += `  <url>\n    <loc>${escapeXml(articleUrl)}</loc>\n    <lastmod>${lastmod}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.9</priority>`;
 
@@ -81,19 +133,25 @@ serve(async (req) => {
       sitemap += "\n  </url>\n";
     }
 
-    for (const category of categories ?? []) {
+    // Categories (excluding innovation)
+    for (const category of filteredCategories) {
       sitemap += `  <url>\n    <loc>${baseUrl}/category/${category.slug}</loc>\n    <changefreq>daily</changefreq>\n    <priority>0.8</priority>\n  </url>\n`;
     }
 
-    for (const tag of tags ?? []) {
+    // Tags with 3+ published articles only
+    for (const tag of qualifiedTags) {
       sitemap += `  <url>\n    <loc>${baseUrl}/tag/${tag.slug}</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.6</priority>\n  </url>\n`;
     }
 
-    for (const author of authors ?? []) {
+    // Authors
+    for (const author of authors) {
       sitemap += `  <url>\n    <loc>${baseUrl}/voices/${author.slug}</loc>\n    <changefreq>monthly</changefreq>\n    <priority>0.7</priority>\n  </url>\n`;
     }
 
     sitemap += "</urlset>";
+
+    const totalUrls = 1 + staticPages.length + articles.length + filteredCategories.length + qualifiedTags.length + authors.length;
+    console.log(`Total sitemap URLs: ${totalUrls}`);
 
     return new Response(sitemap, {
       headers: {
