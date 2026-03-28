@@ -39,6 +39,7 @@ import {
   BreadcrumbSeparator,
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
+import { toProxyUrl } from "@/lib/imageOptimization";
 
 // Category icon mapping
 const categoryIcons: Record<string, LucideIcon> = {
@@ -625,7 +626,7 @@ const Category = () => {
                       <Link to={`/${kooArticles[0].categories?.slug || 'news'}/${kooArticles[0].slug}`}>
                         <div className="relative aspect-video overflow-hidden">
                           <img 
-                            src={kooArticles[0].featured_image_url} 
+                            src={toProxyUrl(kooArticles[0].featured_image_url)} 
                             alt={kooArticles[0].title}
                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                           />
@@ -666,7 +667,7 @@ const Category = () => {
                           className="flex gap-3 group"
                         >
                           <img 
-                            src={article.featured_image_url} 
+                            src={toProxyUrl(article.featured_image_url)} 
                             alt={article.title}
                             className="w-20 h-20 object-cover rounded-lg flex-shrink-0 group-hover:opacity-80 transition-opacity"
                           />
@@ -696,7 +697,7 @@ const Category = () => {
                       <Link to={`/${featuredArticle.categories?.slug || 'news'}/${featuredArticle.slug}`}>
                         <div className="relative aspect-[16/9] overflow-hidden">
                           <img 
-                            src={featuredArticle.featured_image_url} 
+                            src={toProxyUrl(featuredArticle.featured_image_url)} 
                             alt={featuredArticle.title}
                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                           />
@@ -743,7 +744,7 @@ const Category = () => {
                           className="flex gap-3 group"
                         >
                           <img 
-                            src={article.featured_image_url} 
+                            src={toProxyUrl(article.featured_image_url)} 
                             alt={article.title}
                             className="w-20 h-20 object-cover rounded-lg flex-shrink-0 group-hover:opacity-80 transition-opacity"
                           />
@@ -772,7 +773,7 @@ const Category = () => {
                 <Link to={`/${editorsPick.categories?.slug || 'news'}/${editorsPick.slug}`} className="flex flex-col md:flex-row gap-0">
                   <div className="md:w-2/5 relative aspect-video md:aspect-auto overflow-hidden">
                     <img 
-                      src={editorsPick.featured_image_url} 
+                      src={toProxyUrl(editorsPick.featured_image_url)} 
                       alt={editorsPick.title}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
@@ -844,7 +845,7 @@ const Category = () => {
                         </div>
                       </div>
                       <img 
-                        src={article.featured_image_url} 
+                        src={toProxyUrl(article.featured_image_url)} 
                         alt={article.title}
                         className="w-24 h-24 object-cover rounded-lg flex-shrink-0"
                       />
@@ -871,7 +872,7 @@ const Category = () => {
                       </div>
                       <div className="relative aspect-video overflow-hidden">
                         <img 
-                          src={article.featured_image_url} 
+                          src={toProxyUrl(article.featured_image_url)} 
                           alt={article.title}
                           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                         />
@@ -938,7 +939,7 @@ const Category = () => {
                         <Card key={article.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                           <Link to={`/${article.categories?.slug || 'news'}/${article.slug}`} className="flex flex-col sm:flex-row gap-4 p-4">
                             <img 
-                              src={article.featured_image_url} 
+                              src={toProxyUrl(article.featured_image_url)} 
                               alt={article.title}
                               className="w-full sm:w-32 h-32 object-cover rounded-lg flex-shrink-0"
                             />
@@ -981,7 +982,7 @@ const Category = () => {
                     <Link to={`/${article.categories?.slug || 'news'}/${article.slug}`}>
                       <div className="relative aspect-video overflow-hidden">
                         <img 
-                          src={article.featured_image_url} 
+                          src={toProxyUrl(article.featured_image_url)} 
                           alt={article.title}
                           className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
                         />

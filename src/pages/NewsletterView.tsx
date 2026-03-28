@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { toProxyUrl } from "@/lib/imageOptimization";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Helmet } from "react-helmet";
@@ -170,7 +171,7 @@ export default function NewsletterView() {
             <Card className="mb-8 overflow-hidden">
               {edition.heroArticle.featured_image_url && (
                 <img
-                  src={edition.heroArticle.featured_image_url}
+                  src={toProxyUrl(edition.heroArticle.featured_image_url)}
                   alt={edition.heroArticle.title}
                   className="w-full h-64 object-cover"
                 />

@@ -1,6 +1,12 @@
 /**
- * Image optimization utilities for Supabase Storage and static assets
+ * Image optimization utilities for Supabase Storage and static assets.
+ * Images served via first-party proxy: aiinasia.com/images/* → Supabase Storage
+ * This keeps image domain authority on aiinasia.com for SEO.
  */
+
+const SUPABASE_STORAGE_PREFIX =
+  'https://pbmtnvxywplgpldmlygv.supabase.co/storage/v1/object/public/article-images/';
+const IMAGE_PROXY_PREFIX = '/images/';
 
 interface ImageTransformOptions {
   width?: number;
@@ -11,14 +17,41 @@ interface ImageTransformOptions {
 }
 
 /**
- * Generates an optimized Supabase Storage image URL with transformations
- * Supabase supports image transformations via query parameters
+ * Rewrites a Supabase Storage URL to the first-party image proxy.
+ * e.g. https://pbmtnvxywplgpldmlygv.supabase.co/storage/v1/object/public/article-images/foo.jpg
+ *   → /images/foo.jpg
+ * Cloudflare Worker serves /images/* from Supabase with edge caching.
+ * Non-matching URLs are returned unchanged.
+ */
+export function toProxyUrl(url: string): string {
+  if (!url) return url;
+  if (url.includes(SUPABASE_STORAGE_PREFIX)) {
+    return url.replace(SUPABASE_STORAGE_PREFIX, IMAGE_PROXY_PREFIX);
+  }
+  return url;
+}
+
+/**
+ * Returns true if the URL is a Supabase storage image (raw or already proxied).
+ */
+function isSupabaseImage(url: string): boolean {
+  if (!url) return false;
+  return (
+    url.includes('supabase.co/storage') ||
+    url.startsWith(IMAGE_PROXY_PREFIX) ||
+    url.startsWith('/images/')
+  );
+}
+
+/**
+ * Generates an optimized image URL with Supabase transform query params.
+ * Always outputs a first-party proxy URL (/images/...).
  */
 export function getOptimizedSupabaseImage(
   url: string,
   options: ImageTransformOptions = {}
 ): string {
-  if (!url || !url.includes('supabase.co/storage')) {
+  if (!url || !isSupabaseImage(url)) {
     return url;
   }
 
@@ -30,28 +63,27 @@ export function getOptimizedSupabaseImage(
     resize = 'cover',
   } = options;
 
-  // Build transformation URL
-  const urlObj = new URL(url);
-  const params = new URLSearchParams();
+  // Rewrite to proxy URL, strip any existing query string
+  const baseUrl = toProxyUrl(url).split('?')[0];
 
-  if (width) params.set('width', width.toString());
-  if (height) params.set('height', height.toString());
-  params.set('quality', quality.toString());
-  params.set('format', format);
-  params.set('resize', resize);
+  const params: string[] = [];
+  if (width) params.push(`width=${width}`);
+  if (height) params.push(`height=${height}`);
+  params.push(`quality=${quality}`);
+  params.push(`format=${format}`);
+  params.push(`resize=${resize}`);
 
-  urlObj.search = params.toString();
-  return urlObj.toString();
+  return `${baseUrl}?${params.join('&')}`;
 }
 
 /**
- * Generates srcset for responsive images
+ * Generates srcset for responsive images using proxy URLs.
  */
 export function generateResponsiveSrcSet(
   url: string,
   widths: number[] = [320, 640, 960, 1280, 1920]
 ): string {
-  if (!url.includes('supabase.co/storage')) {
+  if (!isSupabaseImage(url)) {
     return '';
   }
 
@@ -64,7 +96,7 @@ export function generateResponsiveSrcSet(
 }
 
 /**
- * Get optimized avatar image
+ * Get optimized avatar image (proxy URL)
  */
 export function getOptimizedAvatar(url: string, size: number = 160): string {
   return getOptimizedSupabaseImage(url, {
@@ -77,7 +109,7 @@ export function getOptimizedAvatar(url: string, size: number = 160): string {
 }
 
 /**
- * Get optimized article thumbnail
+ * Get optimized article thumbnail (proxy URL)
  */
 export function getOptimizedThumbnail(
   url: string,
@@ -94,7 +126,7 @@ export function getOptimizedThumbnail(
 }
 
 /**
- * Get optimized hero/featured image
+ * Get optimized hero/featured image (proxy URL)
  */
 export function getOptimizedHeroImage(
   url: string,
