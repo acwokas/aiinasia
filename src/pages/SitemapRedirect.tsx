@@ -2,8 +2,8 @@ import { useEffect } from 'react';
 
 const SitemapRedirect = () => {
   useEffect(() => {
-    // Redirect to the edge function that generates the sitemap
-    window.location.href = 'https://ppvifagplcdjpdpqknzt.supabase.co/functions/v1/generate-sitemap';
+    // Redirect to the sitemap served by Cloudflare Worker
+    window.location.href = '/sitemap.xml';
   }, []);
 
   return (

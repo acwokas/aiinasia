@@ -266,8 +266,8 @@ const Index = () => {
         <link rel="canonical" href="https://aiinasia.com/" />
         
         {/* Preconnect to critical origins for faster resource loading */}
-        <link rel="preconnect" href="https://ppvifagplcdjpdpqknzt.supabase.co" />
-        <link rel="dns-prefetch" href="https://ppvifagplcdjpdpqknzt.supabase.co" />
+        <link rel="preconnect" href="https://pbmtnvxywplgpldmlygv.supabase.co" />
+        <link rel="dns-prefetch" href="https://pbmtnvxywplgpldmlygv.supabase.co" />
         
         {/* Preload LCP image for faster loading */}
         {featuredArticle?.featured_image_url && (

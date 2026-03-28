@@ -20,7 +20,7 @@ const FixBrokenImage = () => {
       const { error } = await supabase
         .from('articles')
         .update({ 
-          featured_image_url: 'https://ppvifagplcdjpdpqknzt.supabase.co/storage/v1/object/public/article-images/1760799481013-pe3shc.jpg'
+          featured_image_url: 'https://pbmtnvxywplgpldmlygv.supabase.co/storage/v1/object/public/article-images/1760799481013-pe3shc.jpg'
         })
         .eq('id', '99be2f9c-0700-41bf-b44c-db1dd8859d75');
 
