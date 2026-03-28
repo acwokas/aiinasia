@@ -6,6 +6,15 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const SUPABASE_STORAGE_PREFIX =
+  'https://pbmtnvxywplgpldmlygv.supabase.co/storage/v1/object/public/article-images/';
+const IMAGE_PROXY_PREFIX = 'https://aiinasia.com/images/';
+
+function toProxyUrl(url: string): string {
+  if (!url) return url;
+  return url.replace(SUPABASE_STORAGE_PREFIX, IMAGE_PROXY_PREFIX);
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -16,12 +25,12 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const baseUrl = 'https://aiinasia.com'; // Update with your actual domain
+    const baseUrl = 'https://aiinasia.com';
 
     // Fetch all published articles with category info
     const { data: articles } = await supabase
       .from('articles')
-      .select('slug, updated_at, categories:primary_category_id(slug)')
+      .select('slug, updated_at, image_url, categories:primary_category_id(slug)')
       .eq('status', 'published')
       .order('updated_at', { ascending: false });
 
@@ -42,7 +51,7 @@ serve(async (req) => {
 
     // Build XML sitemap
     let sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n';
-    sitemap += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+    sitemap += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n';
 
     // Homepage
     sitemap += `  <url>
@@ -71,13 +80,19 @@ serve(async (req) => {
     // Articles
     articles?.forEach(article => {
       const lastmod = new Date(article.updated_at).toISOString().split('T')[0];
-      // categories is a single object when using primary_category_id join
       const categorySlug = (article.categories as any)?.slug || 'uncategorized';
       sitemap += `  <url>
     <loc>${baseUrl}/${categorySlug}/${article.slug}</loc>
     <lastmod>${lastmod}</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
+    <priority>0.9</priority>`;
+      if (article.image_url) {
+        sitemap += `
+    <image:image>
+      <image:loc>${toProxyUrl(article.image_url)}</image:loc>
+    </image:image>`;
+      }
+      sitemap += `
   </url>\n`;
     });
 
@@ -114,7 +129,7 @@ serve(async (req) => {
       headers: {
         ...corsHeaders,
         'Content-Type': 'application/xml',
-        'Cache-Control': 'public, max-age=3600', // Cache for 1 hour
+        'Cache-Control': 'public, max-age=3600',
       },
     });
   } catch (error) {
