@@ -215,7 +215,7 @@ const TipTapEditor = ({
       lastExternalValue.current = value;
       const html = convertMarkdownToHtml(value);
       if (editor.getHTML() !== html) {
-        editor.commands.setContent(html, false);
+        editor.commands.setContent(html, { emitUpdate: false });
       }
     }
   }, [value, editor]);
