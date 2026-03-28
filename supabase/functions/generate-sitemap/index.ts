@@ -35,23 +35,55 @@ serve(async (req) => {
 
     const baseUrl = "https://aiinasia.com";
 
-    const [{ data: articles }, { data: categories }, { data: tags }, { data: authors }] = await Promise.all([
+    // Fetch all data in parallel
+    const [{ data: articles }, { data: categories }, { data: authors }, { data: tagCounts }] = await Promise.all([
       supabase
         .from("articles")
-        .select("slug, updated_at, image_url, categories:primary_category_id(slug)")
+        .select("slug, updated_at, image_url:featured_image_url, categories:primary_category_id(slug)")
         .eq("status", "published")
         .order("updated_at", { ascending: false }),
       supabase.from("categories").select("slug"),
-      supabase.from("tags").select("slug"),
       supabase.from("authors").select("slug"),
+      // Get tags that have 3+ published articles
+      supabase.rpc("get_tags_with_article_count"),
     ]);
+
+    // If RPC doesn't exist, fall back to fetching tags with a manual count
+    let qualifiedTags: { slug: string }[] = [];
+    if (tagCounts) {
+      qualifiedTags = tagCounts.filter((t: { slug: string; article_count: number }) => t.article_count >= 3);
+    } else {
+      // Fallback: get all tags and filter by joining article_tags
+      const { data: allTags } = await supabase
+        .from("tags")
+        .select("slug, article_tags!inner(article_id, articles!inner(status))")
+        .eq("article_tags.articles.status", "published");
+      
+      if (allTags) {
+        const tagMap = new Map<string, number>();
+        for (const tag of allTags) {
+          const count = Array.isArray((tag as any).article_tags) ? (tag as any).article_tags.length : 0;
+          if (count >= 3) {
+            tagMap.set(tag.slug, count);
+          }
+        }
+        qualifiedTags = Array.from(tagMap.keys()).map(slug => ({ slug }));
+      }
+    }
+
+    // Filter out /category/innovation
+    const filteredCategories = (categories ?? []).filter(
+      (c: { slug: string }) => c.slug !== "innovation"
+    );
 
     let sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n';
     sitemap +=
       '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n';
 
+    // Homepage
     sitemap += `  <url>\n    <loc>${baseUrl}/</loc>\n    <changefreq>daily</changefreq>\n    <priority>1.0</priority>\n  </url>\n`;
 
+    // Static pages
     const staticPages = [
       { path: "/about", priority: "0.8" },
       { path: "/contact", priority: "0.7" },
@@ -64,6 +96,7 @@ serve(async (req) => {
       sitemap += `  <url>\n    <loc>${baseUrl}${page.path}</loc>\n    <changefreq>monthly</changefreq>\n    <priority>${page.priority}</priority>\n  </url>\n`;
     }
 
+    // Articles
     for (const article of articles ?? []) {
       const lastmod = article.updated_at
         ? new Date(article.updated_at).toISOString().split("T")[0]
@@ -81,14 +114,17 @@ serve(async (req) => {
       sitemap += "\n  </url>\n";
     }
 
-    for (const category of categories ?? []) {
+    // Categories (excluding innovation)
+    for (const category of filteredCategories) {
       sitemap += `  <url>\n    <loc>${baseUrl}/category/${category.slug}</loc>\n    <changefreq>daily</changefreq>\n    <priority>0.8</priority>\n  </url>\n`;
     }
 
-    for (const tag of tags ?? []) {
+    // Tags with 3+ published articles only
+    for (const tag of qualifiedTags) {
       sitemap += `  <url>\n    <loc>${baseUrl}/tag/${tag.slug}</loc>\n    <changefreq>weekly</changefreq>\n    <priority>0.6</priority>\n  </url>\n`;
     }
 
+    // Authors
     for (const author of authors ?? []) {
       sitemap += `  <url>\n    <loc>${baseUrl}/voices/${author.slug}</loc>\n    <changefreq>monthly</changefreq>\n    <priority>0.7</priority>\n  </url>\n`;
     }
