@@ -16,6 +16,9 @@ const NotFound = () => {
 
   useEffect(() => {
     console.error("404 Error: User attempted to access non-existent route:", location.pathname);
+    // Signal to Prerender.io that this is a 404 page — prevents caching
+    // non-existent routes as HTTP 200 (soft-404 problem)
+    (window as any).__PRERENDER_STATUS_CODE = 404;
   }, [location.pathname]);
 
   const handleSearch = (e: React.FormEvent) => {
