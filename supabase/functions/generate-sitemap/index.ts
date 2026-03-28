@@ -35,8 +35,8 @@ serve(async (req) => {
 
     const baseUrl = "https://aiinasia.com";
 
-    // Fetch all data in parallel
-    const [{ data: articles }, { data: categories }, { data: authors }, { data: articleTags }] = await Promise.all([
+    // Fetch articles, categories, authors, and article_tags in parallel
+    const [articlesRes, categoriesRes, authorsRes, articleTagsRes] = await Promise.all([
       supabase
         .from("articles")
         .select("slug, updated_at, featured_image_url, categories:primary_category_id(slug)")
@@ -44,27 +44,49 @@ serve(async (req) => {
         .order("updated_at", { ascending: false }),
       supabase.from("categories").select("slug"),
       supabase.from("authors").select("slug"),
-      // Get all article_tags with their tag slugs, only for published articles
+      // Get tag_id for each published article's tag
       supabase
         .from("article_tags")
-        .select("tag_id, tags(slug), articles!inner(status)")
-        .eq("articles.status", "published"),
+        .select("tag_id"),
     ]);
 
-    // Count articles per tag and filter to 3+
+    const articles = articlesRes.data ?? [];
+    const categories = categoriesRes.data ?? [];
+    const authors = authorsRes.data ?? [];
+
+    console.log(`Articles: ${articles.length}, Categories: ${categories.length}, Authors: ${authors.length}`);
+
+    // Get published article IDs for filtering tags
+    const { data: publishedIds } = await supabase
+      .from("articles")
+      .select("id")
+      .eq("status", "published");
+
+    const publishedIdSet = new Set((publishedIds ?? []).map((a: { id: string }) => a.id));
+
+    // Get all article_tags
+    const { data: allArticleTags } = await supabase
+      .from("article_tags")
+      .select("article_id, tags(slug)");
+
+    // Count published articles per tag
     const tagArticleCount = new Map<string, number>();
-    for (const at of articleTags ?? []) {
-      const tagSlug = (at.tags as { slug?: string } | null)?.slug;
-      if (tagSlug) {
-        tagArticleCount.set(tagSlug, (tagArticleCount.get(tagSlug) ?? 0) + 1);
+    for (const at of allArticleTags ?? []) {
+      if (publishedIdSet.has(at.article_id)) {
+        const tagSlug = (at.tags as { slug?: string } | null)?.slug;
+        if (tagSlug) {
+          tagArticleCount.set(tagSlug, (tagArticleCount.get(tagSlug) ?? 0) + 1);
+        }
       }
     }
     const qualifiedTags = Array.from(tagArticleCount.entries())
       .filter(([, count]) => count >= 3)
       .map(([slug]) => ({ slug }));
 
+    console.log(`Qualified tags (3+ articles): ${qualifiedTags.length}`);
+
     // Filter out /category/innovation
-    const filteredCategories = (categories ?? []).filter(
+    const filteredCategories = categories.filter(
       (c: { slug: string }) => c.slug !== "innovation"
     );
 
@@ -89,7 +111,7 @@ serve(async (req) => {
     }
 
     // Articles
-    for (const article of articles ?? []) {
+    for (const article of articles) {
       const lastmod = article.updated_at
         ? new Date(article.updated_at).toISOString().split("T")[0]
         : new Date().toISOString().split("T")[0];
@@ -117,11 +139,14 @@ serve(async (req) => {
     }
 
     // Authors
-    for (const author of authors ?? []) {
+    for (const author of authors) {
       sitemap += `  <url>\n    <loc>${baseUrl}/voices/${author.slug}</loc>\n    <changefreq>monthly</changefreq>\n    <priority>0.7</priority>\n  </url>\n`;
     }
 
     sitemap += "</urlset>";
+
+    const totalUrls = 1 + staticPages.length + articles.length + filteredCategories.length + qualifiedTags.length + authors.length;
+    console.log(`Total sitemap URLs: ${totalUrls}`);
 
     return new Response(sitemap, {
       headers: {
