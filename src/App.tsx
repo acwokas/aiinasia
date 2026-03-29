@@ -36,25 +36,27 @@ const Privacy = lazy(() => import("./pages/Privacy"));
 const Terms = lazy(() => import("./pages/Terms"));
 const CookiePolicy = lazy(() => import("./pages/CookiePolicy"));
 const Redirects = lazy(() => import("./pages/Redirects"));
-const BulkImport = lazy(() => import("./pages/BulkImport"));
-const ImageMigration = lazy(() => import("./pages/ImageMigration"));
-const ExtractImageUrls = lazy(() => import("./pages/ExtractImageUrls"));
-const UpdateArticleImages = lazy(() => import("./pages/UpdateArticleImages"));
-const MigrationDashboard = lazy(() => import("./pages/MigrationDashboard"));
-const BulkRedirects = lazy(() => import("./pages/BulkRedirects"));
-const CsvUrlReplacer = lazy(() => import("./pages/CsvUrlReplacer"));
-const MigrateCategoryUrls = lazy(() => import("./pages/MigrateCategoryUrls"));
-const ContentProcessor = lazy(() => import("./pages/ContentProcessor"));
-const CategoryMapper = lazy(() => import("./pages/CategoryMapper"));
-const CleanArticles = lazy(() => import("./pages/CleanArticles"));
-const FixMigratedContent = lazy(() => import("./pages/FixMigratedContent"));
-const RemoveTweetLinks = lazy(() => import("./pages/RemoveTweetLinks"));
-const PublishAllArticles = lazy(() => import("./pages/PublishAllArticles"));
-const BulkCommentGeneration = lazy(() => import("./pages/BulkCommentGeneration"));
-const GenerateTldrBulk = lazy(() => import("./pages/GenerateTldrBulk"));
-const AssignCategories = lazy(() => import("./pages/AssignCategories"));
-const FixBrokenImage = lazy(() => import("./pages/FixBrokenImage"));
-const BulkOperations = lazy(() => import("./pages/BulkOperations"));
+// --- One-time migration tools (disabled — files kept in src/pages/ for reference) ---
+// To re-enable, uncomment the imports and routes below
+// const BulkImport = lazy(() => import("./pages/BulkImport"));
+// const ImageMigration = lazy(() => import("./pages/ImageMigration"));
+// const ExtractImageUrls = lazy(() => import("./pages/ExtractImageUrls"));
+// const UpdateArticleImages = lazy(() => import("./pages/UpdateArticleImages"));
+// const MigrationDashboard = lazy(() => import("./pages/MigrationDashboard"));
+// const BulkRedirects = lazy(() => import("./pages/BulkRedirects"));
+// const CsvUrlReplacer = lazy(() => import("./pages/CsvUrlReplacer"));
+// const MigrateCategoryUrls = lazy(() => import("./pages/MigrateCategoryUrls"));
+// const ContentProcessor = lazy(() => import("./pages/ContentProcessor"));
+// const CategoryMapper = lazy(() => import("./pages/CategoryMapper"));
+// const CleanArticles = lazy(() => import("./pages/CleanArticles"));
+// const FixMigratedContent = lazy(() => import("./pages/FixMigratedContent"));
+// const RemoveTweetLinks = lazy(() => import("./pages/RemoveTweetLinks"));
+// const PublishAllArticles = lazy(() => import("./pages/PublishAllArticles"));
+// const BulkCommentGeneration = lazy(() => import("./pages/BulkCommentGeneration"));
+// const GenerateTldrBulk = lazy(() => import("./pages/GenerateTldrBulk"));
+// const AssignCategories = lazy(() => import("./pages/AssignCategories"));
+// const FixBrokenImage = lazy(() => import("./pages/FixBrokenImage"));
+// const BulkOperations = lazy(() => import("./pages/BulkOperations"));
 const ContentAnalytics = lazy(() => import("./pages/ContentAnalytics"));
 const SEOTools = lazy(() => import("./pages/SEOTools"));
 const AuthorManagement = lazy(() => import("./pages/AuthorManagement"));
@@ -116,6 +118,7 @@ const App = () => (
               <Route path="/terms" element={<Terms />} />
               <Route path="/cookie-policy" element={<CookiePolicy />} />
               <Route path="/redirects" element={<Redirects />} />
+              {/* --- Migration tools disabled (uncomment to re-enable) ---
               <Route path="/admin/bulk-import" element={<BulkImport />} />
               <Route path="/admin/extract-image-urls" element={<ExtractImageUrls />} />
               <Route path="/admin/image-migration" element={<ImageMigration />} />
@@ -135,6 +138,7 @@ const App = () => (
               <Route path="/admin/assign-categories" element={<AssignCategories />} />
               <Route path="/admin/fix-broken-image" element={<FixBrokenImage />} />
               <Route path="/admin/bulk-operations" element={<BulkOperations />} />
+              --- */}
               <Route path="/admin/analytics" element={<ContentAnalytics />} />
               <Route path="/admin/seo-tools" element={<SEOTools />} />
               <Route path="/admin/author-management" element={<AuthorManagement />} />

@@ -39,7 +39,6 @@ const Article = () => {
     queryKey: ["article", cleanSlug, previewCode],
     staleTime: 5 * 60 * 1000, // 5 minutes
     queryFn: async () => {
-      console.log('Article fetch:', { slug: cleanSlug, previewCode, isPreview });
       
       let query = supabase
         .from("articles")
@@ -53,16 +52,13 @@ const Article = () => {
       // If preview code provided, check for draft/scheduled articles with matching code
       if (previewCode) {
         query = query.eq("preview_code", previewCode);
-        console.log('Looking for article with preview code:', previewCode);
       } else {
         // Otherwise only show published articles
         query = query.eq("status", "published");
-        console.log('Looking for published article');
       }
       
       const { data, error } = await query.maybeSingle();
       
-      console.log('Article query result:', { data, error });
       if (error) throw error;
       return data;
     },

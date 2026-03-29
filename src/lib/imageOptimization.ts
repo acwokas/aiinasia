@@ -1,12 +1,10 @@
 /**
  * Image optimization utilities for Supabase Storage and static assets.
- * Images served via first-party proxy: aiinasia.com/images/* → Supabase Storage
- * This keeps image domain authority on aiinasia.com for SEO.
+ * Images served via first-party proxy: /images/* → Supabase Storage
+ * This keeps image domain authority on the site domain for SEO.
  */
 
-const SUPABASE_STORAGE_PREFIX =
-  'https://pbmtnvxywplgpldmlygv.supabase.co/storage/v1/object/public/article-images/';
-const IMAGE_PROXY_PREFIX = '/images/';
+import { SUPABASE_STORAGE_PREFIX, IMAGE_PROXY_PREFIX } from './siteConfig';
 
 interface ImageTransformOptions {
   width?: number;

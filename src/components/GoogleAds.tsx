@@ -11,7 +11,7 @@ interface GoogleAdProps {
 }
 
 // Google Ads Publisher ID
-const GOOGLE_ADS_CLIENT = "ca-pub-4181437297386228";
+import { GOOGLE_ADS_CLIENT } from "@/lib/siteConfig";
 
 const GoogleAd = ({
   slot,
