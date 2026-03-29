@@ -173,7 +173,6 @@ const ScoutChatbot = () => {
                 try {
                   const toolArgs = JSON.parse(toolCallBuffer);
                   searchQuery = toolArgs.query;
-                  console.log("Scout searching for:", searchQuery);
                   
                   // Search for articles
                   const { data: articles, error: searchError } = await supabase
@@ -186,7 +185,6 @@ const ScoutChatbot = () => {
                   if (searchError) {
                     console.error("Article search error:", searchError);
                   } else if (articles && articles.length > 0) {
-                    console.log("Found articles:", articles.length);
                     setMessages((prev) =>
                       prev.map((msg, i) =>
                         i === prev.length - 1

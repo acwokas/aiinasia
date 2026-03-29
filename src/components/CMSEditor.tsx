@@ -211,7 +211,6 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
       const originalSizeMB = (file.size / (1024 * 1024)).toFixed(2);
       const compressedSizeMB = (compressedFile.size / (1024 * 1024)).toFixed(2);
       
-      console.log(`Image compressed: ${originalSizeMB}MB → ${compressedSizeMB}MB`);
 
       const fileExt = 'jpg'; // Always use jpg after compression
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
@@ -249,7 +248,6 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
   };
 
   const handleOpenAuthorDialog = (author?: any) => {
-    console.log('Opening author dialog with:', author);
     if (author) {
       setIsEditingAuthor(true);
       const formData = {
@@ -264,7 +262,6 @@ const CMSEditor = ({ initialData, onSave }: CMSEditorProps) => {
         linkedin_url: author.linkedin_url || "",
         website_url: author.website_url || ""
       };
-      console.log('Author form data:', formData);
       setAuthorForm(formData);
       setAvatarPreview(author.avatar_url || "");
     } else {

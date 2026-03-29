@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 
 // GA4 Measurement ID
-const GA_MEASUREMENT_ID = "G-M981596ST2";
+import { GA_MEASUREMENT_ID } from "@/lib/siteConfig";
 
 declare global {
   interface Window {
