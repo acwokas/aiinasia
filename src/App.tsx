@@ -36,7 +36,7 @@ const Privacy = lazy(() => import("./pages/Privacy"));
 const Terms = lazy(() => import("./pages/Terms"));
 const CookiePolicy = lazy(() => import("./pages/CookiePolicy"));
 const Redirects = lazy(() => import("./pages/Redirects"));
-// --- One-time migration tools (disabled — files kept in src/pages/ for reference) ---
+// --- One-time migration tools (disabled â files kept in src/pages/ for reference) ---
 // To re-enable, uncomment the imports and routes below
 // const BulkImport = lazy(() => import("./pages/BulkImport"));
 // const ImageMigration = lazy(() => import("./pages/ImageMigration"));
@@ -67,6 +67,7 @@ const Newsletter = lazy(() => import("./pages/Newsletter"));
 const NewsletterManager = lazy(() => import("./pages/NewsletterManager"));
 const NewsletterArchive = lazy(() => import("./pages/NewsletterArchive"));
 const NewsletterView = lazy(() => import("./pages/NewsletterView"));
+const AnalyticsAll = lazy(() => import("./pages/AnalyticsAll"));
 
 // Loading fallback component
 const PageLoader = () => (
@@ -140,6 +141,7 @@ const App = () => (
               <Route path="/admin/bulk-operations" element={<BulkOperations />} />
               --- */}
               <Route path="/admin/analytics" element={<ContentAnalytics />} />
+            <Route path="/admin/analytics/all" element={<AnalyticsAll />} />
               <Route path="/admin/seo-tools" element={<SEOTools />} />
               <Route path="/admin/author-management" element={<AuthorManagement />} />
               <Route path="/admin/editors-picks" element={<EditorsPickManager />} />
