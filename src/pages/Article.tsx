@@ -617,9 +617,9 @@ const Article = () => {
 
       <BreadcrumbStructuredData
         items={[
-          { name: 'Home', url: 'https://aiinasia.com' },
-          { name: article.categories?.name || 'Uncategorized', url: `https://aiinasia.com/category/${article.categories?.slug || 'uncategorized'}` },
-          { name: article.title, url: window.location.href }
+          { name: 'Home', url: '/' },
+          { name: article.categories?.name || 'Uncategorized', url: `/category/${article.categories?.slug || 'uncategorized'}` },
+          { name: article.title, url: `/${article.categories?.slug || 'uncategorized'}/${article.slug}` }
         ]}
       />
 
