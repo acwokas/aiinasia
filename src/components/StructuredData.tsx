@@ -66,7 +66,8 @@ export const BreadcrumbStructuredData = ({ items }: { items: BreadcrumbItem[] })
       "@type": "ListItem",
       position: index + 1,
       name: item.name,
-      item: `https://aiinasia.com${item.url}`,
+      // If url is already absolute (starts with http), use as-is; otherwise prepend base
+      item: item.url.startsWith("http") ? item.url : \`https://aiinasia.com\${item.url}\`,
     })),
   };
 
@@ -124,7 +125,7 @@ export const PersonStructuredData = ({
     name: name,
     ...(bio && { description: bio }),
     ...(imageUrl && { image: imageUrl }),
-    url: `https://aiinasia.com${url}`,
+    url: \`https://aiinasia.com\${url}\`,
   };
 
   return (
